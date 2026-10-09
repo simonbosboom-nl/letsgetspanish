@@ -1,0 +1,25 @@
+name: Diagnose Pages certificate
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/check-pages-certificate.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read Pages certificate status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const r = await github.request("GET /repos/{owner}/{repo}/pages", { owner, repo });
+            const d = r.data;
+            core.info("Pages URL: " + d.html_url);
+            core.info("HTTPS enforced: " + d.https_enforced);
+            core.info("Build type: " + d.build_type);
+            core.info("Certificate status: " + JSON.stringify(d.https_certificate || null));
