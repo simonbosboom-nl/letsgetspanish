@@ -1,0 +1,20 @@
+name: Check live HTTPS certificate
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/check-live-cert.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tls-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify TLS certificate and HTTP response
+        run: |
+          set +e
+          echo "=== TLS certificate verification ==="
+          echo | openssl s_client -connect simonbosboom-nl.github.io:443 -servername simonbosboom-nl.github.io -verify_return_error 2>&1 | tail -n 35
+          echo "=== HTTPS response headers ==="
+          curl -sSI --max-time 20 https://simonbosboom-nl.github.io/letsgetspanish/ | head -n 25
