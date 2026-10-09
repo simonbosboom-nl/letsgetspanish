@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="96" fill="#10182a"/>
+<path d="M0 140H512V372H0Z" fill="#c92332"/>
+<path d="M0 185H512V327H0Z" fill="#ffd447"/>
+<text x="256" y="290" text-anchor="middle" font-size="160" font-weight="900" font-family="Arial,sans-serif" fill="#10182a">¡V!</text>
+<text x="256" y="425" text-anchor="middle" font-size="42" font-weight="800" font-family="Arial,sans-serif" fill="#fff">SPAANS</text>
+</svg>
