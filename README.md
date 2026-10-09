@@ -1,14 +1,16 @@
 # ¡Vamos! — SpaansTool PWA 🇪🇸
 
-Een responsieve Progressive Web App om de Spaanse woordenschat van Paso Adelante 1.1–1.4 te oefenen.
+Een responsieve Progressive Web App om Spaans te oefenen.
 
 ## Functies
 - 90 woorden en 18 Frases clave
 - Meerkeuzequiz, typen, flashcards, woordenlijst en toetsmodus
-- Homework Ninja-waarschuwing bij kleine fouten
+- Homework Ninja-waarschuwingen bij kleine fouten
 - Responsive ontwerp voor mobiel, tablet en desktop
 - Service worker voor offline gebruik na de eerste online laadbeurt
 - Installatie als app op geschikte browsers/apparaten
 
 ## Publicatie
-De GitHub Actions-workflow in `.github/workflows/pages.yml` publiceert elke push naar `main` naar GitHub Pages. Bekijk de voortgang op het tabblad **Actions** en de live-url bij **Settings → Pages**.
+GitHub Pages is ingeschakeld voor deze repository. De GitHub Pages-build en deployment zijn succesvol afgerond. Bekijk het tabblad **Actions** voor de nieuwste status.
+
+Live website: https://simonbosboom-nl.github.io/letsgetspanish/
