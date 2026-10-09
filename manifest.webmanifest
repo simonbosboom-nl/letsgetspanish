@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "SpaansTool — ¡Vamos!",
+  "short_name": "SpaansTool",
+  "description": "Leer Spaans met woorden, Frases clave, quiz, typen en flashcards.",
+  "lang": "nl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f7f4ec",
+  "theme_color": "#10182a",
+  "icons": [
+    {"src":"./icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
