@@ -75,13 +75,14 @@ h2{font-size:1.5rem;letter-spacing:-.025em;margin:0}
       <h1>Frans in je hoofd.<br>Pas à pas. 🇫🇷</h1>
       <p>Oefen Franse woorden en zinnen met flashcards, een quiz of schrijfopdrachten. Je voortgang wordt op dit apparaat bewaard.</p>
     </div>
-    <div class="counter" aria-label="24 woorden en zinnen"><div><strong>27</strong><br><span>woorden & zinnen</span></div></div>
+    <div class="counter" aria-label="24 woorden en zinnen"><div><strong id="totalWords">83</strong><br><span>woorden & zinnen</span></div></div>
   </div>
 </header>
 <nav aria-label="Oefenmenu">
   <button class="navbtn active" data-mode="home">🏠 Start</button>
   <button class="navbtn" data-mode="cards">🃏 Flashcards</button>
   <button class="navbtn" data-mode="quiz">🎯 Quiz</button>
+  <button class="navbtn" data-mode="test">📝 Toetsmodus</button>
   <button class="navbtn" data-mode="write">✍️ Schrijven</button>
   <button class="navbtn" data-mode="words">📚 Woordenlijst</button>
 </nav>
@@ -119,15 +120,71 @@ const WORDS = [
  {fr:'ensemble',nl:['samen']},
  {fr:'huit',nl:['acht']},
  {fr:'neuf',nl:['negen']},
- {fr:'dix',nl:['tien']}
+ {fr:'dix',nl:['tien']},
+ {fr:'bonjour',nl:['goedendag','goedemorgen','hallo']},
+ {fr:'ça va?',nl:['hoe gaat het?','gaat het?']},
+ {fr:'ça va bien?',nl:['gaat het goed?']},
+ {fr:'oui, ça va',nl:['ja, het gaat goed','ja, het gaat']},
+ {fr:'salut!',nl:['hoi','doei']},
+ {fr:"je m'appelle ...",nl:['ik heet','ik heet ...']},
+ {fr:"comment tu t'appelles?",nl:['hoe heet jij?','wat is jouw naam?']},
+ {fr:'au revoir',nl:['tot ziens','dag']},
+ {fr:'très bien',nl:['heel goed','erg goed']},
+ {fr:'excellent',nl:['uitstekend','geweldig']},
+ {fr:'pas mal',nl:['niet slecht','best goed']},
+ {fr:'oui',nl:['ja']},
+ {fr:'non',nl:['nee']},
+ {fr:'merci',nl:['bedankt','dank je']},
+ {fr:'monsieur',nl:['meneer']},
+ {fr:'madame',nl:['mevrouw']},
+ {fr:'zéro',nl:['nul']},
+ {fr:'un, une',nl:['een']},
+ {fr:'deux',nl:['twee']},
+ {fr:'trois',nl:['drie']},
+ {fr:'quatre',nl:['vier']},
+ {fr:'cinq',nl:['vijf']},
+ {fr:'six',nl:['zes']},
+ {fr:'sept',nl:['zeven']},
+ {fr:'bonsoir',nl:['goedenavond']},
+ {fr:"s'il vous plaît",nl:['alstublieft','alsjeblieft']},
+ {fr:'voilà!',nl:['daar is het','hier heb je het','ziezo']},
+ {fr:'le garçon',nl:['de jongen']},
+ {fr:'la fille',nl:['het meisje','de dochter']},
+ {fr:'excusez-moi',nl:['pardon','neem me niet kwalijk']},
+ {fr:'le prénom',nl:['de voornaam']},
+ {fr:'le nom (de famille)',nl:['de achternaam','de familienaam']},
+ {fr:'le surnom',nl:['de bijnaam']},
+ {fr:"l'homme",nl:['de man']},
+ {fr:'la femme',nl:['de vrouw']},
+ {fr:'génial',nl:['geweldig','fantastisch']},
+ {fr:'formidable',nl:['fantastisch','geweldig']},
+ {fr:'chouette',nl:['leuk','geweldig']},
+ {fr:'super',nl:['super','geweldig']},
+ {fr:"j'habite à",nl:['ik woon in','ik woon te']},
+ {fr:'une école',nl:['een school']},
+ {fr:'le collège',nl:['de middelbare school','het middelbaar']},
+ {fr:'le professeur',nl:['de docent','de leraar']},
+ {fr:'la professeur',nl:['de docente','de lerares']},
+ {fr:'onze',nl:['elf']},
+ {fr:'douze',nl:['twaalf']},
+ {fr:'treize',nl:['dertien']},
+ {fr:'quatorze',nl:['veertien']},
+ {fr:'quinze',nl:['vijftien']},
+ {fr:'seize',nl:['zestien']},
+ {fr:'dix-sept',nl:['zeventien']},
+ {fr:'dix-huit',nl:['achttien']},
+ {fr:'dix-neuf',nl:['negentien']},
+ {fr:'vingt',nl:['twintig']},
+ {fr:'tu as quel âge?',nl:['hoe oud ben je?']},
+ {fr:"j'ai douze ans",nl:['ik ben twaalf jaar oud','ik ben twaalf']}
 ];
 const STORE='frans-oefenen-progress-v1';
 let mastered=new Set();
 try{mastered=new Set(JSON.parse(localStorage.getItem(STORE)||'[]').filter(n=>Number.isInteger(n)&&n>=0&&n<WORDS.length));}catch(e){}
-let mode='home',direction='fr-nl',cardIndex=0,flipped=false,quizRound=[],quizIndex=0,quizScore=0,quizAnswered=false,quizOptions=[],quizChosen=-1,writeRound=[],writeIndex=0,writeChecked=false,writeTries=0,wordFilter='';
+let mode='home',direction='fr-nl',cardIndex=0,flipped=false,quizRound=[],quizIndex=0,quizScore=0,quizAnswered=false,quizOptions=[],quizChosen=-1,writeRound=[],writeIndex=0,writeChecked=false,writeTries=0,wordFilter='',testRound=[],testIndex=0,testAnswers=[],testActive=false;
 const view=document.getElementById('view');
 function saveProgress(){try{localStorage.setItem(STORE,JSON.stringify(Array.from(mastered)));}catch(e){};updateProgress();}
-function updateProgress(){document.getElementById('progress-label').textContent=mastered.size+' van '+WORDS.length+' geoefend';document.getElementById('progress-fill').style.width=(mastered.size/WORDS.length*100)+'%';}
+function updateProgress(){document.getElementById('totalWords').textContent=WORDS.length;document.getElementById('progress-label').textContent=mastered.size+' van '+WORDS.length+' geoefend';document.getElementById('progress-fill').style.width=(mastered.size/WORDS.length*100)+'%';}
 function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function norm(s){return String(s).toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’‘]/g,"'").replace(/[.!?;,]/g,'').replace(/\s+/g,' ');}
@@ -137,14 +194,15 @@ function directionBar(){return '<div class="direction" aria-label="Richting"><sp
 function header(title,note){return '<div class="section-head"><div><h2>'+title+'</h2><div class="small-note">'+note+'</div></div>'+directionBar()+'</div>';}
 function setMode(next){mode=next;document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));render();}
 function goHome(){setMode('home');}
-function render(){updateProgress();document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));if(mode==='home')renderHome();else if(mode==='cards')renderCards();else if(mode==='quiz')renderQuiz();else if(mode==='write')renderWrite();else if(mode==='words')renderWords();}
+function render(){updateProgress();document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));if(mode==='home')renderHome();else if(mode==='cards')renderCards();else if(mode==='quiz')renderQuiz();else if(mode==='test')renderTest();else if(mode==='write')renderWrite();else if(mode==='words')renderWords();}
 function renderHome(){
 view.innerHTML='<div class="section-head"><div><h2>Kies je oefening</h2><div class="small-note">Korte rondes helpen je om de woorden te onthouden.</div></div></div>'+
 '<div class="grid">'+
 '<button class="tile" data-mode="cards"><span class="emoji">🃏</span><strong>Flashcards</strong><span>Bekijk de Franse kant en draai de kaart om voor de vertaling.</span></button>'+
 '<button class="tile" data-action="start-quiz"><span class="emoji">🎯</span><strong>Meerkeuzequiz</strong><span>10 vragen. Kies de juiste vertaling of het juiste Franse woord.</span></button>'+
 '<button class="tile" data-action="start-write"><span class="emoji">✍️</span><strong>Schrijven</strong><span>Typ zelf het antwoord. Accenten hoef je niet per se te typen.</span></button>'+
-'<button class="tile" data-mode="words"><span class="emoji">📚</span><strong>Woordenlijst</strong><span>Bekijk alle 24 woorden en zoek snel iets op.</span></button>'+
+'<button class="tile" data-mode="test"><span class="emoji">📝</span><strong>Toetsmodus</strong><span>Maak een oefentoets zonder hints. Aan het einde krijg je je score en de antwoorden.</span></button>
+<button class="tile" data-mode="words"><span class="emoji">📚</span><strong>Woordenlijst</strong><span>Bekijk alle Franse woorden en zoek snel iets op.</span></button>'+
 '</div>'+
 '<div class="section-head"><div><h2>Jouw voortgang</h2><div class="small-note">Een woord telt mee zodra je het goed beantwoordt.</div></div></div>'+
 '<div class="panel"><div class="panel-top"><span>Geoefend</span><span class="pill">'+mastered.size+' / '+WORDS.length+'</span></div><div class="result-number" style="font-size:3rem">'+Math.round(mastered.size/WORDS.length*100)+'%</div><div class="progress-track" style="height:12px"><div class="progress-fill" style="width:'+(mastered.size/WORDS.length*100)+'%"></div></div><div class="action-row"><button class="secondary" data-action="reset-progress">Voortgang opnieuw instellen</button></div></div>';
@@ -186,7 +244,7 @@ view.innerHTML=header('Meerkeuzequiz','Vraag '+(quizIndex+1)+' van '+quizRound.l
 (quizAnswered?'<div class="feedback '+(quizChosen>=0&&quizOptions[quizChosen].id===idx?'good':'bad')+'">'+(quizOptions[quizChosen]&&quizOptions[quizChosen].id===idx?'Helemaal goed! 🎉':'Nog niet. Het juiste antwoord is: '+esc(answerFor(w)))+'</div>':'')+
 '<div class="action-row">'+(quizAnswered?'<button class="primary" data-action="quiz-next">'+(quizIndex===quizRound.length-1?'Bekijk resultaat':'Volgende vraag →')+'</button>':'')+'<button class="secondary" data-action="start-quiz">Stop en start opnieuw</button></div></div>';
 }
-function startWrite(){writeRound=shuffle(WORDS.map((w,i)=>i));writeIndex=0;writeChecked=false;writeTries=0;writeResult=false;writeMistake=false;setMode('write');}
+__INSERT_TEST_FUNCTIONS__
 function renderWrite(){
 if(writeIndex>=writeRound.length){writeRound=shuffle(WORDS.map((w,i)=>i));writeIndex=0;}
 const idx=writeRound[writeIndex],w=WORDS[idx];
@@ -219,19 +277,22 @@ view.addEventListener('click',function(e){
 const b=e.target.closest('button');if(!b)return;
 if(b.dataset.mode){setMode(b.dataset.mode);return;}
 const a=b.dataset.action;
-if(a==='direction'){if(mode==='quiz'&&quizAnswered)return;direction=b.dataset.dir||(direction==='fr-nl'?'nl-fr':'fr-nl');flipped=false;if(mode==='quiz'&&quizIndex<quizRound.length){quizAnswered=false;createQuizOptions();}if(mode==='write'){writeChecked=false;writeTries=0;writeMistake=false;writeResult=false;}render();}
+if(a==='direction'){if((mode==='quiz'&&quizAnswered)||(mode==='test'&&testActive))return;direction=b.dataset.dir||(direction==='fr-nl'?'nl-fr':'fr-nl');flipped=false;if(mode==='quiz'&&quizIndex<quizRound.length){quizAnswered=false;createQuizOptions();}if(mode==='write'){writeChecked=false;writeTries=0;writeMistake=false;writeResult=false;}render();}
 else if(a==='flip'){flipped=!flipped;renderCards();}
 else if(a==='prev'){cardIndex=(cardIndex+WORDS.length-1)%WORDS.length;flipped=false;renderCards();}
 else if(a==='next-card'){cardIndex=(cardIndex+1)%WORDS.length;flipped=false;renderCards();}
 else if(a==='known'){mastered.add(cardIndex);saveProgress();cardIndex=(cardIndex+1)%WORDS.length;flipped=false;renderCards();}
 else if(a==='start-quiz'){startQuiz();}
+else if(a==='begin-test'){startTest(b.dataset.length);}
+else if(a==='new-test'){testActive=false;setMode('test');}
+else if(a==='cancel-test'){testActive=false;setMode('home');}
 else if(a==='quiz-answer'&&!quizAnswered){quizChosen=Number(b.dataset.choice);quizAnswered=true;if(quizOptions[quizChosen].id===quizRound[quizIndex]){quizScore++;mastered.add(quizRound[quizIndex]);saveProgress();}renderQuiz();}
 else if(a==='quiz-next'){quizIndex++;quizAnswered=false;if(quizIndex<quizRound.length)createQuizOptions();renderQuiz();}
 else if(a==='start-write'){startWrite();}
 else if(a==='write-next'){writeIndex++;writeChecked=false;writeTries=0;writeResult=false;writeMistake=false;renderWrite();}
 else if(a==='reset-progress'){if(confirm('Weet je zeker dat je de voortgang wilt wissen?')){mastered.clear();saveProgress();renderHome();}}
 });
-view.addEventListener('submit',function(e){if(e.target.id==='write-form'){e.preventDefault();const inp=document.getElementById('write-answer');if(inp&&!writeChecked)checkWrite(inp.value);}});
+view.addEventListener('submit',function(e){if(e.target.id==='write-form'){e.preventDefault();const inp=document.getElementById('write-answer');if(inp&&!writeChecked)checkWrite(inp.value);}else if(e.target.id==='test-form'){e.preventDefault();const inp=document.getElementById('test-answer');if(inp&&inp.value.trim())submitTestAnswer(inp.value);}});
 view.addEventListener('input',function(e){if(e.target.id==='word-search'){wordFilter=e.target.value;const pos=e.target.selectionStart;renderWords();const inp=document.getElementById('word-search');inp.focus();inp.setSelectionRange(pos,pos);}});
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',function(){setMode(b.dataset.mode);}));
 updateProgress();render();
