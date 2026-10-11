@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#3e1768">
+<meta name="description" content="Oefen Franse woorden en zinnen met flashcards, quizzen en schrijfopdrachten.">
+<title>Frans oefenen — Woorden & zinnen</title>
+<style>
+:root{--purple:#3e1768;--purple2:#522183;--lilac:#eadcf8;--white:#fff;--ink:#241632;--muted:#756783;--line:rgba(255,255,255,.16);--green:#16845a;--red:#bd354d;--gold:#ffd76c}
+*{box-sizing:border-box}
+body{margin:0;background:#f7f3fb;color:var(--ink);font-family:ui-rounded,"Avenir Next",Avenir,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid #f6c94d;outline-offset:3px}
+.shell{max-width:1080px;margin:0 auto;padding:24px 20px 50px}
+.hero{background:var(--purple);color:white;border-radius:28px;padding:30px clamp(20px,5vw,48px);position:relative;overflow:hidden}
+.hero:after{content:"é";position:absolute;font-size:200px;font-weight:800;color:rgba(255,255,255,.055);right:24px;bottom:-70px;pointer-events:none}
+.eyebrow{font-size:.78rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#dec7f7}
+h1{font-size:clamp(2rem,5vw,3.6rem);line-height:1.04;margin:10px 0 12px;letter-spacing:-.04em}
+.hero p{max-width:620px;color:#f0e6f8;font-size:1.04rem;line-height:1.55;margin:0}
+.hero-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;position:relative;z-index:1}
+.counter{flex:0 0 auto;display:grid;place-items:center;width:94px;height:94px;border:1px solid rgba(255,255,255,.24);border-radius:25px;background:rgba(255,255,255,.08);text-align:center}
+.counter strong{font-size:2rem;line-height:1.1}.counter span{font-size:.75rem;color:#eadcf8}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 20px}
+.navbtn{border:1px solid #e4d6ef;background:white;color:#4a2a62;border-radius:13px;padding:10px 15px;font-weight:750}
+.navbtn.active,.navbtn:hover{background:var(--purple);color:white;border-color:var(--purple)}
+.progressbox{display:flex;align-items:center;gap:12px;margin:16px 0 22px;color:var(--muted);font-size:.9rem}
+.progress-track{height:9px;background:#e7deef;border-radius:99px;overflow:hidden;flex:1}
+.progress-fill{height:100%;width:0;background:#7b41b6;border-radius:99px;transition:width .25s}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.tile{background:white;border:1px solid #e6dced;border-radius:22px;padding:22px;text-align:left;color:var(--ink);min-height:150px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;box-shadow:0 6px 18px rgba(63,25,91,.04);transition:transform .16s,border-color .16s}
+.tile:hover{transform:translateY(-2px);border-color:#bda0d3}
+.tile .emoji{font-size:1.7rem}.tile strong{font-size:1.2rem}.tile span:last-child{color:var(--muted);line-height:1.4}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin:25px 0 12px}
+h2{font-size:1.5rem;letter-spacing:-.025em;margin:0}
+.small-note{color:var(--muted);font-size:.9rem}
+.panel{background:white;border:1px solid #e6dced;border-radius:24px;padding:clamp(20px,4vw,36px);box-shadow:0 8px 28px rgba(63,25,91,.05)}
+.panel-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:.9rem}
+.pill{display:inline-flex;border-radius:99px;padding:6px 11px;background:#f0e5fa;color:#60308a;font-weight:800;font-size:.8rem}
+.big-word{font-size:clamp(2rem,6vw,3.8rem);line-height:1.18;letter-spacing:-.03em;text-align:center;padding:50px 8px 24px;overflow-wrap:anywhere}
+.meaning{font-size:clamp(1.3rem,4vw,2rem);text-align:center;color:var(--purple);font-weight:750;padding:8px 0 28px;min-height:64px}
+.action-row{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+.primary,.secondary,.choice{border-radius:13px;padding:12px 17px;border:1px solid transparent;font-weight:800}
+.primary{background:var(--purple);color:white}.primary:hover{background:var(--purple2)}
+.secondary{background:white;color:var(--purple);border-color:#d8c6e7}.secondary:hover{background:#f6eefc}
+.primary:disabled,.secondary:disabled{opacity:.45;cursor:not-allowed}
+.direction{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.direction button{border:1px solid #dfd0ea;background:#fff;color:#65427c;border-radius:11px;padding:8px 11px;font-size:.86rem;font-weight:750}
+.direction button.selected{background:#eee1fa;border-color:#b998d8;color:#462064}
+.quiz-prompt{font-size:clamp(1.7rem,5vw,2.7rem);font-weight:800;text-align:center;padding:26px 0;overflow-wrap:anywhere}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.choice{background:#faf7fd;border-color:#e4d8ed;color:#372148;text-align:left;min-height:62px;line-height:1.35}
+.choice:hover:not(:disabled){border-color:#9f77bf;background:#f2e7fb}
+.choice.correct{background:#e1f6e9;border-color:#87d0a3;color:#135c35}
+.choice.wrong{background:#ffeaed;border-color:#f2a7b4;color:#8b2134}
+.feedback{text-align:center;font-weight:800;margin:18px 0 0;min-height:26px}.feedback.good{color:var(--green)}.feedback.bad{color:var(--red)}
+.write-form{max-width:600px;margin:0 auto}.write-input{display:block;width:100%;border:2px solid #e2d5ec;background:#fcfaff;border-radius:15px;padding:15px 16px;font-size:1.05rem;margin:15px 0}
+.wordlist-tools{display:flex;gap:10px;flex-wrap:wrap;margin:17px 0}.wordlist-tools input{flex:1;min-width:200px}
+.wordlist{border:1px solid #e8deef;border-radius:16px;overflow:hidden}
+.wordrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 16px;border-bottom:1px solid #eee6f4;background:white}
+.wordrow:last-child{border-bottom:0}.wordrow strong{font-size:1.03rem;overflow-wrap:anywhere}.wordrow span{color:#705f7e;overflow-wrap:anywhere}.knownmark{font-size:.78rem;color:var(--green);font-weight:800;text-align:right}
+.result-number{font-size:clamp(2.8rem,9vw,5.6rem);line-height:1;color:var(--purple);font-weight:900;text-align:center;margin:22px 0 12px}
+.footer{text-align:center;color:#8b7b96;font-size:.84rem;margin:26px 0 0}
+@media(max-width:640px){.shell{padding:12px 12px 34px}.hero{border-radius:22px;padding:23px 20px}.hero-row{align-items:flex-start}.counter{width:72px;height:72px;border-radius:18px}.counter strong{font-size:1.6rem}.counter span{font-size:.65rem}.grid{grid-template-columns:1fr}.tile{min-height:0;padding:18px}.choices{grid-template-columns:1fr}.wordrow{grid-template-columns:1fr auto;gap:4px 12px}.wordrow span{grid-column:1}.knownmark{grid-column:2;grid-row:1/3}.big-word{padding:38px 4px 20px}.panel{border-radius:20px}.navbtn{padding:9px 11px;font-size:.9rem}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="hero">
+  <div class="hero-row">
+    <div>
+      <div class="eyebrow">Petit à petit · Frans oefenen</div>
+      <h1>Frans in je hoofd.<br>Pas à pas. 🇫🇷</h1>
+      <p>Oefen de 24 woorden en zinnen uit je lijst met flashcards, een quiz of schrijfopdrachten. Je voortgang wordt op dit apparaat bewaard.</p>
+    </div>
+    <div class="counter" aria-label="24 woorden en zinnen"><div><strong>24</strong><br><span>woorden & zinnen</span></div></div>
+  </div>
+</header>
+<nav aria-label="Oefenmenu">
+  <button class="navbtn active" data-mode="home">🏠 Start</button>
+  <button class="navbtn" data-mode="cards">🃏 Flashcards</button>
+  <button class="navbtn" data-mode="quiz">🎯 Quiz</button>
+  <button class="navbtn" data-mode="write">✍️ Schrijven</button>
+  <button class="navbtn" data-mode="words">📚 Woordenlijst</button>
+</nav>
+<div id="progressbox" class="progressbox"><span id="progress-label">0 van 24 geoefend</span><div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div></div>
+<main id="view" aria-live="polite"></main>
+<p class="footer">Gemaakt om te oefenen · Geen account nodig · Je voortgang blijft op dit apparaat</p>
+</div>
+<script>
+(function(){
+'use strict';
+const WORDS = [
+ {fr:'jouer au foot',nl:['voetballen','voetbal spelen']},
+ {fr:'elle joue au foot',nl:['zij voetbalt','zij speelt voetbal']},
+ {fr:'habiter',nl:['wonen']},
+ {fr:'le talent',nl:['het talent','talent']},
+ {fr:'danser',nl:['dansen']},
+ {fr:'elle danse',nl:['zij danst']},
+ {fr:'chanter',nl:['zingen']},
+ {fr:'il chante',nl:['hij zingt']},
+ {fr:'jouer du piano',nl:['piano spelen']},
+ {fr:'je joue du piano',nl:['ik speel piano']},
+ {fr:'faire du sport',nl:['sporten','aan sport doen']},
+ {fr:'il habite',nl:['hij woont']},
+ {fr:'parler',nl:['spreken','praten']},
+ {fr:'elle parle',nl:['zij spreekt','zij praat']},
+ {fr:"il s'appelle",nl:['hij heet']},
+ {fr:"elle s'appelle",nl:['zij heet']},
+ {fr:"c'est",nl:['het is','dit is']},
+ {fr:'un chien',nl:['een hond']},
+ {fr:'le français',nl:['het Frans','de Franse taal']},
+ {fr:'je parle français',nl:['ik spreek Frans','ik praat Frans']},
+ {fr:'un enfant',nl:['een kind']},
+ {fr:'toujours',nl:['altijd']},
+ {fr:'beaucoup',nl:['veel']},
+ {fr:'ensemble',nl:['samen']}
+];
+const STORE='frans-oefenen-progress-v1';
+let mastered=new Set();
+try{mastered=new Set(JSON.parse(localStorage.getItem(STORE)||'[]').filter(n=>Number.isInteger(n)&&n>=0&&n<WORDS.length));}catch(e){}
+let mode='home',direction='fr-nl',cardIndex=0,flipped=false,quizRound=[],quizIndex=0,quizScore=0,quizAnswered=false,quizOptions=[],quizChosen=-1,writeRound=[],writeIndex=0,writeChecked=false,writeTries=0,wordFilter='';
+const view=document.getElementById('view');
+function saveProgress(){try{localStorage.setItem(STORE,JSON.stringify(Array.from(mastered)));}catch(e){};updateProgress();}
+function updateProgress(){document.getElementById('progress-label').textContent=mastered.size+' van '+WORDS.length+' geoefend';document.getElementById('progress-fill').style.width=(mastered.size/WORDS.length*100)+'%';}
+function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function norm(s){return String(s).toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’‘]/g,"'").replace(/[.!?;,]/g,'').replace(/\s+/g,' ');}
+function promptFor(w){return direction==='fr-nl'?w.fr:w.nl[0];}
+function answerFor(w){return direction==='fr-nl'?w.nl[0]:w.fr;}
+function directionBar(){return '<div class="direction" aria-label="Richting"><span class="small-note">Richting:</span><button data-action="direction" class="'+(direction==='fr-nl'?'selected':'')+'">🇫🇷 → 🇳🇱</button><button data-action="direction" class="'+(direction==='nl-fr'?'selected':'')+'">🇳🇱 → 🇫🇷</button></div>';}
+function header(title,note){return '<div class="section-head"><div><h2>'+title+'</h2><div class="small-note">'+note+'</div></div>'+directionBar()+'</div>';}
+function setMode(next){mode=next;document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));render();}
+function goHome(){setMode('home');}
+function render(){updateProgress();document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));if(mode==='home')renderHome();else if(mode==='cards')renderCards();else if(mode==='quiz')renderQuiz();else if(mode==='write')renderWrite();else if(mode==='words')renderWords();}
+function renderHome(){
+view.innerHTML='<div class="section-head"><div><h2>Kies je oefening</h2><div class="small-note">Korte rondes helpen je om de woorden te onthouden.</div></div></div>'+
+'<div class="grid">'+
+'<button class="tile" data-mode="cards"><span class="emoji">🃏</span><strong>Flashcards</strong><span>Bekijk de Franse kant en draai de kaart om voor de vertaling.</span></button>'+
+'<button class="tile" data-action="start-quiz"><span class="emoji">🎯</span><strong>Meerkeuzequiz</strong><span>10 vragen. Kies de juiste vertaling of het juiste Franse woord.</span></button>'+
+'<button class="tile" data-action="start-write"><span class="emoji">✍️</span><strong>Schrijven</strong><span>Typ zelf het antwoord. Accenten hoef je niet per se te typen.</span></button>'+
+'<button class="tile" data-mode="words"><span class="emoji">📚</span><strong>Woordenlijst</strong><span>Bekijk alle 24 woorden en zoek snel iets op.</span></button>'+
+'</div>'+
+'<div class="section-head"><div><h2>Jouw voortgang</h2><div class="small-note">Een woord telt mee zodra je het goed beantwoordt.</div></div></div>'+
+'<div class="panel"><div class="panel-top"><span>Geoefend</span><span class="pill">'+mastered.size+' / '+WORDS.length+'</span></div><div class="result-number" style="font-size:3rem">'+Math.round(mastered.size/WORDS.length*100)+'%</div><div class="progress-track" style="height:12px"><div class="progress-fill" style="width:'+(mastered.size/WORDS.length*100)+'%"></div></div><div class="action-row"><button class="secondary" data-action="reset-progress">Voortgang opnieuw instellen</button></div></div>';
+}
+function renderCards(){
+if(cardIndex>=WORDS.length)cardIndex=0;
+const w=WORDS[cardIndex];
+view.innerHTML=header('Flashcards','Kaart '+(cardIndex+1)+' van '+WORDS.length)+
+'<div class="panel"><div class="panel-top"><span class="pill">'+(mastered.has(cardIndex)?'✓ Geoefend':'Oefenkaart')+'</span><span>'+ (cardIndex+1)+' / '+WORDS.length+'</span></div>'+
+'<button class="secondary" data-action="flip" style="display:block;margin:20px auto 0">↻ Draai kaart om</button>'+
+'<div class="big-word">'+esc(flipped?answerFor(w):promptFor(w))+'</div>'+
+'<div class="meaning">'+(flipped?'<span class="pill">Vertaling</span>':'<span class="small-note">Denk aan de vertaling en draai de kaart om.</span>')+'</div>'+
+'<div class="action-row"><button class="secondary" data-action="prev">← Vorige</button><button class="primary" data-action="known">✓ Dit kende ik</button><button class="primary" data-action="next-card">Volgende →</button></div></div>';
+}
+function createQuizOptions(){
+const w=WORDS[quizRound[quizIndex]];
+const right=answerFor(w);
+const pool=shuffle(WORDS.map((x,i)=>({id:i,label:answerFor(x)})).filter(x=>x.id!==quizRound[quizIndex]&&norm(x.label)!==norm(right)));
+const opts=[{id:quizRound[quizIndex],label:right}];
+const used=new Set([norm(right)]);
+for(const option of pool){if(!used.has(norm(option.label))){opts.push(option);used.add(norm(option.label));}if(opts.length===4)break;}
+quizOptions=shuffle(opts);quizChosen=-1;
+}
+function startQuiz(){quizRound=shuffle(WORDS.map((w,i)=>i)).slice(0,10);quizIndex=0;quizScore=0;quizAnswered=false;createQuizOptions();setMode('quiz');}
+function renderQuiz(){
+if(quizIndex>=quizRound.length){
+view.innerHTML='<div class="panel" style="text-align:center"><div class="eyebrow" style="color:#74449a">Ronde afgerond</div><h2 style="margin-top:8px">Goed gedaan!</h2><div class="result-number">'+quizScore+' / '+quizRound.length+'</div><p class="small-note">Je hebt '+quizScore+' vragen goed beantwoord.</p><div class="action-row"><button class="primary" data-action="start-quiz">Nog een quiz</button><button class="secondary" data-mode="home">Terug naar start</button></div></div>';return;
+}
+const idx=quizRound[quizIndex],w=WORDS[idx];
+let choices='';
+quizOptions.forEach((o,i)=>{
+let cls='choice';
+if(quizAnswered&&o.id===idx)cls+=' correct';
+else if(quizAnswered&&i===quizChosen&&o.id!==idx)cls+=' wrong';
+choices+='<button class="'+cls+'" data-action="quiz-answer" data-choice="'+i+'" '+(quizAnswered?'disabled':'')+'>'+esc(o.label)+'</button>';
+});
+view.innerHTML=header('Meerkeuzequiz','Vraag '+(quizIndex+1)+' van '+quizRound.length+' · score '+quizScore)+
+'<div class="panel"><div class="panel-top"><span class="pill">Kies één antwoord</span><span>'+Math.round(quizIndex/quizRound.length*100)+'% van de ronde</span></div><div class="quiz-prompt">'+esc(promptFor(w))+'</div><div class="choices">'+choices+'</div>'+
+(quizAnswered?'<div class="feedback '+(quizChosen>=0&&quizOptions[quizChosen].id===idx?'good':'bad')+'">'+(quizOptions[quizChosen]&&quizOptions[quizChosen].id===idx?'Helemaal goed! 🎉':'Nog niet. Het juiste antwoord is: '+esc(answerFor(w)))+'</div>':'')+
+'<div class="action-row">'+(quizAnswered?'<button class="primary" data-action="quiz-next">'+(quizIndex===quizRound.length-1?'Bekijk resultaat':'Volgende vraag →')+'</button>':'')+'<button class="secondary" data-action="start-quiz">Stop en start opnieuw</button></div></div>';
+}
+function startWrite(){writeRound=shuffle(WORDS.map((w,i)=>i));writeIndex=0;writeChecked=false;writeTries=0;setMode('write');}
+function renderWrite(){
+if(writeIndex>=writeRound.length){writeRound=shuffle(WORDS.map((w,i)=>i));writeIndex=0;}
+const idx=writeRound[writeIndex],w=WORDS[idx];
+view.innerHTML=header('Schrijven','Woord '+(writeIndex+1)+' van '+writeRound.length)+
+'<div class="panel"><div class="panel-top"><span class="pill">Typ zelf het antwoord</span><span>'+(direction==='fr-nl'?'Frans naar Nederlands':'Nederlands naar Frans')+'</span></div>'+
+'<div class="quiz-prompt">'+esc(promptFor(w))+'</div><form id="write-form" class="write-form"><label for="write-answer" class="small-note">Jouw antwoord</label><input id="write-answer" class="write-input" type="text" autocomplete="off" autocapitalize="off" placeholder="Typ je antwoord..." '+(writeChecked?'disabled':'')+' required>'+
+'<div class="action-row">'+(writeChecked?'<button type="button" class="primary" data-action="write-next">Volgend woord →</button>':'<button type="submit" class="primary">Controleer antwoord</button>')+'</div></form>'+
+(writeChecked?'<div class="feedback '+(writeResult?'good':'bad')+'">'+(writeResult?'Goed gedaan! 🎉':'Goede poging! Antwoord: '+esc(answerFor(w)))+'</div>':'<p class="small-note" style="text-align:center;margin-top:18px">Tip: hoofdletters en Franse accenten maken niet uit.</p>')+
+'<div class="action-row"><button class="secondary" data-action="start-write">Nieuwe willekeurige reeks</button></div></div>';
+if(!writeChecked){const inp=document.getElementById('write-answer');if(inp)inp.focus();}
+}
+let writeResult=false;
+function checkWrite(value){
+const w=WORDS[writeRound[writeIndex]];
+const allowed=direction==='fr-nl'?w.nl:[w.fr];
+writeTries++;
+writeResult=allowed.some(a=>norm(a)===norm(value));
+if(writeResult){writeChecked=true;mastered.add(writeRound[writeIndex]);saveProgress();}
+else if(writeTries>=2){writeChecked=true;}
+renderWrite();
+}
+function renderWords(){
+const shown=WORDS.map((w,i)=>({w,i})).filter(x=>norm(x.w.fr+' '+x.w.nl.join(' ')).includes(norm(wordFilter)));
+let rows='';
+shown.forEach(x=>{rows+='<div class="wordrow"><strong>'+esc(x.w.fr)+'</strong><span>'+esc(x.w.nl.join(' / '))+'</span><span class="knownmark">'+(mastered.has(x.i)?'✓ Geoefend':'')+'</span></div>';});
+view.innerHTML='<div class="section-head"><div><h2>Woordenlijst</h2><div class="small-note">'+shown.length+' van de '+WORDS.length+' woorden en zinnen</div></div></div><div class="panel"><div class="wordlist-tools"><input class="write-input" id="word-search" type="search" placeholder="Zoek Frans of Nederlands..." value="'+esc(wordFilter)+'" style="margin:0"></div><div class="wordlist">'+(rows||'<div class="wordrow">Geen woorden gevonden.</div>')+'</div><div class="action-row"><button class="primary" data-mode="cards">Oefenen met flashcards</button></div></div>';
+}
+view.addEventListener('click',function(e){
+const b=e.target.closest('button');if(!b)return;
+if(b.dataset.mode){setMode(b.dataset.mode);return;}
+const a=b.dataset.action;
+if(a==='direction'){direction=direction==='fr-nl'?'nl-fr':'fr-nl';flipped=false;if(mode==='quiz'&&quizIndex<quizRound.length){quizAnswered=false;createQuizOptions();}if(mode==='write'){writeChecked=false;writeTries=0;}render();}
+else if(a==='flip'){flipped=!flipped;renderCards();}
+else if(a==='prev'){cardIndex=(cardIndex+WORDS.length-1)%WORDS.length;flipped=false;renderCards();}
+else if(a==='next-card'){cardIndex=(cardIndex+1)%WORDS.length;flipped=false;renderCards();}
+else if(a==='known'){mastered.add(cardIndex);saveProgress();cardIndex=(cardIndex+1)%WORDS.length;flipped=false;renderCards();}
+else if(a==='start-quiz'){startQuiz();}
+else if(a==='quiz-answer'&&!quizAnswered){quizChosen=Number(b.dataset.choice);quizAnswered=true;if(quizOptions[quizChosen].id===quizRound[quizIndex]){quizScore++;mastered.add(quizRound[quizIndex]);saveProgress();}renderQuiz();}
+else if(a==='quiz-next'){quizIndex++;quizAnswered=false;if(quizIndex<quizRound.length)createQuizOptions();renderQuiz();}
+else if(a==='start-write'){startWrite();}
+else if(a==='write-next'){writeIndex++;writeChecked=false;writeTries=0;writeResult=false;renderWrite();}
+else if(a==='reset-progress'){if(confirm('Weet je zeker dat je de voortgang wilt wissen?')){mastered.clear();saveProgress();renderHome();}}
+});
+view.addEventListener('submit',function(e){if(e.target.id==='write-form'){e.preventDefault();const inp=document.getElementById('write-answer');if(inp&&!writeChecked)checkWrite(inp.value);}});
+view.addEventListener('input',function(e){if(e.target.id==='word-search'){wordFilter=e.target.value;const pos=e.target.selectionStart;renderWords();const inp=document.getElementById('word-search');inp.focus();inp.setSelectionRange(pos,pos);}});
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',function(){setMode(b.dataset.mode);}));
+updateProgress();render();
+})();
+</script>
+</body>
+</html>
