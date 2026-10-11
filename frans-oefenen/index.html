@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#3e1768">
-<meta name="description" content="Oefen Franse woorden en zinnen met flashcards, quizzen en schrijfopdrachten.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<meta name="description" content="Oefen Franse woorden en zinnen met flashcards, quizzen, schrijfopdrachten en een woordenlijst.">
 <title>Frans oefenen — Woorden & zinnen</title>
 <style>
 :root{--purple:#3e1768;--purple2:#522183;--lilac:#eadcf8;--white:#fff;--ink:#241632;--muted:#756783;--line:rgba(255,255,255,.16);--green:#16845a;--red:#bd354d;--gold:#ffd76c}
@@ -71,9 +73,9 @@ h2{font-size:1.5rem;letter-spacing:-.025em;margin:0}
     <div>
       <div class="eyebrow">Petit à petit · Frans oefenen</div>
       <h1>Frans in je hoofd.<br>Pas à pas. 🇫🇷</h1>
-      <p>Oefen de 24 woorden en zinnen uit je lijst met flashcards, een quiz of schrijfopdrachten. Je voortgang wordt op dit apparaat bewaard.</p>
+      <p>Oefen Franse woorden en zinnen met flashcards, een quiz of schrijfopdrachten. Je voortgang wordt op dit apparaat bewaard.</p>
     </div>
-    <div class="counter" aria-label="24 woorden en zinnen"><div><strong>24</strong><br><span>woorden & zinnen</span></div></div>
+    <div class="counter" aria-label="24 woorden en zinnen"><div><strong>27</strong><br><span>woorden & zinnen</span></div></div>
   </div>
 </header>
 <nav aria-label="Oefenmenu">
@@ -85,7 +87,7 @@ h2{font-size:1.5rem;letter-spacing:-.025em;margin:0}
 </nav>
 <div id="progressbox" class="progressbox"><span id="progress-label">0 van 24 geoefend</span><div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div></div>
 <main id="view" aria-live="polite"></main>
-<p class="footer">Gemaakt om te oefenen · Geen account nodig · Je voortgang blijft op dit apparaat</p>
+<p class="footer">Gemaakt om te oefenen · Geen account nodig · Je voortgang blijft op dit apparaat<br><a href="../" style="color:#68458a;font-weight:750">← Ook Spaans oefenen</a></p>
 </div>
 <script>
 (function(){
@@ -114,7 +116,10 @@ const WORDS = [
  {fr:'un enfant',nl:['een kind']},
  {fr:'toujours',nl:['altijd']},
  {fr:'beaucoup',nl:['veel']},
- {fr:'ensemble',nl:['samen']}
+ {fr:'ensemble',nl:['samen']},
+ {fr:'huit',nl:['acht']},
+ {fr:'neuf',nl:['negen']},
+ {fr:'dix',nl:['tien']}
 ];
 const STORE='frans-oefenen-progress-v1';
 let mastered=new Set();
@@ -230,6 +235,7 @@ view.addEventListener('submit',function(e){if(e.target.id==='write-form'){e.prev
 view.addEventListener('input',function(e){if(e.target.id==='word-search'){wordFilter=e.target.value;const pos=e.target.selectionStart;renderWords();const inp=document.getElementById('word-search');inp.focus();inp.setSelectionRange(pos,pos);}});
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',function(){setMode(b.dataset.mode);}));
 updateProgress();render();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
 })();
 </script>
 </body>
