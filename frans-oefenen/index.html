@@ -181,7 +181,7 @@ view.innerHTML=header('Meerkeuzequiz','Vraag '+(quizIndex+1)+' van '+quizRound.l
 (quizAnswered?'<div class="feedback '+(quizChosen>=0&&quizOptions[quizChosen].id===idx?'good':'bad')+'">'+(quizOptions[quizChosen]&&quizOptions[quizChosen].id===idx?'Helemaal goed! 🎉':'Nog niet. Het juiste antwoord is: '+esc(answerFor(w)))+'</div>':'')+
 '<div class="action-row">'+(quizAnswered?'<button class="primary" data-action="quiz-next">'+(quizIndex===quizRound.length-1?'Bekijk resultaat':'Volgende vraag →')+'</button>':'')+'<button class="secondary" data-action="start-quiz">Stop en start opnieuw</button></div></div>';
 }
-function startWrite(){writeRound=shuffle(WORDS.map((w,i)=>i));writeIndex=0;writeChecked=false;writeTries=0;setMode('write');}
+function startWrite(){writeRound=shuffle(WORDS.map((w,i)=>i));writeIndex=0;writeChecked=false;writeTries=0;writeResult=false;writeMistake=false;setMode('write');}
 function renderWrite(){
 if(writeIndex>=writeRound.length){writeRound=shuffle(WORDS.map((w,i)=>i));writeIndex=0;}
 const idx=writeRound[writeIndex],w=WORDS[idx];
@@ -189,16 +189,17 @@ view.innerHTML=header('Schrijven','Woord '+(writeIndex+1)+' van '+writeRound.len
 '<div class="panel"><div class="panel-top"><span class="pill">Typ zelf het antwoord</span><span>'+(direction==='fr-nl'?'Frans naar Nederlands':'Nederlands naar Frans')+'</span></div>'+
 '<div class="quiz-prompt">'+esc(promptFor(w))+'</div><form id="write-form" class="write-form"><label for="write-answer" class="small-note">Jouw antwoord</label><input id="write-answer" class="write-input" type="text" autocomplete="off" autocapitalize="off" placeholder="Typ je antwoord..." '+(writeChecked?'disabled':'')+' required>'+
 '<div class="action-row">'+(writeChecked?'<button type="button" class="primary" data-action="write-next">Volgend woord →</button>':'<button type="submit" class="primary">Controleer antwoord</button>')+'</div></form>'+
-(writeChecked?'<div class="feedback '+(writeResult?'good':'bad')+'">'+(writeResult?'Goed gedaan! 🎉':'Goede poging! Antwoord: '+esc(answerFor(w)))+'</div>':'<p class="small-note" style="text-align:center;margin-top:18px">Tip: hoofdletters en Franse accenten maken niet uit.</p>')+
+(writeChecked?'<div class="feedback '+(writeResult?'good':'bad')+'">'+(writeResult?'Goed gedaan! 🎉':'Goede poging! Antwoord: '+esc(answerFor(w)))+'</div>':(writeMistake?'<div class="feedback bad">Niet helemaal — probeer het nog eens.</div>':'<p class="small-note" style="text-align:center;margin-top:18px">Tip: hoofdletters en Franse accenten maken niet uit.</p>'))+
 '<div class="action-row"><button class="secondary" data-action="start-write">Nieuwe willekeurige reeks</button></div></div>';
 if(!writeChecked){const inp=document.getElementById('write-answer');if(inp)inp.focus();}
 }
-let writeResult=false;
+let writeResult=false,writeMistake=false;
 function checkWrite(value){
 const w=WORDS[writeRound[writeIndex]];
 const allowed=direction==='fr-nl'?w.nl:[w.fr];
 writeTries++;
 writeResult=allowed.some(a=>norm(a)===norm(value));
+writeMistake=!writeResult;
 if(writeResult){writeChecked=true;mastered.add(writeRound[writeIndex]);saveProgress();}
 else if(writeTries>=2){writeChecked=true;}
 renderWrite();
@@ -213,7 +214,7 @@ view.addEventListener('click',function(e){
 const b=e.target.closest('button');if(!b)return;
 if(b.dataset.mode){setMode(b.dataset.mode);return;}
 const a=b.dataset.action;
-if(a==='direction'){direction=b.dataset.dir||(direction==='fr-nl'?'nl-fr':'fr-nl');flipped=false;if(mode==='quiz'&&quizIndex<quizRound.length){quizAnswered=false;createQuizOptions();}if(mode==='write'){writeChecked=false;writeTries=0;}render();}
+if(a==='direction'){if(mode==='quiz'&&quizAnswered)return;direction=b.dataset.dir||(direction==='fr-nl'?'nl-fr':'fr-nl');flipped=false;if(mode==='quiz'&&quizIndex<quizRound.length){quizAnswered=false;createQuizOptions();}if(mode==='write'){writeChecked=false;writeTries=0;writeMistake=false;writeResult=false;}render();}
 else if(a==='flip'){flipped=!flipped;renderCards();}
 else if(a==='prev'){cardIndex=(cardIndex+WORDS.length-1)%WORDS.length;flipped=false;renderCards();}
 else if(a==='next-card'){cardIndex=(cardIndex+1)%WORDS.length;flipped=false;renderCards();}
@@ -222,7 +223,7 @@ else if(a==='start-quiz'){startQuiz();}
 else if(a==='quiz-answer'&&!quizAnswered){quizChosen=Number(b.dataset.choice);quizAnswered=true;if(quizOptions[quizChosen].id===quizRound[quizIndex]){quizScore++;mastered.add(quizRound[quizIndex]);saveProgress();}renderQuiz();}
 else if(a==='quiz-next'){quizIndex++;quizAnswered=false;if(quizIndex<quizRound.length)createQuizOptions();renderQuiz();}
 else if(a==='start-write'){startWrite();}
-else if(a==='write-next'){writeIndex++;writeChecked=false;writeTries=0;writeResult=false;renderWrite();}
+else if(a==='write-next'){writeIndex++;writeChecked=false;writeTries=0;writeResult=false;writeMistake=false;renderWrite();}
 else if(a==='reset-progress'){if(confirm('Weet je zeker dat je de voortgang wilt wissen?')){mastered.clear();saveProgress();renderHome();}}
 });
 view.addEventListener('submit',function(e){if(e.target.id==='write-form'){e.preventDefault();const inp=document.getElementById('write-answer');if(inp&&!writeChecked)checkWrite(inp.value);}});
