@@ -247,6 +247,7 @@ view.innerHTML=header('Meerkeuzequiz','Vraag '+(quizIndex+1)+' van '+quizRound.l
 __INSERT_TEST_FUNCTIONS__
 function startTest(length){
   const n=Math.min(Number(length)||10,WORDS.length);
+  direction='fr-nl';
   testRound=shuffle(WORDS.map((w,i)=>i)).slice(0,n);
   testIndex=0;testAnswers=[];testActive=true;setMode('test');
 }
@@ -269,8 +270,8 @@ function renderTest(){
     return;
   }
   const id=testRound[testIndex],w=WORDS[id];
-  view.innerHTML=header('Toetsmodus','Vraag '+(testIndex+1)+' van '+testRound.length)+
-    '<div class="panel"><div class="panel-top"><span class="pill">Geen hints</span><span>'+Math.round(testIndex/testRound.length*100)+'% van de toets</span></div><div class="progress-track"><div class="progress-fill" style="width:'+(testIndex/testRound.length*100)+'%"></div></div><div class="quiz-prompt">'+esc(promptFor(w))+'</div><form id="test-form" class="write-form"><label for="test-answer" class="small-note">Typ je antwoord</label><input id="test-answer" class="write-input" type="text" autocomplete="off" autocapitalize="off" placeholder="Jouw antwoord..." required><div class="action-row"><button type="submit" class="primary">Beantwoord en ga verder →</button></div></form><p class="small-note" style="text-align:center">Je kunt je antwoord niet veranderen nadat je verdergaat.</p><div class="action-row"><button class="secondary" data-action="cancel-test">Toets stoppen</button></div></div>';
+  view.innerHTML='<div class="section-head"><div><h2>📝 Toetsmodus</h2><div class="small-note">Frans → Nederlands · Geen hints · Geen taalwissel tijdens de toets</div></div><span class="pill">Vraag '+(testIndex+1)+' van '+testRound.length+'</span></div>'+
+    '<div class="panel"><div class="panel-top"><span class="pill">Antwoord in het Nederlands</span><span>'+Math.round(testIndex/testRound.length*100)+'% van de toets</span></div><div class="progress-track"><div class="progress-fill" style="width:'+(testIndex/testRound.length*100)+'%"></div></div><div class="quiz-prompt">'+esc(w.fr)+'</div><form id="test-form" class="write-form"><label for="test-answer" class="small-note">Wat betekent dit in het Nederlands?</label><input id="test-answer" class="write-input" type="text" autocomplete="off" autocapitalize="off" placeholder="Typ de Nederlandse vertaling..." required><div class="action-row"><button type="submit" class="primary">Beantwoord en ga verder →</button></div></form><p class="small-note" style="text-align:center">Je kunt je antwoord niet veranderen nadat je verdergaat.</p><div class="action-row"><button class="secondary" data-action="cancel-test">Toets stoppen</button></div></div>';
   const inp=document.getElementById('test-answer');if(inp)inp.focus();
 }
 function submitTestAnswer(value){
