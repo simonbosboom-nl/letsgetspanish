@@ -261,10 +261,11 @@ function renderTest(){
     '</div><div class="action-row"><button class="secondary" data-mode="home">← Terug naar start</button></div>';
     return;
   }
+  direction='fr-nl';
   if(testIndex>=testRound.length){
     const score=testAnswers.filter(a=>a.correct).length;
     let review='';
-    testAnswers.forEach((a,i)=>{review+='<div class="wordrow"><strong>'+(i+1)+'. '+esc(WORDS[a.id].fr)+'</strong><span>Jouw antwoord: '+esc(a.answer||'Geen antwoord')+'</span><span class="knownmark">'+(a.correct?'✓ Goed':'Juiste antwoord: '+esc(answerFor(WORDS[a.id])))+'</span></div>';});
+    testAnswers.forEach((a,i)=>{review+='<div class="wordrow"><strong>'+(i+1)+'. '+esc(WORDS[a.id].fr)+'</strong><span>Jouw antwoord: '+esc(a.answer||'Geen antwoord')+'</span><span class="knownmark">'+(a.correct?'✓ Goed':'Juiste antwoord: '+esc(WORDS[a.id].nl[0]))+'</span></div>';});
     view.innerHTML='<div class="panel" style="text-align:center"><div class="eyebrow" style="color:#74449a">Toets afgerond</div><h2 style="margin-top:8px">Jouw resultaat</h2><div class="result-number">'+score+' / '+testRound.length+'</div><p class="small-note">'+Math.round(score/testRound.length*100)+'% goed beantwoord.</p><div class="progress-track" style="height:12px"><div class="progress-fill" style="width:'+(score/testRound.length*100)+'%"></div></div><div class="action-row"><button class="primary" data-action="new-test">Nog een toets</button><button class="secondary" data-mode="home">Terug naar start</button></div></div>'+
     '<div class="section-head"><div><h2>Antwoorden nakijken</h2><div class="small-note">Bekijk wat je goed had en wat je nog kunt oefenen.</div></div></div><div class="panel"><div class="wordlist">'+review+'</div></div>';
     return;
@@ -277,7 +278,7 @@ function renderTest(){
 function submitTestAnswer(value){
   if(!testActive||testIndex>=testRound.length)return;
   const id=testRound[testIndex],w=WORDS[id],answer=value.trim();
-  const acceptable=direction==='fr-nl'?w.nl:[w.fr];
+  const acceptable=w.nl;
   const correct=acceptable.some(a=>norm(a)===norm(answer));
   testAnswers.push({id,answer,correct});
   if(correct){mastered.add(id);saveProgress();}
