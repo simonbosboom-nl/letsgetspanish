@@ -1,0 +1,19 @@
+{
+  "name": "Frans oefenen — Woorden & zinnen",
+  "short_name": "Frans oefenen",
+  "description": "Oefen Franse woorden met flashcards, quiz en schrijfopdrachten.",
+  "lang": "nl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f3fb",
+  "theme_color": "#3e1768",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
