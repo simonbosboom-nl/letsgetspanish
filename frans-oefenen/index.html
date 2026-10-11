@@ -244,7 +244,6 @@ view.innerHTML=header('Meerkeuzequiz','Vraag '+(quizIndex+1)+' van '+quizRound.l
 (quizAnswered?'<div class="feedback '+(quizChosen>=0&&quizOptions[quizChosen].id===idx?'good':'bad')+'">'+(quizOptions[quizChosen]&&quizOptions[quizChosen].id===idx?'Helemaal goed! 🎉':'Nog niet. Het juiste antwoord is: '+esc(answerFor(w)))+'</div>':'')+
 '<div class="action-row">'+(quizAnswered?'<button class="primary" data-action="quiz-next">'+(quizIndex===quizRound.length-1?'Bekijk resultaat':'Volgende vraag →')+'</button>':'')+'<button class="secondary" data-action="start-quiz">Stop en start opnieuw</button></div></div>';
 }
-__INSERT_TEST_FUNCTIONS__
 function startTest(length){
   const n=Math.min(Number(length)||10,WORDS.length);
   direction='fr-nl';
