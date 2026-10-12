@@ -90,7 +90,7 @@ const werkwoorden = [
 ["yo hago (hacer)","ik doe","Werkwoorden"],["tú haces (hacer)","jij doet","Werkwoorden"],["él/ella hace (hacer)","hij/zij doet","Werkwoorden"],["nosotros/as hacemos (hacer)","wij doen","Werkwoorden"],["vosotros/as hacéis (hacer)","jullie doen","Werkwoorden"],["ellos/ellas hacen (hacer)","zij doen","Werkwoorden"]
 ];
 const basisItems = woorden.map(x=>[x[0],x[1],x[2]]).concat(frases.map(x=>[x[0],x[1],"Frases clave"]));
-const bestaandeVormen = new Set(werkwoorden.map(x=>x[0].split(" (")[0]));
+const bestaandeVormen = new Set(werkwoorden.map(x=>x[0].split(" (")[0].replace(/^(yo|tú|él\/ella|nosotros\/as|vosotros\/as|ellos\/ellas)\s+/,"")));
 const oefenItems = basisItems.filter(x=>!bestaandeVormen.has(x[0])).concat(werkwoorden);
 let quizList=[], quizIndex=0, quizScore=0, quizChosen=false;
 let typingList=[], typingIndex=0;
