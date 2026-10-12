@@ -39,6 +39,7 @@
       <button class="tile t-purple" onclick="startFlashcards()"><span class="emoji">🧠</span><h3>Flashcards</h3><p>Leren, omdraaien en herhalen.</p><span class="arrow">→</span></button>
       <button class="tile t-blue" onclick="showTestSetup()"><span class="emoji">📝</span><h3>Toets modus</h3><p>Woorden, Frases clave en werkwoordvervoegingen.</p><span class="arrow">→</span></button>
       <button class="tile t-teal" onclick="showWords()"><span class="emoji">📚</span><h3>Woordenlijst</h3><p>Zoek op woord en filter per les.</p><span class="arrow">→</span></button>
+      <button class="tile t-red" onclick="startArticles()"><span class="emoji">🧩</span><h3>Lidwoorden oefenen</h3><p>Kies het juiste Spaanse lidwoord in een zin: el, la, los, las, un, una, unos of unas.</p><span class="arrow">→</span></button>
     </div>
     <div class="footer">🇪🇸 Pequeños pasos, grandes resultados. ¡Vamos! 🚀</div>
   </section>
@@ -64,6 +65,27 @@
 <section id="flash" class="page view hidden"><div class="card"><h2>🧠 Flashcards</h2><div class="submeta" id="flashMeta"></div><div class="word-prompt" id="flashPrompt"></div><div id="flashAnswer" class="feedback" style="font-size:24px;min-height:60px"></div><div class="actions"><button class="primary" onclick="flipFlash()">👀 Antwoord</button><button class="success" onclick="nextFlash()">Volgende →</button><button class="quiet" onclick="goHome()">🏠 Menu</button></div></div></section>
 
 <section id="test" class="page view hidden"><div class="card"><div id="testSetup"><h2>📝 Toets modus</h2><p>De toets kan alle woorden, Frases clave en 48 vervoegingen van ser, estar, tener, llamarse, hablar, vivir, ir en hacer gebruiken.</p><div class="notice">Kleine foutjes kunnen worden goed gerekend, maar de homework ninja waarschuwt je wel.</div><label for="testGroup">Onderdeel</label><select id="testGroup"><option value="all">Alles — inclusief werkwoorden</option><option value="words">Alleen woorden — 90</option><option value="phrases">Alleen Frases clave — 18</option><option value="verbs">Werkwoordvervoegingen — 48 vormen</option><option value="1.1">Les 1.1</option><option value="1.2">Les 1.2</option><option value="1.3">Les 1.3</option><option value="1.4">Les 1.4</option></select><label for="testCount">Aantal vragen</label><select id="testCount"><option value="all">Alles uit dit onderdeel</option><option value="10">10 vragen</option><option value="20">20 vragen</option><option value="30">30 vragen</option></select><div class="actions"><button class="primary" onclick="beginTest()">Start toets</button><button class="quiet" onclick="goHome()">🏠 Menu</button></div></div><div id="testRun" class="hidden"><div id="testMeta" class="submeta"></div><div class="progress"><span id="testBar"></span></div><div id="testPrompt" class="word-prompt"></div><input id="testInput" placeholder="Typ je antwoord..." autocomplete="off"><div id="testFeedback" class="feedback"></div><div class="actions"><button class="warn" onclick="checkTestAnswer()">✓ Controleer</button><button id="testNext" class="success" onclick="nextTest()" disabled>Volgende →</button><button id="testFinish" class="primary hidden" onclick="finishTest()">Lever toets in</button><button class="quiet" onclick="goHome()">🏠 Menu</button></div></div><div id="testResult" class="hidden"><h2>📊 Resultaat</h2><div class="resultbox" id="testScore"></div><div id="testDetails" class="feedback"></div><div class="actions"><button class="primary" onclick="showTestSetup()">Opnieuw</button><button class="quiet" onclick="goHome()">🏠 Menu</button></div></div></div></section>
+
+<section id="articles" class="page view hidden">
+  <div class="card">
+    <div class="submeta" id="articleMeta">Lidwoorden oefenen</div>
+    <h2>🧩 Vul het juiste Spaanse lidwoord in</h2>
+    <p class="hint">Kies welk lidwoord in de zin past. Let op: mannelijk of vrouwelijk, enkelvoud of meervoud, en of het om iets bepaalds gaat.</p>
+    <div class="notice" style="margin:14px 0">
+      <b>Bepaald:</b> el, la, los, las &nbsp;·&nbsp; <b>Onbepaald:</b> un, una, unos, unas
+    </div>
+    <div class="progress"><span id="articleBar"></span></div>
+    <div class="word-prompt" id="articleSentence" style="font-size:clamp(24px,5vw,38px)">Klik op starten om te oefenen.</div>
+    <div class="answers" id="articleAnswers"></div>
+    <div class="feedback" id="articleFeedback" aria-live="polite"></div>
+    <div id="articleReason" class="notice hidden"></div>
+    <div class="actions">
+      <button class="primary" id="articleStart" onclick="startArticles()">Start oefenen</button>
+      <button class="success hidden" id="articleNext" onclick="nextArticle()">Volgende zin →</button>
+      <button class="quiet" onclick="goHome()">🏠 Menu</button>
+    </div>
+  </div>
+</section>
 
 <section id="words" class="page view hidden"><div class="card"><h2>📚 Woordenlijst</h2><div class="listtools"><input id="searchBox" placeholder="Zoek Spaans of Nederlands…" oninput="renderWords()"><select id="lessonFilter" onchange="renderWords()"><option value="all">Alle onderdelen</option><option value="1.1">Les 1.1</option><option value="1.2">Les 1.2</option><option value="1.3">Les 1.3</option><option value="1.4">Les 1.4</option><option value="Frases clave">Frases clave</option><option value="Werkwoorden">Werkwoorden</option></select></div><p class="hint" id="wordCount"></p><div class="tablewrap"><table><thead><tr><th>Spaans</th><th>Nederlands</th><th>Onderdeel</th></tr></thead><tbody id="wordRows"></tbody></table></div><div class="actions"><button class="quiet" onclick="goHome()">🏠 Menu</button></div></div></section>
 </main>
@@ -140,6 +162,92 @@ function renderTest(){document.getElementById("testMeta").textContent="Vraag "+(
 function checkTestAnswer(){testAnswers[testIndex]=document.getElementById("testInput").value.trim();const item=testList[testIndex],r=answerCheck(testAnswers[testIndex],item[1]);testChecked[testIndex]=r;const el=document.getElementById("testFeedback");if(r.kind==="empty"){el.textContent="❌ de homework ninja vind dit niet goed: vul eerst iets in.";document.getElementById("testNext").disabled=true;return}el.textContent=r.correct?(r.kind==="warning"?"⚠️ "+r.message:"✅ Helemaal goed!"):("❌ "+r.message);document.getElementById("testNext").disabled=false;if(r.correct)saveProgress()}
 function nextTest(){testAnswers[testIndex]=document.getElementById("testInput").value.trim();if(testIndex<testList.length-1){testIndex++;renderTest()}}
 function finishTest(){testAnswers[testIndex]=document.getElementById("testInput").value.trim();let score=0,warn=[],wrong=[];testList.forEach((item,i)=>{const r=answerCheck(testAnswers[i]||"",item[1]);if(r.correct){score++;if(r.kind==="warning")warn.push(item[0])}else wrong.push(item[0])});document.getElementById("testRun").classList.add("hidden");document.getElementById("testResult").classList.remove("hidden");document.getElementById("testBar").style.width="100%";document.getElementById("testScore").textContent=score+" / "+testList.length+" ("+Math.round(score/testList.length*100)+"%)";let details="";if(warn.length)details+="<p>⚠️ <b>de homework ninja vind dit niet goed bij "+warn.length+" antwoord"+(warn.length===1?"":"en")+".</b></p><p>Controleer nog even: "+warn.join(", ")+"</p>";if(wrong.length)details+="<p>❌ <b>Nog oefenen:</b> "+wrong.join(", ")+"</p>";if(!wrong.length&&!warn.length)details+="🎉 Alles helemaal goed!";document.getElementById("testDetails").innerHTML=details}
+const articleQuestions = [
+{sentence:"___ chico de la foto es mi hermano.",answer:"El",options:["El","La","Un","Una"],reason:"El chico: je hebt het over een specifieke jongen op de foto."},
+{sentence:"En el camping hay ___ piscina grande.",answer:"Una",options:["El","La","Un","Una"],reason:"Una piscina: je noemt een zwembad voor het eerst; piscina is vrouwelijk enkelvoud."},
+{sentence:"___ chica que canta en el vídeo se llama Ana.",answer:"La",options:["El","La","Un","Una"],reason:"La chica: het gaat om die specifieke meid die in de video zingt."},
+{sentence:"Tengo ___ hermano y dos hermanas.",answer:"Un",options:["El","La","Un","Una"],reason:"Un hermano: je noemt één broer, zonder dat hij al bekend is."},
+{sentence:"___ amigos de Marta llegan a las ocho.",answer:"Los",options:["Los","Las","Unos","Unas"],reason:"Los amigos de Marta: je bedoelt de specifieke vrienden van Marta."},
+{sentence:"Necesitamos comprar agua. Buscamos ___ tiendas cerca de aquí.",answer:"Unas",options:["Los","Las","Unos","Unas"],reason:"Unas tiendas: een paar winkels, nog niet eerder genoemd."},
+{sentence:"___ vacaciones de verano empiezan mañana.",answer:"Las",options:["Los","Las","Unos","Unas"],reason:"Las vacaciones: in deze zin gaat het om de specifieke zomervakantie."},
+{sentence:"Hay ___ pueblo muy bonito cerca de Gerona.",answer:"Un",options:["El","La","Un","Una"],reason:"Un pueblo: je introduceert een dorp; pueblo is mannelijk enkelvoud."},
+{sentence:"___ pueblo donde vive mi abuela está cerca del mar.",answer:"El",options:["El","La","Un","Una"],reason:"El pueblo: je bedoelt het specifieke dorp waar je oma woont."},
+{sentence:"Quiero escuchar ___ canción que me recomendaste.",answer:"La",options:["El","La","Un","Una"],reason:"La canción: het is het specifieke liedje dat je hebt aangeraden."},
+{sentence:"En la fiesta hay ___ chicos de mi clase.",answer:"Unos",options:["Los","Las","Unos","Unas"],reason:"Unos chicos: je noemt een aantal jongens, zonder precies te zeggen welke."},
+{sentence:"___ colores de la bandera son rojo y amarillo.",answer:"Los",options:["Los","Las","Unos","Unas"],reason:"Los colores: je bedoelt de specifieke kleuren van de vlag."},
+{sentence:"¿Dónde están ___ hermanas? Son las chicas de la foto.",answer:"Las",options:["Los","Las","Unos","Unas"],reason:"Las hermanas: je bedoelt de zussen die je daarna aanwijst."},
+{sentence:"Mi madre compra ___ naranjas para el desayuno.",answer:"Unas",options:["Los","Las","Unos","Unas"],reason:"Unas naranjas: je noemt sinaasappels zonder ze eerder te hebben genoemd."},
+{sentence:"___ número de teléfono de Pablo empieza por seis.",answer:"El",options:["El","La","Un","Una"],reason:"El número: número is mannelijk en het gaat om Pablo's specifieke nummer."},
+{sentence:"Necesito ___ mapa de España para el proyecto.",answer:"Un",options:["El","La","Un","Una"],reason:"Un mapa: je noemt één kaart; mapa is een mannelijk woord."},
+{sentence:"___ escuela de mi barrio es muy grande.",answer:"La",options:["El","La","Un","Una"],reason:"La escuela: je bedoelt de specifieke school in jouw buurt."},
+{sentence:"Mi hermana habla con ___ profesor nuevo.",answer:"Un",options:["El","La","Un","Una"],reason:"Un profesor: je noemt een nieuwe docent die nog niet eerder is genoemd."},
+{sentence:"___ profesora de español es muy simpática.",answer:"La",options:["El","La","Un","Una"],reason:"La profesora: je bedoelt de specifieke docente Spaans."},
+{sentence:"En esa ciudad hay ___ parques bonitos.",answer:"Unos",options:["Los","Las","Unos","Unas"],reason:"Unos parques: je noemt een aantal parken zonder te zeggen welke precies."},
+{sentence:"No encuentro ___ libros que dejé en la mesa.",answer:"Los",options:["Los","Las","Unos","Unas"],reason:"Los libros: het gaat om de specifieke boeken die je op tafel hebt gelegd."},
+{sentence:"Voy a comprar ___ camiseta roja.",answer:"Una",options:["El","La","Un","Una"],reason:"Una camiseta: je noemt één T-shirt dat je wilt kopen."},
+{sentence:"___ chicas de ese equipo juegan al fútbol.",answer:"Las",options:["Los","Las","Unos","Unas"],reason:"Las chicas: je bedoelt de specifieke meisjes van dat team."},
+{sentence:"En la tienda veo ___ zapatos azules muy bonitos.",answer:"Unos",options:["Los","Las","Unos","Unas"],reason:"Unos zapatos: je noemt een paar schoenen die je daar ziet."},
+{sentence:"___ hijo de Ana tiene quince años.",answer:"El",options:["El","La","Un","Una"],reason:"El hijo: je bedoelt Ana's specifieke zoon."},
+{sentence:"Veo ___ participantes nuevos en el concurso.",answer:"Unos",options:["Los","Las","Unos","Unas"],reason:"Unos participantes: je introduceert een aantal nieuwe deelnemers."},
+{sentence:"___ canción preferida de mi amiga es fantástica.",answer:"La",options:["El","La","Un","Una"],reason:"La canción: het gaat om het specifieke lievelingsliedje van je vriendin."},
+{sentence:"Quiero visitar ___ ciudad española este verano.",answer:"Una",options:["El","La","Un","Una"],reason:"Una ciudad: je hebt het over één willekeurige Spaanse stad."},
+{sentence:"___ ciudades de España son muy diferentes.",answer:"Las",options:["Los","Las","Unos","Unas"],reason:"Las ciudades de España: je bedoelt de steden van Spanje als specifieke groep."},
+{sentence:"Tenemos ___ amigos de México que vienen mañana.",answer:"Unos",options:["Los","Las","Unos","Unas"],reason:"Unos amigos: je noemt een aantal vrienden uit Mexico; ze zijn nog niet eerder genoemd."}
+];
+let articleList=[],articleIndex=0,articleScore=0,articleAnswered=false,articleHistory=[];
+function startArticles(){
+ articleList=shuffle(articleQuestions);articleIndex=0;articleScore=0;articleAnswered=false;articleHistory=[];
+ document.getElementById("articleStart").classList.add("hidden");
+ document.getElementById("articleNext").classList.add("hidden");
+ showView("articles");renderArticle();
+}
+function renderArticle(){
+ const meta=document.getElementById("articleMeta"),sentence=document.getElementById("articleSentence"),box=document.getElementById("articleAnswers"),feedback=document.getElementById("articleFeedback"),reason=document.getElementById("articleReason");
+ document.getElementById("articleBar").style.width=(articleIndex/articleList.length*100)+"%";
+ if(articleIndex>=articleList.length){
+  sentence.textContent="¡Muy bien! 🎉";box.innerHTML="";
+  meta.textContent="Les afgerond · "+articleScore+" van "+articleList.length+" goed";
+  feedback.textContent="Je score: "+Math.round(articleScore/articleList.length*100)+"%";
+  reason.classList.remove("hidden");reason.innerHTML="<b>Tip:</b> el/los zijn mannelijk, la/las vrouwelijk. Un/una zijn onbepaald enkelvoud; unos/unas zijn onbepaald meervoud.";
+  document.getElementById("articleBar").style.width="100%";
+  document.getElementById("articleNext").classList.add("hidden");
+  document.getElementById("articleStart").textContent="Nog een ronde";
+  document.getElementById("articleStart").classList.remove("hidden");
+  return;
+ }
+ articleAnswered=false;
+ const q=articleList[articleIndex];
+ meta.textContent="Zin "+(articleIndex+1)+" van "+articleList.length+" · Score: "+articleScore;
+ sentence.textContent=q.sentence;
+ box.innerHTML="";
+ q.options.forEach(option=>{
+  const b=document.createElement("button");
+  b.textContent=option.toLowerCase();
+  b.onclick=()=>chooseArticle(b,option,q);
+  box.appendChild(b);
+ });
+ feedback.textContent="";
+ reason.classList.add("hidden");reason.textContent="";
+ document.getElementById("articleNext").classList.add("hidden");
+ document.getElementById("articleStart").classList.add("hidden");
+}
+function chooseArticle(btn,choice,q){
+ if(articleAnswered)return;
+ articleAnswered=true;
+ const correct=choice===q.answer;
+ if(correct){articleScore++;saveProgress();}
+ document.querySelectorAll("#articleAnswers button").forEach(b=>{
+  b.disabled=true;
+  if(b.textContent.toLowerCase()===q.answer.toLowerCase())b.classList.add("correct");
+ });
+ if(!correct)btn.classList.add("wrong");
+ document.getElementById("articleFeedback").textContent=correct?"✅ Goed!":"❌ de homework ninja vind dit niet goed — het juiste lidwoord is "+q.answer.toLowerCase()+".";
+ document.getElementById("articleReason").textContent=q.reason;
+ document.getElementById("articleReason").classList.remove("hidden");
+ document.getElementById("articleMeta").textContent="Zin "+(articleIndex+1)+" van "+articleList.length+" · Score: "+articleScore;
+ document.getElementById("articleNext").classList.remove("hidden");
+}
+function nextArticle(){if(!articleAnswered)return;articleIndex++;renderArticle();}
 function renderWords(){const q=(document.getElementById("searchBox").value||"").toLowerCase(),filter=document.getElementById("lessonFilter").value;const all=filter==="Werkwoorden"?werkwoorden.slice():(filter==="all"?oefenItems.slice():basisItems);const list=all.filter(x=>(filter==="all"||filter==="Werkwoorden"||x[2]===filter)&&(!q||(x[0]+" "+x[1]).toLowerCase().includes(q)));document.getElementById("wordCount").textContent=list.length+" resultaten";document.getElementById("wordRows").innerHTML=list.map(x=>"<tr><td>"+escapeHtml(x[0])+"</td><td>"+escapeHtml(x[1])+"</td><td>"+escapeHtml(x[2])+"</td></tr>").join("")}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 try{const n=Number(localStorage.getItem("spaansToolCorrect")||0);document.getElementById("homeProgress").style.width=Math.min(100,Math.round(n/108*100))+"%";document.getElementById("homeProgressText").textContent=n?n+" goede antwoorden geoefend":"Start je eerste oefening!"}catch(e){}
