@@ -39,6 +39,7 @@
       <button class="tile t-purple" onclick="startFlashcards()"><span class="emoji">🧠</span><h3>Flashcards</h3><p>Leren, omdraaien en herhalen.</p><span class="arrow">→</span></button>
       <button class="tile t-blue" onclick="showTestSetup()"><span class="emoji">📝</span><h3>Toets modus</h3><p>Woorden, Frases clave en werkwoordvervoegingen.</p><span class="arrow">→</span></button>
       <button class="tile t-teal" onclick="showWords()"><span class="emoji">📚</span><h3>Woordenlijst</h3><p>Zoek op woord en filter per les.</p><span class="arrow">→</span></button>
+      <button class="tile t-purple" onclick="showArticleLesson()"><span class="emoji">📘</span><h3>Lidwoorden leren</h3><p>Leer de regels met voorbeelden voordat je gaat oefenen.</p><span class="arrow">→</span></button>
       <button class="tile t-red" onclick="startArticles()"><span class="emoji">🧩</span><h3>Lidwoorden oefenen</h3><p>Kies het juiste Spaanse lidwoord in een zin: el, la, los, las, un, una, unos of unas.</p><span class="arrow">→</span></button>
     </div>
     <div class="footer">🇪🇸 Pequeños pasos, grandes resultados. ¡Vamos! 🚀</div>
@@ -65,6 +66,40 @@
 <section id="flash" class="page view hidden"><div class="card"><h2>🧠 Flashcards</h2><div class="submeta" id="flashMeta"></div><div class="word-prompt" id="flashPrompt"></div><div id="flashAnswer" class="feedback" style="font-size:24px;min-height:60px"></div><div class="actions"><button class="primary" onclick="flipFlash()">👀 Antwoord</button><button class="success" onclick="nextFlash()">Volgende →</button><button class="quiet" onclick="goHome()">🏠 Menu</button></div></div></section>
 
 <section id="test" class="page view hidden"><div class="card"><div id="testSetup"><h2>📝 Toets modus</h2><p>De toets kan alle woorden, Frases clave en 48 vervoegingen van ser, estar, tener, llamarse, hablar, vivir, ir en hacer gebruiken.</p><div class="notice">Kleine foutjes kunnen worden goed gerekend, maar de homework ninja waarschuwt je wel.</div><label for="testGroup">Onderdeel</label><select id="testGroup"><option value="all">Alles — inclusief werkwoorden</option><option value="words">Alleen woorden — 90</option><option value="phrases">Alleen Frases clave — 18</option><option value="verbs">Werkwoordvervoegingen — 48 vormen</option><option value="1.1">Les 1.1</option><option value="1.2">Les 1.2</option><option value="1.3">Les 1.3</option><option value="1.4">Les 1.4</option></select><label for="testCount">Aantal vragen</label><select id="testCount"><option value="all">Alles uit dit onderdeel</option><option value="10">10 vragen</option><option value="20">20 vragen</option><option value="30">30 vragen</option></select><div class="actions"><button class="primary" onclick="beginTest()">Start toets</button><button class="quiet" onclick="goHome()">🏠 Menu</button></div></div><div id="testRun" class="hidden"><div id="testMeta" class="submeta"></div><div class="progress"><span id="testBar"></span></div><div id="testPrompt" class="word-prompt"></div><input id="testInput" placeholder="Typ je antwoord..." autocomplete="off"><div id="testFeedback" class="feedback"></div><div class="actions"><button class="warn" onclick="checkTestAnswer()">✓ Controleer</button><button id="testNext" class="success" onclick="nextTest()" disabled>Volgende →</button><button id="testFinish" class="primary hidden" onclick="finishTest()">Lever toets in</button><button class="quiet" onclick="goHome()">🏠 Menu</button></div></div><div id="testResult" class="hidden"><h2>📊 Resultaat</h2><div class="resultbox" id="testScore"></div><div id="testDetails" class="feedback"></div><div class="actions"><button class="primary" onclick="showTestSetup()">Opnieuw</button><button class="quiet" onclick="goHome()">🏠 Menu</button></div></div></div></section>
+
+<section id="article-lesson" class="page view hidden">
+  <div class="card">
+    <div class="submeta">Spaans · mini-les</div>
+    <h2>📘 Lidwoorden leren</h2>
+    <p>In het Spaans past het lidwoord zich aan het woord aan. Let op <b>geslacht</b> (mannelijk of vrouwelijk), <b>aantal</b> (enkelvoud of meervoud), en of je iets specifieks bedoelt.</p>
+    <h3>1. Bepaalde lidwoorden — de / het</h3>
+    <div class="tablewrap"><table><thead><tr><th></th><th>Enkelvoud</th><th>Meervoud</th></tr></thead><tbody>
+      <tr><td><b>Mannelijk</b></td><td><b>el</b> chico — de jongen</td><td><b>los</b> chicos — de jongens</td></tr>
+      <tr><td><b>Vrouwelijk</b></td><td><b>la</b> chica — het meisje</td><td><b>las</b> chicas — de meisjes</td></tr>
+    </tbody></table></div>
+    <h3>2. Onbepaalde lidwoorden — een / een paar</h3>
+    <div class="tablewrap"><table><thead><tr><th></th><th>Enkelvoud</th><th>Meervoud</th></tr></thead><tbody>
+      <tr><td><b>Mannelijk</b></td><td><b>un</b> perro — een hond</td><td><b>unos</b> perros — een paar honden</td></tr>
+      <tr><td><b>Vrouwelijk</b></td><td><b>una</b> piscina — een zwembad</td><td><b>unas</b> piscinas — een paar zwembaden</td></tr>
+    </tbody></table></div>
+    <div class="notice"><b>Onthoud:</b> el/un = mannelijk enkelvoud; la/una = vrouwelijk enkelvoud; los/unos = mannelijk meervoud; las/unas = vrouwelijk meervoud.</div>
+    <h3>3. Hoe kies je het juiste lidwoord?</h3>
+    <p>• Een bekend of specifiek ding: <b>el, la, los, las</b>.</p>
+    <p>• Je noemt iets voor het eerst of bedoelt één/een paar: <b>un, una, unos, unas</b>.</p>
+    <p>• Veel woorden op <b>-o</b> zijn mannelijk en veel woorden op <b>-a</b> zijn vrouwelijk, maar er zijn uitzonderingen. Leer het lidwoord daarom liefst samen met het zelfstandig naamwoord.</p>
+    <h3>4. Voorbeelden</h3>
+    <div class="tablewrap"><table><thead><tr><th>Spaans</th><th>Nederlands</th><th>Waarom?</th></tr></thead><tbody>
+      <tr><td>El chico de la foto</td><td>De jongen op de foto</td><td>Specifieke jongen</td></tr>
+      <tr><td>Una piscina grande</td><td>Een groot zwembad</td><td>Nieuw genoemd, vrouwelijk woord</td></tr>
+      <tr><td>Los amigos de Marta</td><td>De vrienden van Marta</td><td>Specifieke groep, meervoud</td></tr>
+      <tr><td>Unos parques bonitos</td><td>Een paar mooie parken</td><td>Onbepaald, mannelijk meervoud</td></tr>
+    </tbody></table></div>
+    <div class="actions">
+      <button class="primary" onclick="startArticles()">🧩 Ik snap het — oefenen</button>
+      <button class="quiet" onclick="goHome()">🏠 Menu</button>
+    </div>
+  </div>
+</section>
 
 <section id="articles" class="page view hidden">
   <div class="card">
@@ -162,6 +197,7 @@ function renderTest(){document.getElementById("testMeta").textContent="Vraag "+(
 function checkTestAnswer(){testAnswers[testIndex]=document.getElementById("testInput").value.trim();const item=testList[testIndex],r=answerCheck(testAnswers[testIndex],item[1]);testChecked[testIndex]=r;const el=document.getElementById("testFeedback");if(r.kind==="empty"){el.textContent="❌ de homework ninja vind dit niet goed: vul eerst iets in.";document.getElementById("testNext").disabled=true;return}el.textContent=r.correct?(r.kind==="warning"?"⚠️ "+r.message:"✅ Helemaal goed!"):("❌ "+r.message);document.getElementById("testNext").disabled=false;if(r.correct)saveProgress()}
 function nextTest(){testAnswers[testIndex]=document.getElementById("testInput").value.trim();if(testIndex<testList.length-1){testIndex++;renderTest()}}
 function finishTest(){testAnswers[testIndex]=document.getElementById("testInput").value.trim();let score=0,warn=[],wrong=[];testList.forEach((item,i)=>{const r=answerCheck(testAnswers[i]||"",item[1]);if(r.correct){score++;if(r.kind==="warning")warn.push(item[0])}else wrong.push(item[0])});document.getElementById("testRun").classList.add("hidden");document.getElementById("testResult").classList.remove("hidden");document.getElementById("testBar").style.width="100%";document.getElementById("testScore").textContent=score+" / "+testList.length+" ("+Math.round(score/testList.length*100)+"%)";let details="";if(warn.length)details+="<p>⚠️ <b>de homework ninja vind dit niet goed bij "+warn.length+" antwoord"+(warn.length===1?"":"en")+".</b></p><p>Controleer nog even: "+warn.join(", ")+"</p>";if(wrong.length)details+="<p>❌ <b>Nog oefenen:</b> "+wrong.join(", ")+"</p>";if(!wrong.length&&!warn.length)details+="🎉 Alles helemaal goed!";document.getElementById("testDetails").innerHTML=details}
+function showArticleLesson(){showView("article-lesson")}
 const articleQuestions = [
 {sentence:"___ chico de la foto es mi hermano.",answer:"El",options:["El","La","Un","Una"],reason:"El chico: je hebt het over een specifieke jongen op de foto."},
 {sentence:"En el camping hay ___ piscina grande.",answer:"Una",options:["El","La","Un","Una"],reason:"Una piscina: je noemt een zwembad voor het eerst; piscina is vrouwelijk enkelvoud."},
