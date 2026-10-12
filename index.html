@@ -110,7 +110,7 @@
   <div class="card">
     <div class="submeta" id="articleMeta">Lidwoorden oefenen</div>
     <h2>🧩 Vul het juiste Spaanse lidwoord in</h2>
-    <p class="hint">Kies welk lidwoord in de zin past. Let op: mannelijk of vrouwelijk, enkelvoud of meervoud, en of het om iets bepaalds gaat.</p>
+    <p class="hint">Kies het juiste lidwoord. De belangrijkste woorden in de zinnen komen uit de woordenlijst van SpaansTool. Let op: mannelijk of vrouwelijk, enkelvoud of meervoud.</p>
     <div class="notice" style="margin:14px 0">
       <b>Bepaald:</b> el, la, los, las &nbsp;·&nbsp; <b>Onbepaald:</b> un, una, unos, unas
     </div>
@@ -204,36 +204,36 @@ function nextTest(){testAnswers[testIndex]=document.getElementById("testInput").
 function finishTest(){testAnswers[testIndex]=document.getElementById("testInput").value.trim();let score=0,warn=[],wrong=[];testList.forEach((item,i)=>{const r=answerCheck(testAnswers[i]||"",item[1]);if(r.correct){score++;if(r.kind==="warning")warn.push(item[0])}else wrong.push(item[0])});document.getElementById("testRun").classList.add("hidden");document.getElementById("testResult").classList.remove("hidden");document.getElementById("testBar").style.width="100%";document.getElementById("testScore").textContent=score+" / "+testList.length+" ("+Math.round(score/testList.length*100)+"%)";let details="";if(warn.length)details+="<p>⚠️ <b>de homework ninja vind dit niet goed bij "+warn.length+" antwoord"+(warn.length===1?"":"en")+".</b></p><p>Controleer nog even: "+warn.join(", ")+"</p>";if(wrong.length)details+="<p>❌ <b>Nog oefenen:</b> "+wrong.join(", ")+"</p>";if(!wrong.length&&!warn.length)details+="🎉 Alles helemaal goed!";document.getElementById("testDetails").innerHTML=details}
 function showArticleLesson(){showView("article-lesson")}
 const articleQuestions = [
-{sentence:"___ chico de la foto es mi hermano.",answer:"El",options:["El","La","Un","Una"],reason:"El chico: je hebt het over een specifieke jongen op de foto."},
-{sentence:"En el camping hay ___ piscina grande.",answer:"Una",options:["El","La","Un","Una"],reason:"Una piscina: je noemt een zwembad voor het eerst; piscina is vrouwelijk enkelvoud."},
-{sentence:"___ chica que canta en el vídeo se llama Ana.",answer:"La",options:["El","La","Un","Una"],reason:"La chica: het gaat om die specifieke meid die in de video zingt."},
-{sentence:"Tengo ___ hermano y dos hermanas.",answer:"Un",options:["El","La","Un","Una"],reason:"Un hermano: je noemt één broer, zonder dat hij al bekend is."},
-{sentence:"___ amigos de Marta llegan a las ocho.",answer:"Los",options:["Los","Las","Unos","Unas"],reason:"Los amigos de Marta: je bedoelt de specifieke vrienden van Marta."},
-{sentence:"Necesitamos comprar agua. Buscamos ___ tiendas cerca de aquí.",answer:"Unas",options:["Los","Las","Unos","Unas"],reason:"Unas tiendas: een paar winkels, nog niet eerder genoemd."},
-{sentence:"___ vacaciones de verano empiezan mañana.",answer:"Las",options:["Los","Las","Unos","Unas"],reason:"Las vacaciones: in deze zin gaat het om de specifieke zomervakantie."},
-{sentence:"Hay ___ pueblo muy bonito cerca de Gerona.",answer:"Un",options:["El","La","Un","Una"],reason:"Un pueblo: je introduceert een dorp; pueblo is mannelijk enkelvoud."},
-{sentence:"___ pueblo donde vive mi abuela está cerca del mar.",answer:"El",options:["El","La","Un","Una"],reason:"El pueblo: je bedoelt het specifieke dorp waar je oma woont."},
-{sentence:"Quiero escuchar ___ canción que me recomendaste.",answer:"La",options:["El","La","Un","Una"],reason:"La canción: het is het specifieke liedje dat je hebt aangeraden."},
-{sentence:"En la fiesta hay ___ chicos de mi clase.",answer:"Unos",options:["Los","Las","Unos","Unas"],reason:"Unos chicos: je noemt een aantal jongens, zonder precies te zeggen welke."},
-{sentence:"___ colores de la bandera son rojo y amarillo.",answer:"Los",options:["Los","Las","Unos","Unas"],reason:"Los colores: je bedoelt de specifieke kleuren van de vlag."},
-{sentence:"¿Dónde están ___ hermanas? Son las chicas de la foto.",answer:"Las",options:["Los","Las","Unos","Unas"],reason:"Las hermanas: je bedoelt de zussen die je daarna aanwijst."},
-{sentence:"Mi madre compra ___ naranjas para el desayuno.",answer:"Unas",options:["Los","Las","Unos","Unas"],reason:"Unas naranjas: je noemt sinaasappels zonder ze eerder te hebben genoemd."},
-{sentence:"___ número de teléfono de Pablo empieza por seis.",answer:"El",options:["El","La","Un","Una"],reason:"El número: número is mannelijk en het gaat om Pablo's specifieke nummer."},
-{sentence:"Necesito ___ mapa de España para el proyecto.",answer:"Un",options:["El","La","Un","Una"],reason:"Un mapa: je noemt één kaart; mapa is een mannelijk woord."},
-{sentence:"___ escuela de mi barrio es muy grande.",answer:"La",options:["El","La","Un","Una"],reason:"La escuela: je bedoelt de specifieke school in jouw buurt."},
-{sentence:"Mi hermana habla con ___ profesor nuevo.",answer:"Un",options:["El","La","Un","Una"],reason:"Un profesor: je noemt een nieuwe docent die nog niet eerder is genoemd."},
-{sentence:"___ profesora de español es muy simpática.",answer:"La",options:["El","La","Un","Una"],reason:"La profesora: je bedoelt de specifieke docente Spaans."},
-{sentence:"En esa ciudad hay ___ parques bonitos.",answer:"Unos",options:["Los","Las","Unos","Unas"],reason:"Unos parques: je noemt een aantal parken zonder te zeggen welke precies."},
-{sentence:"No encuentro ___ libros que dejé en la mesa.",answer:"Los",options:["Los","Las","Unos","Unas"],reason:"Los libros: het gaat om de specifieke boeken die je op tafel hebt gelegd."},
-{sentence:"Voy a comprar ___ camiseta roja.",answer:"Una",options:["El","La","Un","Una"],reason:"Una camiseta: je noemt één T-shirt dat je wilt kopen."},
-{sentence:"___ chicas de ese equipo juegan al fútbol.",answer:"Las",options:["Los","Las","Unos","Unas"],reason:"Las chicas: je bedoelt de specifieke meisjes van dat team."},
-{sentence:"En la tienda veo ___ zapatos azules muy bonitos.",answer:"Unos",options:["Los","Las","Unos","Unas"],reason:"Unos zapatos: je noemt een paar schoenen die je daar ziet."},
-{sentence:"___ hijo de Ana tiene quince años.",answer:"El",options:["El","La","Un","Una"],reason:"El hijo: je bedoelt Ana's specifieke zoon."},
-{sentence:"Veo ___ participantes nuevos en el concurso.",answer:"Unos",options:["Los","Las","Unos","Unas"],reason:"Unos participantes: je introduceert een aantal nieuwe deelnemers."},
-{sentence:"___ canción preferida de mi amiga es fantástica.",answer:"La",options:["El","La","Un","Una"],reason:"La canción: het gaat om het specifieke lievelingsliedje van je vriendin."},
-{sentence:"Quiero visitar ___ ciudad española este verano.",answer:"Una",options:["El","La","Un","Una"],reason:"Una ciudad: je hebt het over één willekeurige Spaanse stad."},
-{sentence:"___ ciudades de España son muy diferentes.",answer:"Las",options:["Los","Las","Unos","Unas"],reason:"Las ciudades de España: je bedoelt de steden van Spanje als specifieke groep."},
-{sentence:"Tenemos ___ amigos de México que vienen mañana.",answer:"Unos",options:["Los","Las","Unos","Unas"],reason:"Unos amigos: je noemt een aantal vrienden uit Mexico; ze zijn nog niet eerder genoemd."}
+{sentence:"Tengo un hermano. ___ hermano tiene 14 años.",answer:"El",options:["El","La","Un","Una"],reason:"Je noemt eerst un hermano. Daarna gaat het over diezelfde broer: el hermano."},
+{sentence:"Tengo una hermana. ___ hermana tiene 14 años.",answer:"La",options:["El","La","Un","Una"],reason:"Je noemt eerst una hermana. Daarna gaat het over diezelfde zus: la hermana."},
+{sentence:"En el camping hay una piscina. ___ piscina es grande.",answer:"La",options:["El","La","Un","Una"],reason:"De piscina is al genoemd, dus je verwijst naar dat zwembad: la piscina."},
+{sentence:"En el camping hay ___ piscina grande.",answer:"Una",options:["El","La","Un","Una"],reason:"Je noemt de piscina voor het eerst. Piscina is vrouwelijk enkelvoud: una piscina."},
+{sentence:"¿Es un pueblo? Sí, es ___ pueblo.",answer:"Un",options:["El","La","Un","Una"],reason:"Pueblo is mannelijk enkelvoud. Je zegt: es un pueblo."},
+{sentence:"No es un pueblo. Es ___ ciudad.",answer:"Una",options:["El","La","Un","Una"],reason:"Ciudad is vrouwelijk enkelvoud: una ciudad."},
+{sentence:"Tengo un amigo. ___ amigo es holandés.",answer:"El",options:["El","La","Un","Una"],reason:"Je hebt de amigo al genoemd. Je verwijst naar dezelfde vriend: el amigo."},
+{sentence:"Tengo una amiga. ___ amiga es holandesa.",answer:"La",options:["El","La","Un","Una"],reason:"Je hebt de amiga al genoemd. Je verwijst naar dezelfde vriendin: la amiga."},
+{sentence:"Hay un chico y una chica. ___ chico se llama Pablo.",answer:"El",options:["El","La","Un","Una"],reason:"Je verwijst naar de jongen die je net hebt genoemd: el chico."},
+{sentence:"Hay un chico y una chica. ___ chica se llama Ana.",answer:"La",options:["El","La","Un","Una"],reason:"Je verwijst naar het meisje dat je net hebt genoemd: la chica."},
+{sentence:"En el camping hay ___ chicos holandeses.",answer:"Unos",options:["Los","Las","Unos","Unas"],reason:"Je noemt een aantal jongens zonder precies aan te wijzen welke: unos chicos."},
+{sentence:"En el camping hay ___ chicas holandesas.",answer:"Unas",options:["Los","Las","Unos","Unas"],reason:"Je noemt een aantal meisjes zonder precies aan te wijzen welke: unas chicas."},
+{sentence:"Tengo unos amigos. ___ amigos son de Holanda.",answer:"Los",options:["Los","Las","Unos","Unas"],reason:"Je hebt de amigos al genoemd. Het gaat om diezelfde vrienden: los amigos."},
+{sentence:"Tengo unas amigas. ___ amigas son de Italia.",answer:"Las",options:["Los","Las","Unos","Unas"],reason:"Je hebt de amigas al genoemd. Het gaat om diezelfde vriendinnen: las amigas."},
+{sentence:"Tengo un hermano. ___ hermano es de España.",answer:"El",options:["El","La","Un","Una"],reason:"Je verwijst naar de broer die je al genoemd hebt: el hermano."},
+{sentence:"Tengo una hermana. ___ hermana es de Francia.",answer:"La",options:["El","La","Un","Una"],reason:"Je verwijst naar de zus die je al genoemd hebt: la hermana."},
+{sentence:"Vivo en Gerona. Gerona es ___ ciudad de España.",answer:"Una",options:["El","La","Un","Una"],reason:"Je beschrijft Gerona als een stad. Ciudad is vrouwelijk enkelvoud: una ciudad."},
+{sentence:"Vivo en ___ pueblo cerca de Barcelona.",answer:"Un",options:["El","La","Un","Una"],reason:"Pueblo is mannelijk enkelvoud: un pueblo."},
+{sentence:"Vivo en Gerona. ___ ciudad está en España.",answer:"La",options:["El","La","Un","Una"],reason:"Je bedoelt de specifieke stad waar je woont: la ciudad."},
+{sentence:"Vivo en Barcelona. Barcelona es ___ ciudad.",answer:"Una",options:["El","La","Un","Una"],reason:"Je noemt Barcelona als een stad: una ciudad."},
+{sentence:"Voy a la tienda. ___ tienda está cerca del camping.",answer:"La",options:["El","La","Un","Una"],reason:"De tienda is al genoemd. Je verwijst naar diezelfde winkel: la tienda."},
+{sentence:"Voy al camping. ___ camping está cerca de la piscina.",answer:"El",options:["El","La","Un","Una"],reason:"Camping is mannelijk enkelvoud. Je verwijst naar die specifieke camping: el camping."},
+{sentence:"Tengo una canción. ___ canción es fantástica.",answer:"La",options:["El","La","Un","Una"],reason:"Je hebt de canción al genoemd. Je verwijst naar datzelfde liedje: la canción."},
+{sentence:"Tengo ___ canción preferida.",answer:"Una",options:["El","La","Un","Una"],reason:"Je noemt een lievelingsliedje: canción is vrouwelijk enkelvoud, dus una canción."},
+{sentence:"Tengo una canción preferida. Es ___ canción preferida.",answer:"La",options:["El","La","Un","Una"],reason:"Het gaat om het specifieke lievelingsliedje dat je net noemde: la canción preferida."},
+{sentence:"Tengo ___ número de teléfono.",answer:"Un",options:["El","La","Un","Una"],reason:"Número is mannelijk enkelvoud: un número de teléfono."},
+{sentence:"Tengo un hijo. ___ hijo tiene 14 años.",answer:"El",options:["El","La","Un","Una"],reason:"Je verwijst naar de zoon die je al genoemd hebt: el hijo."},
+{sentence:"Tengo una hija. ___ hija tiene 14 años.",answer:"La",options:["El","La","Un","Una"],reason:"Je verwijst naar de dochter die je al genoemd hebt: la hija."},
+{sentence:"En las vacaciones tengo ___ amigos de Holanda.",answer:"Unos",options:["Los","Las","Unos","Unas"],reason:"Je noemt een aantal vrienden uit Holanda, niet een specifieke groep: unos amigos."},
+{sentence:"En las vacaciones tengo ___ amigas de Italia.",answer:"Unas",options:["Los","Las","Unos","Unas"],reason:"Je noemt een aantal vriendinnen uit Italia, niet een specifieke groep: unas amigas."}
 ];
 let articleList=[],articleIndex=0,articleScore=0,articleAnswered=false,articleHistory=[];
 function startArticles(){
