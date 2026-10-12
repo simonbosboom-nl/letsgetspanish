@@ -79,7 +79,19 @@ const woorden = [
 const frases = [
 ["¿Qué tal?","Hoe gaat het?"],["¿Cómo te llamas?","Hoe heet je?"],["¿Eres español / española?","Ben je Spaans / Spaanse?"],["¿Hablas español?","Spreek je Spaans?"],["Muy bien.","Heel goed."],["Me llamo Bart.","Ik heet Bart."],["No, soy holandés / holandesa.","Nee, ik ben Nederlander / Nederlandse."],["No, hablo holandés.","Nee, ik spreek Nederlands."],["¿Dónde vives?","Waar woon je?"],["¿Es un pueblo?","Is het een dorp?"],["¿Dónde está?","Waar ligt dat?"],["¿Cuántos años tienes?","Hoe oud ben je?"],["¿Cuál es tu número de teléfono?","Wat is je telefoonnummer?"],["Vivo en Gerona, está en España.","Ik woon in Gerona, dat ligt in Spanje."],["No, es una ciudad.","Nee, het is een stad."],["Cerca de Barcelona.","Vlakbij Barcelona."],["Tengo 14 años.","Ik ben 14 jaar."],["Es el 06 09 10 07 03 06.","Dat is 06 09 10 07 03 06."]
 ];
-const oefenItems = woorden.map(x=>[x[0],x[1],x[2]]).concat(frases.map(x=>[x[0],x[1],"Frases clave"]));
+const werkwoorden = [
+["yo soy (ser)","ik ben","Werkwoorden"],["tú eres (ser)","jij bent","Werkwoorden"],["él/ella es (ser)","hij/zij is","Werkwoorden"],["nosotros/as somos (ser)","wij zijn","Werkwoorden"],["vosotros/as sois (ser)","jullie zijn","Werkwoorden"],["ellos/ellas son (ser)","zij zijn","Werkwoorden"],
+["yo estoy (estar)","ik ben","Werkwoorden"],["tú estás (estar)","jij bent","Werkwoorden"],["él/ella está (estar)","hij/zij is","Werkwoorden"],["nosotros/as estamos (estar)","wij zijn","Werkwoorden"],["vosotros/as estáis (estar)","jullie zijn","Werkwoorden"],["ellos/ellas están (estar)","zij zijn","Werkwoorden"],
+["yo tengo (tener)","ik heb","Werkwoorden"],["tú tienes (tener)","jij hebt","Werkwoorden"],["él/ella tiene (tener)","hij/zij heeft","Werkwoorden"],["nosotros/as tenemos (tener)","wij hebben","Werkwoorden"],["vosotros/as tenéis (tener)","jullie hebben","Werkwoorden"],["ellos/ellas tienen (tener)","zij hebben","Werkwoorden"],
+["yo me llamo (llamarse)","ik heet","Werkwoorden"],["tú te llamas (llamarse)","jij heet","Werkwoorden"],["él/ella se llama (llamarse)","hij/zij heet","Werkwoorden"],["nosotros/as nos llamamos (llamarse)","wij heten","Werkwoorden"],["vosotros/as os llamáis (llamarse)","jullie heten","Werkwoorden"],["ellos/ellas se llaman (llamarse)","zij heten","Werkwoorden"],
+["yo hablo (hablar)","ik spreek","Werkwoorden"],["tú hablas (hablar)","jij spreekt","Werkwoorden"],["él/ella habla (hablar)","hij/zij spreekt","Werkwoorden"],["nosotros/as hablamos (hablar)","wij spreken","Werkwoorden"],["vosotros/as habláis (hablar)","jullie spreken","Werkwoorden"],["ellos/ellas hablan (hablar)","zij spreken","Werkwoorden"],
+["yo vivo (vivir)","ik woon","Werkwoorden"],["tú vives (vivir)","jij woont","Werkwoorden"],["él/ella vive (vivir)","hij/zij woont","Werkwoorden"],["nosotros/as vivimos (vivir)","wij wonen","Werkwoorden"],["vosotros/as vivís (vivir)","jullie wonen","Werkwoorden"],["ellos/ellas viven (vivir)","zij wonen","Werkwoorden"],
+["yo voy (ir)","ik ga","Werkwoorden"],["tú vas (ir)","jij gaat","Werkwoorden"],["él/ella va (ir)","hij/zij gaat","Werkwoorden"],["nosotros/as vamos (ir)","wij gaan","Werkwoorden"],["vosotros/as vais (ir)","jullie gaan","Werkwoorden"],["ellos/ellas van (ir)","zij gaan","Werkwoorden"],
+["yo hago (hacer)","ik doe","Werkwoorden"],["tú haces (hacer)","jij doet","Werkwoorden"],["él/ella hace (hacer)","hij/zij doet","Werkwoorden"],["nosotros/as hacemos (hacer)","wij doen","Werkwoorden"],["vosotros/as hacéis (hacer)","jullie doen","Werkwoorden"],["ellos/ellas hacen (hacer)","zij doen","Werkwoorden"]
+];
+const basisItems = woorden.map(x=>[x[0],x[1],x[2]]).concat(frases.map(x=>[x[0],x[1],"Frases clave"]));
+const bestaandeVormen = new Set(werkwoorden.map(x=>x[0].split(" (")[0]));
+const oefenItems = basisItems.filter(x=>!bestaandeVormen.has(x[0])).concat(werkwoorden);
 let quizList=[], quizIndex=0, quizScore=0, quizChosen=false;
 let typingList=[], typingIndex=0;
 let flashList=[], flashIndex=0, flashShown=false;
