@@ -1,5 +1,5 @@
 {
-  "mode": "surprise",
-  "target": "spanish",
-  "message": "🚨 Taalgeest gedetecteerd! Blijf oefenen 😄"
+  "mode": "banner",
+  "target": "both",
+  "message": "hoi"
 }
