@@ -494,6 +494,7 @@ function submitTestAnswer(value){
   if(correct){mastered.add(id);saveProgress();}
   testIndex++;renderTest();
 }
+function startWrite(){writeRound=shuffle(WORDS.map((w,i)=>i));writeIndex=0;writeChecked=false;writeTries=0;writeMistake=false;writeResult=false;setMode('write');}
 function renderWrite(){
 if(writeIndex>=writeRound.length){writeRound=shuffle(WORDS.map((w,i)=>i));writeIndex=0;}
 const idx=writeRound[writeIndex],w=WORDS[idx];
@@ -526,7 +527,7 @@ view.addEventListener('click',function(e){
 const b=e.target.closest('button');if(!b)return;
 if(b.dataset.mode){setMode(b.dataset.mode);return;}
 const a=b.dataset.action;
-if(a==='direction-mode'){direction=b.dataset.dir;if(b.dataset.target==='test'){testDirection=direction;setMode('test');}else{setMode(b.dataset.target);}return;}
+if(a==='direction-mode'){direction=b.dataset.dir;if(b.dataset.target==='test'){testDirection=direction;testActive=false;setMode('test');}else if(b.dataset.target==='quiz'){startQuiz();}else if(b.dataset.target==='write'){startWrite();}else{setMode(b.dataset.target);}return;}
 if(a==='path-direction'){pathDirection=b.dataset.dir;renderPath();return;}
 if(a==='path-start'){startFrenchPathLesson(Number(b.dataset.lesson));return;}
 if(a==='path-answer'&&mode==='path-session'&&!pathAnswered){pathChosen=b.dataset.choice;pathAnswered=true;if(pathChosen===answerFor(WORDS[pathRound[pathIndex]]))pathScore++;pathHistory.push({id:pathRound[pathIndex],choice:pathChosen});renderPathSession();return;}
