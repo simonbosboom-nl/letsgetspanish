@@ -1,4 +1,4 @@
-const CACHE_NAME = "spaans-tool-pwa-v6";
+const CACHE_NAME = "spaans-tool-pwa-v7";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -9,6 +9,7 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET" || new URL(event.request.url).origin !== self.location.origin) return;
   const url = new URL(event.request.url);
+  if (url.pathname.endsWith("/prank-settings.json")) return; // Always fetch the current admin setting.
   const isPage = event.request.mode === "navigate" || url.pathname.endsWith("/index.html");
   if (isPage) {
     event.respondWith(fetch(event.request).then(response => {
