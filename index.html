@@ -430,6 +430,6 @@ function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":
 try{const n=Number(localStorage.getItem("spaansToolCorrect")||0);document.getElementById("homeProgress").style.width=Math.min(100,Math.round(n/oefenItems.length*100))+"%";document.getElementById("homeProgressText").textContent=n?n+" goede antwoorden geoefend":"Start je eerste oefening!"}catch(e){}
 if("serviceWorker" in navigator && location.protocol!=="file:"){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}
 </script>
-  <script src="./pranks.js?v=2"></script>
+  <script src="./pranks.js?v=3"></script>
 </body>
 </html>
