@@ -13,6 +13,7 @@ on:
           - banner
           - confetti
           - surprise
+          - secret-code
       target:
         description: "Op welke oefenwebsite moet de grap te zien zijn?"
         required: true
@@ -24,6 +25,11 @@ on:
           - french
       banner_text:
         description: "Jouw eigen bannertekst (maximaal 180 tekens; leeg = standaardtekst)"
+        required: false
+        type: string
+        default: ""
+      secret_code:
+        description: "Alleen voor secret-code: kies een code van minimaal 8 tekens"
         required: false
         type: string
         default: ""
@@ -48,13 +54,26 @@ jobs:
               off: "",
               banner: "👀 Verrassing! De taalgeest wenst je veel succes.",
               confetti: "",
-              surprise: "🚨 Taalgeest gedetecteerd! Blijf oefenen 😄"
+              surprise: "🚨 Taalgeest gedetecteerd! Blijf oefenen 😄",
+              "secret-code": "🎉 Code goed! Je hebt de geheime verrassing gevonden 😎"
             };
+            let codeHash = "";
+            if (mode === "secret-code") {
+              const rawCode = String(context.payload.inputs.secret_code || "");
+              const normalizedCode = rawCode.normalize("NFKC").trim().toLowerCase();
+              if (normalizedCode.length < 8) {
+                core.setFailed("Kies bij secret_code een code van minimaal 8 tekens.");
+                return;
+              }
+              core.setSecret(rawCode);
+              codeHash = require("crypto").createHash("sha256").update(normalizedCode, "utf8").digest("hex");
+            }
             const message = customMessage || messages[mode] || "";
             const content = JSON.stringify({
               mode,
               target,
-              message
+              message,
+              codeHash
             }, null, 2) + "\n";
             const owner = context.repo.owner;
             const repo = context.repo.repo;
