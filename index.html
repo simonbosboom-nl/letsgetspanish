@@ -208,6 +208,32 @@ const werkwoorden = [
 const basisItems = woorden.map(x=>[x[0],x[1],x[2]]).concat(frases.map(x=>[x[0],x[1],"Frases clave"]));
 const bestaandeVormen = new Set(werkwoorden.map(x=>x[0].split(" (")[0].replace(/^(yo|tú|él\/ella|nosotros\/as|vosotros\/as|ellos\/ellas)\s+/,"")));
 const oefenItems = basisItems.filter(x=>!bestaandeVormen.has(x[0])).concat(werkwoorden);
+
+const PATH_STORE='spaansToolPath-v1';
+const PATH_LESSONS=[
+ {title:'1. Eerste woorden',subtitle:'Begroeten en basiswoorden uit les 1.1',group:'1.1'},
+ {title:'2. Mensen en plaatsen',subtitle:'Personen, familie en plekken uit les 1.2',group:'1.2'},
+ {title:'3. Muziek, kleuren en landen',subtitle:'Nieuwe woorden uit les 1.3',group:'1.3'},
+ {title:'4. Frases clave',subtitle:'Handige zinnen om een gesprek te voeren',group:'phrases'},
+ {title:'5. Ser & estar',subtitle:'Twee manieren om “zijn” te zeggen',group:'ser-estar'},
+ {title:'6. Tener & llamarse',subtitle:'Hebben en iemand voorstellen',group:'tener-llamarse'},
+ {title:'7. Hablar & vivir',subtitle:'Spreken en wonen',group:'hablar-vivir'},
+ {title:'8. Ir & hacer',subtitle:'Gaan en doen',group:'ir-hacer'}
+];
+let pathState={unlocked:1,completed:[],xp:0};
+try{const savedPath=JSON.parse(localStorage.getItem(PATH_STORE)||'null');if(savedPath&&Number.isInteger(savedPath.unlocked))pathState={unlocked:Math.max(1,Math.min(PATH_LESSONS.length,savedPath.unlocked)),completed:Array.isArray(savedPath.completed)?savedPath.completed.filter(n=>Number.isInteger(n)&&n>=0&&n<PATH_LESSONS.length):[],xp:Number(savedPath.xp)||0};}catch(e){}
+let practiceDirection='es-nl',testDirection='es-nl',pathDirection='es-nl',pathLessonIndex=0,pathQuestions=[],pathIndex=0,pathScore=0,pathAnswered=false,pathOptions=[],pathChosen=-1,pathHistory=[];
+function itemPrompt(item){return practiceDirection==='es-nl'?item[0]:item[1]}
+function itemAnswer(item){return practiceDirection==='es-nl'?item[1]:item[0]}
+function directionTitle(dir){return dir==='es-nl'?'Spaans → Nederlands':'Nederlands → Spaans'}
+function launchPractice(dir,kind){
+ practiceDirection=dir;testDirection=dir;
+ if(kind==='quiz')startQuiz(dir);
+ else if(kind==='typing')startTyping(dir);
+ else if(kind==='flash')startFlashcards(dir);
+ else if(kind==='test')showTestSetup(dir);
+}
+
 let quizList=[], quizIndex=0, quizScore=0, quizChosen=false;
 let typingList=[], typingIndex=0;
 let flashList=[], flashIndex=0, flashShown=false;
@@ -233,29 +259,85 @@ function answerCheck(input, expected){
  if(a.length>=5&&expNoArticle.length>=5&&lev(a,expNoArticle)<=1)return {correct:true,kind:"warning",message:"de homework ninja vind dit niet goed: controleer de spelling en het lidwoord."};
  return {correct:false,kind:"wrong",message:"de homework ninja vind dit niet goed. Het juiste antwoord is: "+expected};
 }
-function startQuiz(){quizList=getMixed();quizIndex=0;quizScore=0;showView("quiz");renderQuiz()}
+function startQuiz(dir){if(dir)practiceDirection=dir;quizList=getMixed();quizIndex=0;quizScore=0;showView("quiz");renderQuiz()}
 function renderQuiz(){
- quizChosen=false;const item=quizList[quizIndex];document.getElementById("quizMeta").textContent="Vraag "+(quizIndex+1)+" van "+quizList.length+" · Score: "+quizScore;document.getElementById("quizBar").style.width=(quizIndex/quizList.length*100)+"%";document.getElementById("quizPrompt").textContent=item[0];
- const others=shuffle([...new Set(oefenItems.filter(x=>norm(x[1])!==norm(item[1])).map(x=>x[1]))]).slice(0,3);const options=shuffle([item[1]].concat(others));const box=document.getElementById("quizAnswers");box.innerHTML="";options.forEach(opt=>{const b=document.createElement("button");b.textContent=opt;b.onclick=()=>chooseQuiz(b,opt,item[1]);box.appendChild(b)});document.getElementById("quizFeedback").textContent="";document.getElementById("quizNext").disabled=true;document.getElementById("quizBar").style.width=(quizIndex/quizList.length*100)+"%";
+ quizChosen=false;const item=quizList[quizIndex],correct=itemAnswer(item);document.getElementById("quizMeta").textContent="Vraag "+(quizIndex+1)+" van "+quizList.length+" · "+directionTitle(practiceDirection)+" · Score: "+quizScore;document.getElementById("quizBar").style.width=(quizIndex/quizList.length*100)+"%";document.getElementById("quizPrompt").textContent=itemPrompt(item);
+ const others=shuffle([...new Set(oefenItems.filter(x=>norm(itemAnswer(x))!==norm(correct)).map(x=>itemAnswer(x)))]).slice(0,3);const options=shuffle([correct].concat(others));const box=document.getElementById("quizAnswers");box.innerHTML="";options.forEach(opt=>{const b=document.createElement("button");b.textContent=opt;b.onclick=()=>chooseQuiz(b,opt,correct);box.appendChild(b)});document.getElementById("quizFeedback").textContent="";document.getElementById("quizNext").disabled=true;document.getElementById("quizBar").style.width=(quizIndex/quizList.length*100)+"%";
 }
 function chooseQuiz(btn,answer,correct){if(quizChosen)return;quizChosen=true;document.querySelectorAll("#quizAnswers button").forEach(b=>{b.disabled=true;if(b.textContent===correct)b.classList.add("correct")});if(answer===correct){quizScore++;saveProgress();document.getElementById("quizFeedback").textContent="✅ ¡Muy bien!";}else{btn.classList.add("wrong");document.getElementById("quizFeedback").textContent="❌ de homework ninja vind dit niet goed — "+correct;}document.getElementById("quizMeta").textContent="Vraag "+(quizIndex+1)+" van "+quizList.length+" · Score: "+quizScore;document.getElementById("quizNext").disabled=false}
 function nextQuiz(){if(!quizChosen)return;if(quizIndex<quizList.length-1){quizIndex++;renderQuiz()}else{document.getElementById("quizPrompt").textContent="¡Terminado! 🎉";document.getElementById("quizAnswers").innerHTML="";document.getElementById("quizFeedback").textContent="Je score: "+quizScore+" van "+quizList.length;document.getElementById("quizNext").textContent="Opnieuw";document.getElementById("quizNext").onclick=startQuiz;document.getElementById("quizNext").disabled=false}}
-function startTyping(){typingList=getMixed();typingIndex=0;showView("typing");renderTyping()}
-function renderTyping(){const item=typingList[typingIndex];document.getElementById("typingMeta").textContent="Kaart "+(typingIndex+1)+" van "+typingList.length;document.getElementById("typingPrompt").textContent=item[0];document.getElementById("typingInput").value="";document.getElementById("typingFeedback").textContent="";document.getElementById("typingInput").focus()}
-function checkTyping(){const item=typingList[typingIndex],r=answerCheck(document.getElementById("typingInput").value,item[1]);const el=document.getElementById("typingFeedback");if(r.kind==="empty"){el.textContent="⚠️ "+r.message;return}el.textContent=r.correct?(r.kind==="warning"?"✅ Goed gerekend! "+r.message:"✅ Goed!"):("❌ "+r.message);if(r.correct)saveProgress()}
+function startTyping(dir){if(dir)practiceDirection=dir;typingList=getMixed();typingIndex=0;showView("typing");renderTyping()}
+function renderTyping(){const item=typingList[typingIndex];document.getElementById("typingMeta").textContent="Kaart "+(typingIndex+1)+" van "+typingList.length+" · "+directionTitle(practiceDirection);document.getElementById("typingPrompt").textContent=itemPrompt(item);document.getElementById("typingInput").placeholder=practiceDirection==="es-nl"?"Typ de Nederlandse vertaling...":"Typ de Spaanse vertaling...";document.getElementById("typingInput").value="";document.getElementById("typingFeedback").textContent="";document.getElementById("typingInput").focus()}
+function checkTyping(){const item=typingList[typingIndex],r=answerCheck(document.getElementById("typingInput").value,itemAnswer(item));const el=document.getElementById("typingFeedback");if(r.kind==="empty"){el.textContent="⚠️ "+r.message;return}el.textContent=r.correct?(r.kind==="warning"?"✅ Goed gerekend! "+r.message:"✅ Goed!"):("❌ "+r.message);if(r.correct)saveProgress()}
 function nextTyping(){typingIndex=(typingIndex+1)%typingList.length;renderTyping()}
 document.getElementById("typingInput").addEventListener("keydown",e=>{if(e.key==="Enter")checkTyping()});
-function startFlashcards(){flashList=getMixed();flashIndex=0;flashShown=false;showView("flash");renderFlash()}
-function renderFlash(){const item=flashList[flashIndex];document.getElementById("flashMeta").textContent="Kaart "+(flashIndex+1)+" van "+flashList.length;document.getElementById("flashPrompt").textContent=item[0];document.getElementById("flashAnswer").textContent="❓ Tik op Antwoord om de vertaling te zien.";flashShown=false}
-function flipFlash(){if(!flashShown){document.getElementById("flashAnswer").textContent=flashList[flashIndex][1];flashShown=true}else{document.getElementById("flashAnswer").textContent="Je hebt het antwoord gezien. Klaar voor de volgende?";}}
+function startFlashcards(dir){if(dir)practiceDirection=dir;flashList=getMixed();flashIndex=0;flashShown=false;showView("flash");renderFlash()}
+function renderFlash(){const item=flashList[flashIndex];document.getElementById("flashMeta").textContent="Kaart "+(flashIndex+1)+" van "+flashList.length+" · "+directionTitle(practiceDirection);document.getElementById("flashPrompt").textContent=itemPrompt(item);document.getElementById("flashAnswer").textContent="❓ Tik op Antwoord om de vertaling te zien.";flashShown=false}
+function flipFlash(){if(!flashShown){document.getElementById("flashAnswer").textContent=itemAnswer(flashList[flashIndex]);flashShown=true}else{document.getElementById("flashAnswer").textContent="Je hebt het antwoord gezien. Klaar voor de volgende?";}}
 function nextFlash(){flashIndex=(flashIndex+1)%flashList.length;renderFlash()}
-function showTestSetup(){document.getElementById("testSetup").classList.remove("hidden");document.getElementById("testRun").classList.add("hidden");document.getElementById("testResult").classList.add("hidden");showView("test")}
+function showTestSetup(dir){if(dir){testDirection=dir;practiceDirection=dir;}else{testDirection=practiceDirection;}document.getElementById("testSetup").classList.remove("hidden");document.getElementById("testRun").classList.add("hidden");document.getElementById("testResult").classList.add("hidden");showView("test")}
 function getTestPool(){const group=document.getElementById("testGroup").value;if(group==="all")return oefenItems.slice();if(group==="words")return woorden.map(x=>[x[0],x[1],x[2]]);if(group==="phrases")return frases.map(x=>[x[0],x[1],"Frases clave"]);if(group==="verbs")return werkwoorden.slice();return woorden.filter(x=>x[2]===group).map(x=>[x[0],x[1],x[2]])}
-function beginTest(){const pool=getTestPool(),count=document.getElementById("testCount").value;testList=shuffle(pool).slice(0,count==="all"?pool.length:Math.min(Number(count),pool.length));testIndex=0;testAnswers=[];testChecked=[];document.getElementById("testSetup").classList.add("hidden");document.getElementById("testResult").classList.add("hidden");document.getElementById("testRun").classList.remove("hidden");renderTest()}
-function renderTest(){document.getElementById("testMeta").textContent="Vraag "+(testIndex+1)+" van "+testList.length+" · "+testList[testIndex][2];document.getElementById("testBar").style.width=(testIndex/testList.length*100)+"%";document.getElementById("testPrompt").textContent=testList[testIndex][0];document.getElementById("testInput").value=testAnswers[testIndex]||"";document.getElementById("testFeedback").textContent="";document.getElementById("testNext").disabled=true;document.getElementById("testNext").classList.toggle("hidden",testIndex===testList.length-1);document.getElementById("testFinish").classList.toggle("hidden",testIndex!==testList.length-1);document.getElementById("testInput").focus()}
-function checkTestAnswer(){testAnswers[testIndex]=document.getElementById("testInput").value.trim();const item=testList[testIndex],r=answerCheck(testAnswers[testIndex],item[1]);testChecked[testIndex]=r;const el=document.getElementById("testFeedback");if(r.kind==="empty"){el.textContent="❌ de homework ninja vind dit niet goed: vul eerst iets in.";document.getElementById("testNext").disabled=true;return}el.textContent=r.correct?(r.kind==="warning"?"⚠️ "+r.message:"✅ Helemaal goed!"):("❌ "+r.message);document.getElementById("testNext").disabled=false;if(r.correct)saveProgress()}
+function beginTest(){practiceDirection=testDirection;const pool=getTestPool(),count=document.getElementById("testCount").value;testList=shuffle(pool).slice(0,count==="all"?pool.length:Math.min(Number(count),pool.length));testIndex=0;testAnswers=[];testChecked=[];document.getElementById("testSetup").classList.add("hidden");document.getElementById("testResult").classList.add("hidden");document.getElementById("testRun").classList.remove("hidden");renderTest()}
+function renderTest(){document.getElementById("testMeta").textContent="Vraag "+(testIndex+1)+" van "+testList.length+" · "+testList[testIndex][2];document.getElementById("testBar").style.width=(testIndex/testList.length*100)+"%";document.getElementById("testPrompt").textContent=itemPrompt(testList[testIndex]);document.getElementById("testInput").value=testAnswers[testIndex]||"";document.getElementById("testInput").placeholder=practiceDirection==="es-nl"?"Typ de Nederlandse vertaling...":"Typ de Spaanse vertaling...";document.getElementById("testFeedback").textContent="";document.getElementById("testNext").disabled=true;document.getElementById("testNext").classList.toggle("hidden",testIndex===testList.length-1);document.getElementById("testFinish").classList.toggle("hidden",testIndex!==testList.length-1);document.getElementById("testInput").focus()}
+function checkTestAnswer(){testAnswers[testIndex]=document.getElementById("testInput").value.trim();const item=testList[testIndex],r=answerCheck(testAnswers[testIndex],itemAnswer(item));testChecked[testIndex]=r;const el=document.getElementById("testFeedback");if(r.kind==="empty"){el.textContent="❌ de homework ninja vind dit niet goed: vul eerst iets in.";document.getElementById("testNext").disabled=true;return}el.textContent=r.correct?(r.kind==="warning"?"⚠️ "+r.message:"✅ Helemaal goed!"):("❌ "+r.message);document.getElementById("testNext").disabled=false;if(r.correct)saveProgress()}
 function nextTest(){testAnswers[testIndex]=document.getElementById("testInput").value.trim();if(testIndex<testList.length-1){testIndex++;renderTest()}}
-function finishTest(){testAnswers[testIndex]=document.getElementById("testInput").value.trim();let score=0,warn=[],wrong=[];testList.forEach((item,i)=>{const r=answerCheck(testAnswers[i]||"",item[1]);if(r.correct){score++;if(r.kind==="warning")warn.push(item[0])}else wrong.push(item[0])});document.getElementById("testRun").classList.add("hidden");document.getElementById("testResult").classList.remove("hidden");document.getElementById("testBar").style.width="100%";document.getElementById("testScore").textContent=score+" / "+testList.length+" ("+Math.round(score/testList.length*100)+"%)";let details="";if(warn.length)details+="<p>⚠️ <b>de homework ninja vind dit niet goed bij "+warn.length+" antwoord"+(warn.length===1?"":"en")+".</b></p><p>Controleer nog even: "+warn.join(", ")+"</p>";if(wrong.length)details+="<p>❌ <b>Nog oefenen:</b> "+wrong.join(", ")+"</p>";if(!wrong.length&&!warn.length)details+="🎉 Alles helemaal goed!";document.getElementById("testDetails").innerHTML=details}
+function finishTest(){testAnswers[testIndex]=document.getElementById("testInput").value.trim();let score=0,warn=[],wrong=[];testList.forEach((item,i)=>{const r=answerCheck(testAnswers[i]||"",item[1]);if(r.correct){score++;if(r.kind==="warning")warn.push(itemPrompt(item))}else wrong.push(itemPrompt(item))});document.getElementById("testRun").classList.add("hidden");document.getElementById("testResult").classList.remove("hidden");document.getElementById("testBar").style.width="100%";document.getElementById("testScore").textContent=score+" / "+testList.length+" ("+Math.round(score/testList.length*100)+"%)";let details="";if(warn.length)details+="<p>⚠️ <b>de homework ninja vind dit niet goed bij "+warn.length+" antwoord"+(warn.length===1?"":"en")+".</b></p><p>Controleer nog even: "+warn.join(", ")+"</p>";if(wrong.length)details+="<p>❌ <b>Nog oefenen:</b> "+wrong.join(", ")+"</p>";if(!wrong.length&&!warn.length)details+="🎉 Alles helemaal goed!";document.getElementById("testDetails").innerHTML=details}
+
+function pathPool(index){
+ const lesson=PATH_LESSONS[index];
+ if(!lesson)return [];
+ if(lesson.group==='phrases')return frases.map(x=>[x[0],x[1],'Frases clave']);
+ if(lesson.group==='ser-estar')return werkwoorden.filter(x=>x[0].includes('(ser)')||x[0].includes('(estar)'));
+ if(lesson.group==='tener-llamarse')return werkwoorden.filter(x=>x[0].includes('(tener)')||x[0].includes('(llamarse)'));
+ if(lesson.group==='hablar-vivir')return werkwoorden.filter(x=>x[0].includes('(hablar)')||x[0].includes('(vivir)'));
+ if(lesson.group==='ir-hacer')return werkwoorden.filter(x=>x[0].includes('(ir)')||x[0].includes('(hacer)'));
+ return oefenItems.filter(x=>x[2]===lesson.group);
+}
+function savePathState(){try{localStorage.setItem(PATH_STORE,JSON.stringify(pathState));}catch(e){}}
+function showLearningPath(){pathDirection=practiceDirection;renderPathNodes();showView("learning-path")}
+function setPathDirection(dir){pathDirection=dir;renderPathNodes()}
+function renderPathNodes(){
+ const done=new Set(pathState.completed);
+ document.getElementById("pathSummary").textContent="⭐ "+pathState.xp+" XP · "+done.size+" van "+PATH_LESSONS.length+" lessen voltooid";
+ document.getElementById("pathProgressBar").style.width=(done.size/PATH_LESSONS.length*100)+"%";
+ document.getElementById("pathDirEsNl").classList.toggle("primary",pathDirection==='es-nl');document.getElementById("pathDirEsNl").classList.toggle("quiet",pathDirection!=='es-nl');
+ document.getElementById("pathDirNlEs").classList.toggle("primary",pathDirection==='nl-es');document.getElementById("pathDirNlEs").classList.toggle("quiet",pathDirection!=='nl-es');
+ document.getElementById("pathNodes").innerHTML=PATH_LESSONS.map((l,i)=>{
+  const locked=i>=pathState.unlocked,completed=done.has(i),count=Math.min(8,pathPool(i).length);
+  return '<div class="path-row"><div class="path-rail"><span class="path-dot '+(completed?'done':locked?'locked':'ready')+'">'+(completed?'✓':locked?'🔒':(i+1))+'</span></div><button class="path-node" '+(locked?'disabled':'')+' onclick="startPathLesson('+i+')"><div><strong>'+l.title+'</strong><p>'+l.subtitle+'</p><small>'+count+' vragen · '+(completed?'Voltooid':locked?'Speel vorige les vrij':'Start les')+'</small></div><span class="path-xp">'+(completed?'✓ Klaar':locked?'🔒':'+'+(count*5)+' XP')+'</span></button></div>';
+ }).join("");
+}
+function startPathLesson(index){
+ const pool=pathPool(index);if(index>=pathState.unlocked||!pool.length)return;
+ pathLessonIndex=index;pathQuestions=shuffle(pool).slice(0,Math.min(8,pool.length));pathIndex=0;pathScore=0;pathAnswered=false;pathOptions=[];pathChosen=-1;pathHistory=[];
+ practiceDirection=pathDirection;renderPathNodes();showView("path-session");renderPathQuestion();
+}
+function pathMakeOptions(correct){
+ const used=new Set([norm(correct)]),out=[correct];
+ for(const item of shuffle(oefenItems)){const answer=itemAnswer(item),key=norm(answer);if(!used.has(key)){used.add(key);out.push(answer)}if(out.length===4)break}
+ return shuffle(out);
+}
+function renderPathQuestion(){
+ const lesson=PATH_LESSONS[pathLessonIndex],box=document.getElementById("pathSessionContent");
+ if(pathIndex>=pathQuestions.length){
+  const percent=Math.round(pathScore/pathQuestions.length*100),passed=percent>=70,already=pathState.completed.includes(pathLessonIndex);
+  if(passed){if(!already){pathState.completed.push(pathLessonIndex);pathState.xp+=pathScore*5}pathState.unlocked=Math.max(pathState.unlocked,Math.min(PATH_LESSONS.length,pathLessonIndex+2));savePathState()}
+  const review=pathHistory.map((h,i)=>'<div class="wordrow"><strong>'+(i+1)+'. '+escapeHtml(itemPrompt(h.item))+'</strong><span>Jouw antwoord: '+escapeHtml(h.choice)+'</span><span class="knownmark">'+(h.choice===itemAnswer(h.item)?'✓ Goed':'Juiste antwoord: '+escapeHtml(itemAnswer(h.item)))+'</span></div>').join("");
+  box.innerHTML='<div class="submeta">🗺️ LEERPAD · '+lesson.title+'</div><h2 style="text-align:center;margin-top:8px">'+(passed?'¡Muy bien! 🎉':'Bijna! 💪')+'</h2><div class="resultbox">'+pathScore+' / '+pathQuestions.length+'</div><p class="hint" style="text-align:center">'+percent+'% goed · '+(passed?'De volgende les is vrijgespeeld.':'Haal minimaal 70% om de volgende les vrij te spelen.')+'</p><div class="progress"><span style="width:'+percent+'%"></span></div><div class="actions"><button class="primary" onclick="'+(passed?(pathLessonIndex===PATH_LESSONS.length-1?'showLearningPath()':'startPathLesson('+(pathLessonIndex+1)+')'):'startPathLesson('+pathLessonIndex+')')+'">'+(passed?(pathLessonIndex===PATH_LESSONS.length-1?'Terug naar leerpad':'Volgende les →'):'Probeer opnieuw')+'</button><button class="quiet" onclick="showLearningPath()">Bekijk leerpad</button></div><h3 style="margin-top:24px">Je antwoorden</h3><div class="tablewrap">'+review+'</div>';
+  renderPathNodes();return;
+ }
+ const item=pathQuestions[pathIndex],correct=itemAnswer(item);
+ if(!pathOptions.length)pathOptions=pathMakeOptions(correct);
+ box.innerHTML='<div class="submeta">🗺️ '+lesson.title+' · '+directionTitle(pathDirection)+'</div><div class="progress"><span style="width:'+(pathIndex/pathQuestions.length*100)+'%"></span></div><h2>Vraag '+(pathIndex+1)+' van '+pathQuestions.length+'</h2><div class="word-prompt">'+escapeHtml(itemPrompt(item))+'</div><div class="answers">'+pathOptions.map((opt,i)=>'<button '+(pathAnswered?'disabled':'')+' class="'+(pathAnswered&&opt===correct?'correct':pathAnswered&&i===pathChosen?'wrong':'')+'" onclick="choosePathAnswer('+i+')">'+escapeHtml(opt)+'</button>').join("")+'</div>'+(pathAnswered?'<div class="feedback">'+(pathOptions[pathChosen]===correct?'✅ Goed gedaan!':'❌ Het juiste antwoord is: '+escapeHtml(correct))+'</div><div class="actions"><button class="success" onclick="nextPathQuestion()">'+(pathIndex===pathQuestions.length-1?'Bekijk resultaat':'Volgende vraag →')+'</button></div>':'')+'<div class="actions"><button class="quiet" onclick="showLearningPath()">← Stop en terug naar leerpad</button></div>';
+}
+function choosePathAnswer(index){
+ if(pathAnswered)return;pathChosen=index;pathAnswered=true;
+ const item=pathQuestions[pathIndex],choice=pathOptions[index];
+ pathHistory.push({item,choice});if(choice===itemAnswer(item)){pathScore++;saveProgress()}
+ renderPathQuestion();
+}
+function nextPathQuestion(){if(!pathAnswered)return;pathIndex++;pathAnswered=false;pathOptions=[];pathChosen=-1;renderPathQuestion()}
+
 function showArticleLesson(){showView("article-lesson")}
 const articleQuestions = [
 {sentence:"Tengo un hermano. ___ hermano tiene 14 años.",answer:"El",options:["El","La","Un","Una"],reason:"Je noemt eerst un hermano. Daarna gaat het over diezelfde broer: el hermano."},
@@ -345,7 +427,7 @@ function chooseArticle(btn,choice,q){
 function nextArticle(){if(!articleAnswered)return;articleIndex++;renderArticle();}
 function renderWords(){const q=(document.getElementById("searchBox").value||"").toLowerCase(),filter=document.getElementById("lessonFilter").value;const all=filter==="Werkwoorden"?werkwoorden.slice():(filter==="all"?oefenItems.slice():basisItems);const list=all.filter(x=>(filter==="all"||filter==="Werkwoorden"||x[2]===filter)&&(!q||(x[0]+" "+x[1]).toLowerCase().includes(q)));document.getElementById("wordCount").textContent=list.length+" resultaten";document.getElementById("wordRows").innerHTML=list.map(x=>"<tr><td>"+escapeHtml(x[0])+"</td><td>"+escapeHtml(x[1])+"</td><td>"+escapeHtml(x[2])+"</td></tr>").join("")}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-try{const n=Number(localStorage.getItem("spaansToolCorrect")||0);document.getElementById("homeProgress").style.width=Math.min(100,Math.round(n/108*100))+"%";document.getElementById("homeProgressText").textContent=n?n+" goede antwoorden geoefend":"Start je eerste oefening!"}catch(e){}
+try{const n=Number(localStorage.getItem("spaansToolCorrect")||0);document.getElementById("homeProgress").style.width=Math.min(100,Math.round(n/oefenItems.length*100))+"%";document.getElementById("homeProgressText").textContent=n?n+" goede antwoorden geoefend":"Start je eerste oefening!"}catch(e){}
 if("serviceWorker" in navigator && location.protocol!=="file:"){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}
 </script>
 </body>
