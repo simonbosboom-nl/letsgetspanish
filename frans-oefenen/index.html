@@ -64,6 +64,70 @@ h2{font-size:1.5rem;letter-spacing:-.025em;margin:0}
 .result-number{font-size:clamp(2.8rem,9vw,5.6rem);line-height:1;color:var(--purple);font-weight:900;text-align:center;margin:22px 0 12px}
 .footer{text-align:center;color:#8b7b96;font-size:.84rem;margin:26px 0 0}
 @media(max-width:640px){.shell{padding:12px 12px 34px}.hero{border-radius:22px;padding:23px 20px}.hero-row{align-items:flex-start}.counter{width:72px;height:72px;border-radius:18px}.counter strong{font-size:1.6rem}.counter span{font-size:.65rem}.grid{grid-template-columns:1fr}.tile{min-height:0;padding:18px}.choices{grid-template-columns:1fr}.wordrow{grid-template-columns:1fr auto;gap:4px 12px}.wordrow span{grid-column:1}.knownmark{grid-column:2;grid-row:1/3}.big-word{padding:38px 4px 20px}.panel{border-radius:20px}.navbtn{padding:9px 11px;font-size:.9rem}}
+
+/* SpaansTool-inspired theme: navy, cream and colorful practice tiles */
+:root{--purple:#8250d7;--purple2:#6d3bb8;--lilac:#e6d9ff;--white:#fff;--ink:#182033;--muted:#657083;--line:rgba(255,255,255,.16);--green:#20b56a;--red:#ef3348;--gold:#ffd84b}
+body{background:#f7f4ec;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.shell{max-width:1500px;padding:22px clamp(12px,2vw,24px) 38px}
+.hero{background:linear-gradient(130deg,#071a35,#173a62 58%,#1e605c);border-radius:22px;padding:25px clamp(20px,3vw,34px);box-shadow:0 9px 26px #0002}
+.hero:after{content:"🇫🇷 🥐 🗼 🗣️";font-size:30px;font-weight:800;color:rgba(255,255,255,.18);right:18px;bottom:8px}
+.eyebrow{color:#ffd84b;letter-spacing:.08em}
+h1{letter-spacing:-.025em}
+.hero p{color:#f0f3f7}
+.counter{border-radius:20px;border-color:#ffffff3d;background:#ffffff12}
+.counter span{color:#e3eaf2}
+nav{gap:7px;margin:14px 0 16px}
+.navbtn{border:0;background:var(--navy,#10182a);background:#10182a;color:#fff;border-radius:12px;padding:10px 14px;font-weight:800;box-shadow:0 4px 12px #00000010}
+.navbtn.active,.navbtn:hover{background:#8250d7;color:#fff;border-color:#8250d7}
+.progressbox{margin:14px 0 20px;color:#657083}
+.progress-track{background:#d6e0e5}
+.progress-fill{background:#20b56a}
+.grid{gap:14px}
+.tile{border:0;border-radius:18px;padding:20px;min-height:138px;color:#fff;box-shadow:0 8px 20px #00000012;gap:7px}
+.tile:hover{transform:translateY(-2px);border-color:transparent;filter:brightness(1.04)}
+.tile .emoji{font-size:31px}
+.tile strong{font-size:22px;letter-spacing:-.02em;color:#fff}
+.tile span:last-child{color:#fff;opacity:.96;line-height:1.4;font-size:14px}
+.grid>.tile:nth-child(1){background:#8250d7}
+.grid>.tile:nth-child(2){background:#20b56a}
+.grid>.tile:nth-child(3){background:#f18413}
+.grid>.tile:nth-child(4){background:#2c83d5}
+.grid>.tile:nth-child(5){background:#20b5a8}
+.section-head{margin:22px 0 12px}
+h2{letter-spacing:-.02em}
+.small-note{color:#657083}
+.panel{border:0;border-radius:22px;box-shadow:0 8px 30px #00000012}
+.pill{background:#efe7ff;color:#59349e}
+.big-word{color:#5b35a2}
+.meaning{color:#5b35a2}
+.primary,.secondary,.choice{border-radius:14px;font-weight:800}
+.primary{background:#5d38ad;color:#fff}
+.primary:hover{background:#4d2b98}
+.secondary{background:#edf0f4;color:#202b3d;border-color:transparent}
+.secondary:hover{background:#dfe4eb}
+.choice{background:#eee8fb;border-color:transparent;color:#43227a}
+.choice:hover:not(:disabled){border-color:#bba6f2;background:#e4d8f8}
+.choice.correct{background:#19a968;border-color:#19a968;color:#fff}
+.choice.wrong{background:#dc3545;border-color:#dc3545;color:#fff}
+.write-input{border:2px solid #d8dce4;background:#fff;border-radius:12px}
+.write-input:focus{outline:3px solid #bba6f2;border-color:#7e5ac7}
+.wordlist{border:0;border-radius:16px}
+.wordrow{border-color:#e2e5ea}
+.wordrow:nth-child(even){background:#f7f5fb}
+.result-number{color:#5b35a2}
+.footer{background:#10182a;color:#fff;border-radius:15px;padding:13px 16px;line-height:1.6}
+.footer a{color:#ffd84b!important}
+@media(max-width:640px){
+ .shell{padding:13px 12px 30px}
+ .hero{border-radius:20px;padding:22px 18px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .tile{min-height:138px;padding:15px}
+ .tile strong{font-size:19px}
+ .tile span:last-child{font-size:13px}
+ .navbtn{padding:9px 10px;font-size:.85rem}
+}
+@media(max-width:390px){.grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
