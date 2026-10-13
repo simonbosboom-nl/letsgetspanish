@@ -9,6 +9,7 @@
   let currentBanner = null;
   let currentGate = null;
   const activePieces = new Set();
+  const BONUS_KEY = "letsgetspanish_bonus_unlocked_v1";
 
   const addStyles = () => {
     if (document.getElementById("site-prank-styles")) return;
@@ -24,6 +25,12 @@
       ".site-prank-gate input { width:min(220px,55vw); box-sizing:border-box; padding:9px 10px; border:1px solid #9ca3af; border-radius:8px; background:white; color:#111827; font:500 14px system-ui,sans-serif; }",
       ".site-prank-gate button { border:0; border-radius:8px; padding:9px 13px; background:#3730a3; color:white; font:700 14px system-ui,sans-serif; cursor:pointer; }",
       ".site-prank-gate .site-prank-error { flex-basis:100%; text-align:center; color:#b91c1c; font-weight:600; }",
+      ".site-prank-reward { position:relative; z-index:10002; margin:14px auto; padding:22px; width:min(680px,calc(100% - 36px)); box-sizing:border-box; border:2px solid #65a30d; border-radius:18px; background:linear-gradient(135deg,#f0fdf4,#ecfeff); color:#16321d; box-shadow:0 16px 40px rgba(20,83,45,.18); font:500 15px/1.5 system-ui,sans-serif; text-align:center; }",
+      ".site-prank-reward h2 { margin:0 0 8px; color:#166534; font-size:clamp(22px,4vw,30px); }",
+      ".site-prank-reward p { margin:8px 0 14px; }",
+      ".site-prank-reward-links { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:14px; }",
+      ".site-prank-reward-link { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 16px; border-radius:10px; background:#166534; color:white !important; text-decoration:none !important; font-weight:800; }",
+      ".site-prank-reward-link.secondary { background:#3730a3; }",
       "@media (prefers-reduced-motion: reduce) { .site-prank-piece { display:none !important; animation:none !important; } }"
     ].join("\n");
     document.head.appendChild(style);
@@ -56,6 +63,45 @@
     banner.append(text, close);
     document.body.prepend(banner);
     currentBanner = banner;
+  };
+
+  const addReward = message => {
+    const reward = document.createElement("section");
+    reward.className = "site-prank-reward";
+    reward.setAttribute("role", "status");
+    const title = document.createElement("h2");
+    title.textContent = "🎉 Bonus vrijgespeeld!";
+    const description = document.createElement("p");
+    description.textContent = message || "Je hebt de bonus gevonden! Je kunt de Spaanse en Franse oefenspellen zo vaak gebruiken als je wilt.";
+    const details = document.createElement("p");
+    details.textContent = "Kies een taal en begin meteen met oefenen.";
+    const links = document.createElement("div");
+    links.className = "site-prank-reward-links";
+    const spanish = document.createElement("a");
+    spanish.className = "site-prank-reward-link";
+    spanish.href = "https://simonbosboom-nl.github.io/letsgetspanish/";
+    spanish.textContent = "🇪🇸 Start Spaans";
+    const french = document.createElement("a");
+    french.className = "site-prank-reward-link secondary";
+    french.href = "https://simonbosboom-nl.github.io/letsgetspanish/frans-oefenen/";
+    french.textContent = "🇫🇷 Start Frans";
+    links.append(spanish, french);
+    const foot = document.createElement("p");
+    foot.style.fontSize = "12px";
+    foot.style.opacity = ".8";
+    foot.textContent = "De bonus blijft op deze browser onthouden. De oefenwebsites zijn openbaar; de code is een leuke verrassing, geen echte toegangsbeveiliging.";
+    const close = document.createElement("button");
+    close.className = "site-prank-close";
+    close.type = "button";
+    close.setAttribute("aria-label", "Bonus sluiten");
+    close.textContent = "×";
+    close.addEventListener("click", () => {
+      reward.remove();
+      if (currentBanner === reward) currentBanner = null;
+    });
+    reward.append(title, description, details, links, foot, close);
+    document.body.prepend(reward);
+    currentBanner = reward;
   };
 
   const addConfetti = () => {
@@ -123,8 +169,9 @@
         if (expectedHash && submittedHash === expectedHash) {
           gate.remove();
           if (currentGate === gate) currentGate = null;
+          try { localStorage.setItem(BONUS_KEY, "yes"); } catch (_) {}
           addStyles();
-          addBanner(message || "🎉 Code goed! Je hebt de geheime verrassing gevonden 😎");
+          addReward(message);
           addConfetti();
         } else {
           error.textContent = "Niet helemaal 😈 Probeer nog eens.";
@@ -159,13 +206,21 @@
     if (target !== "both" && target !== page) mode = "off";
     const message = typeof config.message === "string" ? config.message.slice(0, 180) : "";
     const codeHash = typeof config.codeHash === "string" ? config.codeHash : "";
-    const key = JSON.stringify({ mode, target, message, codeHash });
+    const hasPrankLink = new URLSearchParams(location.search).get("prank") === "code";
+    let bonusUnlocked = false;
+    try { bonusUnlocked = localStorage.getItem(BONUS_KEY) === "yes"; } catch (_) {}
+    const key = JSON.stringify({ mode, target, message, codeHash, hasPrankLink, bonusUnlocked });
     if (key === lastSettingKey) return;
     lastSettingKey = key;
     removeEffects();
+    if (hasPrankLink && bonusUnlocked) {
+      addStyles();
+      addReward(message);
+      return;
+    }
     if (mode === "off") return;
     if (mode === "secret-code") {
-      if (new URLSearchParams(location.search).get("prank") === "code") {
+      if (hasPrankLink) {
         addStyles();
         addCodeGate(codeHash, message);
       }
