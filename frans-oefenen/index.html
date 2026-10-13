@@ -128,6 +128,8 @@ h2{letter-spacing:-.02em}
 }
 @media(max-width:390px){.grid{grid-template-columns:1fr}}
 
+.grid>.tile:nth-child(6){background:#ef3348}
+@media(max-width:640px){.grid>.tile:nth-child(6){background:#ef3348}}
 </style>
 </head>
 <body>
@@ -149,6 +151,7 @@ h2{letter-spacing:-.02em}
   <button class="navbtn" data-mode="test">📝 Toetsmodus</button>
   <button class="navbtn" data-mode="write">✍️ Schrijven</button>
   <button class="navbtn" data-mode="words">📚 Woordenlijst</button>
+  <button class="navbtn" data-mode="articles">🧩 Lidwoorden</button>
 </nav>
 <div id="progressbox" class="progressbox"><span id="progress-label">0 van 24 geoefend</span><div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div></div>
 <main id="view" aria-live="polite"></main>
@@ -241,11 +244,45 @@ const WORDS = [
  {fr:'vingt',nl:['twintig']},
  {fr:'tu as quel âge?',nl:['hoe oud ben je?']},
  {fr:"j'ai douze ans",nl:['ik ben twaalf jaar oud','ik ben twaalf']}
+]; 
+const ARTICLE_OPTIONS = ['le','la','l’','les','un','une','des'];
+const ARTICLE_QUESTIONS = [
+{context:'Je bedoelt de jongen die al bekend is.',sentence:'___ garçon joue au foot.',answer:'le',complete:'Le garçon joue au foot.',why:'Le gebruik je bij een bepaald mannelijk woord: le garçon.'},
+{context:'Je bedoelt het meisje dat al bekend is.',sentence:'___ fille danse.',answer:'la',complete:'La fille danse.',why:'La gebruik je bij een bepaald vrouwelijk woord: la fille.'},
+{context:'Je bedoelt de man die al bekend is.',sentence:'___ homme chante.',answer:'l’',complete:'L’homme chante.',why:'Voor homme gebruik je l’ omdat het woord met een stille h begint.'},
+{context:'Je bedoelt de vrouw die al bekend is.',sentence:'___ femme parle français.',answer:'la',complete:'La femme parle français.',why:'Femme is vrouwelijk: la femme.'},
+{context:'Je bedoelt het kind dat al bekend is.',sentence:'___ enfant joue du piano.',answer:'l’',complete:'L’enfant joue du piano.',why:'Voor enfant gebruik je l’ omdat het woord met een klinker begint.'},
+{context:'Je bedoelt de docent die al bekend is.',sentence:'___ professeur parle français.',answer:'le',complete:'Le professeur parle français.',why:'Professeur is hier mannelijk: le professeur.'},
+{context:'Je bedoelt de school waarover je al praatte.',sentence:'___ école, c’est génial.',answer:'l’',complete:'L’école, c’est génial.',why:'Voor école gebruik je l’ omdat het woord met een klinker begint.'},
+{context:'Je bedoelt de middelbare school die al bekend is.',sentence:'___ collège, c’est super.',answer:'le',complete:'Le collège, c’est super.',why:'Collège is mannelijk: le collège.'},
+{context:'Je bedoelt het talent waarover je al praatte.',sentence:'___ talent, c’est génial.',answer:'le',complete:'Le talent, c’est génial.',why:'Talent is mannelijk: le talent.'},
+{context:'Je bedoelt de jongens die al bekend zijn.',sentence:'___ garçons jouent au foot.',answer:'les',complete:'Les garçons jouent au foot.',why:'Les gebruik je bij een bepaalde groep in het meervoud.'},
+{context:'Je bedoelt de meisjes die al bekend zijn.',sentence:'___ filles dansent ensemble.',answer:'les',complete:'Les filles dansent ensemble.',why:'Les gebruik je bij een bepaalde groep in het meervoud.'},
+{context:'Je bedoelt de kinderen die al bekend zijn.',sentence:'___ enfants jouent du piano.',answer:'les',complete:'Les enfants jouent du piano.',why:'Les gebruik je bij een bepaalde groep in het meervoud.'},
+{context:'Je bedoelt de mannen die al bekend zijn.',sentence:'___ hommes chantent ensemble.',answer:'les',complete:'Les hommes chantent ensemble.',why:'Les gebruik je bij een bepaalde groep in het meervoud.'},
+{context:'Je bedoelt de vrouwen die al bekend zijn.',sentence:'___ femmes parlent français.',answer:'les',complete:'Les femmes parlent français.',why:'Les gebruik je bij een bepaalde groep in het meervoud.'},
+{context:'Je bedoelt de docenten die al bekend zijn.',sentence:'___ professeurs parlent français.',answer:'les',complete:'Les professeurs parlent français.',why:'Les gebruik je bij een bepaalde groep in het meervoud.'},
+{context:'Je noemt een jongen voor het eerst.',sentence:'C’est ___ garçon.',answer:'un',complete:'C’est un garçon.',why:'Un gebruik je bij een mannelijk woord als je het niet als iets specifieks bedoelt.'},
+{context:'Je noemt een meisje voor het eerst.',sentence:'C’est ___ fille.',answer:'une',complete:'C’est une fille.',why:'Une gebruik je bij een vrouwelijk woord als je het niet als iets specifieks bedoelt.'},
+{context:'Je noemt een man voor het eerst.',sentence:'C’est ___ homme.',answer:'un',complete:'C’est un homme.',why:'Un is het onbepaalde lidwoord bij mannelijke woorden. Het volgende woord begint met een h.'},
+{context:'Je noemt een vrouw voor het eerst.',sentence:'C’est ___ femme.',answer:'une',complete:'C’est une femme.',why:'Une gebruik je bij een vrouwelijk woord.'},
+{context:'Je noemt een kind voor het eerst.',sentence:'C’est ___ enfant.',answer:'un',complete:'C’est un enfant.',why:'Un gebruik je bij enfant als je het kind voor het eerst noemt.'},
+{context:'Je noemt een hond voor het eerst.',sentence:'C’est ___ chien.',answer:'un',complete:'C’est un chien.',why:'Chien is mannelijk: un chien.'},
+{context:'Je noemt een school voor het eerst.',sentence:'C’est ___ école.',answer:'une',complete:'C’est une école.',why:'École is vrouwelijk: une école.'},
+{context:'Je noemt een middelbare school voor het eerst.',sentence:'C’est ___ collège.',answer:'un',complete:'C’est un collège.',why:'Collège is mannelijk: un collège.'},
+{context:'Je noemt een talent voor het eerst.',sentence:'C’est ___ talent.',answer:'un',complete:'C’est un talent.',why:'Talent is mannelijk: un talent.'},
+{context:'Je hebt het over een paar jongens, niet over een specifieke groep.',sentence:'___ garçons jouent au foot ensemble.',answer:'des',complete:'Des garçons jouent au foot ensemble.',why:'Des gebruik je voor onbepaalde meervouden: een paar jongens.'},
+{context:'Je hebt het over een paar meisjes, niet over een specifieke groep.',sentence:'___ filles dansent ensemble.',answer:'des',complete:'Des filles dansent ensemble.',why:'Des gebruik je voor onbepaalde meervouden: een paar meisjes.'},
+{context:'Je hebt het over een paar kinderen, niet over specifieke kinderen.',sentence:'___ enfants jouent du piano.',answer:'des',complete:'Des enfants jouent du piano.',why:'Des gebruik je voor onbepaalde meervouden: een paar kinderen.'},
+{context:'Je hebt het over een paar mannen, niet over specifieke mannen.',sentence:'___ hommes chantent ensemble.',answer:'des',complete:'Des hommes chantent ensemble.',why:'Des gebruik je voor onbepaalde meervouden: een paar mannen.'},
+{context:'Je hebt het over een paar vrouwen, niet over specifieke vrouwen.',sentence:'___ femmes parlent français.',answer:'des',complete:'Des femmes parlent français.',why:'Des gebruik je voor onbepaalde meervouden: een paar vrouwen.'},
+{context:'Je hebt het over een paar docenten, niet over specifieke docenten.',sentence:'___ professeurs parlent français.',answer:'des',complete:'Des professeurs parlent français.',why:'Des gebruik je voor onbepaalde meervouden: een paar docenten.'}
 ];
 const STORE='frans-oefenen-progress-v1';
 let mastered=new Set();
 try{mastered=new Set(JSON.parse(localStorage.getItem(STORE)||'[]').filter(n=>Number.isInteger(n)&&n>=0&&n<WORDS.length));}catch(e){}
 let mode='home',direction='fr-nl',cardIndex=0,flipped=false,quizRound=[],quizIndex=0,quizScore=0,quizAnswered=false,quizOptions=[],quizChosen=-1,writeRound=[],writeIndex=0,writeChecked=false,writeTries=0,wordFilter='',testRound=[],testIndex=0,testAnswers=[],testActive=false;
+let articlesStarted=false,articleRound=[],articleIndex=0,articleScore=0,articleAnswered=false,articleChosen='',articleHistory=[];
 const view=document.getElementById('view');
 function saveProgress(){try{localStorage.setItem(STORE,JSON.stringify(Array.from(mastered)));}catch(e){};updateProgress();}
 function updateProgress(){document.getElementById('totalWords').textContent=WORDS.length;document.getElementById('progress-label').textContent=mastered.size+' van '+WORDS.length+' geoefend';document.getElementById('progress-fill').style.width=(mastered.size/WORDS.length*100)+'%';}
@@ -256,9 +293,9 @@ function promptFor(w){return direction==='fr-nl'?w.fr:w.nl[0];}
 function answerFor(w){return direction==='fr-nl'?w.nl[0]:w.fr;}
 function directionBar(){return '<div class="direction" aria-label="Richting"><span class="small-note">Richting:</span><button data-action="direction" data-dir="fr-nl" class="'+(direction==='fr-nl'?'selected':'')+'">🇫🇷 → 🇳🇱</button><button data-action="direction" data-dir="nl-fr" class="'+(direction==='nl-fr'?'selected':'')+'">🇳🇱 → 🇫🇷</button></div>';}
 function header(title,note){return '<div class="section-head"><div><h2>'+title+'</h2><div class="small-note">'+note+'</div></div>'+directionBar()+'</div>';}
-function setMode(next){mode=next;document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));render();}
+function setMode(next){mode=next;if(next==='articles'){articlesStarted=false;articleHistory=[];}document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));render();}
 function goHome(){setMode('home');}
-function render(){updateProgress();document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));if(mode==='home')renderHome();else if(mode==='cards')renderCards();else if(mode==='quiz')renderQuiz();else if(mode==='test')renderTest();else if(mode==='write')renderWrite();else if(mode==='words')renderWords();}
+function render(){updateProgress();document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));if(mode==='home')renderHome();else if(mode==='cards')renderCards();else if(mode==='quiz')renderQuiz();else if(mode==='test')renderTest();else if(mode==='write')renderWrite();else if(mode==='words')renderWords();else if(mode==='articles')renderArticles();}
 function renderHome(){
 view.innerHTML='<div class="section-head"><div><h2>Kies je oefening</h2><div class="small-note">Korte rondes helpen je om de woorden te onthouden.</div></div></div>'+
 '<div class="grid">'+
@@ -267,9 +304,52 @@ view.innerHTML='<div class="section-head"><div><h2>Kies je oefening</h2><div cla
 '<button class="tile" data-action="start-write"><span class="emoji">✍️</span><strong>Schrijven</strong><span>Typ zelf het antwoord. Accenten hoef je niet per se te typen.</span></button>'+
 '<button class="tile" data-mode="test"><span class="emoji">📝</span><strong>Toetsmodus</strong><span>Maak een oefentoets zonder hints. Aan het einde krijg je je score en de antwoorden.</span></button>'+
 '<button class="tile" data-mode="words"><span class="emoji">📚</span><strong>Woordenlijst</strong><span>Bekijk alle Franse woorden en zoek snel iets op.</span></button>'+
+'<button class="tile" data-mode="articles"><span class="emoji">🧩</span><strong>Lidwoorden oefenen</strong><span>Vul le, la, l’, les, un, une of des in. Met woorden die je al oefent.</span></button>'+
 '</div>'+
 '<div class="section-head"><div><h2>Jouw voortgang</h2><div class="small-note">Een woord telt mee zodra je het goed beantwoordt.</div></div></div>'+
 '<div class="panel"><div class="panel-top"><span>Geoefend</span><span class="pill">'+mastered.size+' / '+WORDS.length+'</span></div><div class="result-number" style="font-size:3rem">'+Math.round(mastered.size/WORDS.length*100)+'%</div><div class="progress-track" style="height:12px"><div class="progress-fill" style="width:'+(mastered.size/WORDS.length*100)+'%"></div></div><div class="action-row"><button class="secondary" data-action="reset-progress">Voortgang opnieuw instellen</button></div></div>';
+}
+function startArticles(){
+  articleRound=shuffle(ARTICLE_QUESTIONS);
+  articleIndex=0;articleScore=0;articleAnswered=false;articleChosen='';articleHistory=[];
+  articlesStarted=true;renderArticles();
+}
+function renderArticles(){
+  if(!articlesStarted){
+    view.innerHTML='<div class="section-head"><div><h2>🧩 Franse lidwoorden</h2><div class="small-note">Oefen met bekende woorden uit je flashcards, quiz, schrijfopdrachten en woordenlijst.</div></div></div>'+
+    '<div class="panel"><div class="panel-top"><span class="pill">Mini-uitleg</span><span>30 zinnen</span></div>'+
+    '<div class="quiz-prompt" style="padding:16px 0 8px;font-size:clamp(1.4rem,4vw,2.1rem)">le · la · l’ · les · un · une · des</div>'+
+    '<p>Gebruik <b>le</b> bij een bepaald mannelijk woord, <b>la</b> bij een bepaald vrouwelijk woord en <b>l’</b> vóór een klinker of stille h. <b>Les</b> is meervoud. Voor iets niet-specifieks gebruik je <b>un</b> (mannelijk), <b>une</b> (vrouwelijk) en <b>des</b> (meervoud).</p>'+
+    '<p class="small-note">De zinnen gebruiken woorden zoals <i>garçon, fille, homme, femme, enfant, chien, école, collège, professeur, jouer au foot, danser, chanter</i> en <i>parler français</i> uit de andere oefeningen.</p>'+
+    '<div class="action-row"><button class="primary" data-action="start-articles">Start lidwoordenoefening →</button><button class="secondary" data-mode="home">← Terug naar start</button></div></div>';
+    return;
+  }
+  if(articleIndex>=articleRound.length){
+    const percent=Math.round(articleScore/articleRound.length*100);
+    let review='';
+    articleHistory.forEach((entry,i)=>{
+      const q=entry.q,ok=entry.choice===q.answer;
+      review+='<div class="wordrow"><strong>'+(i+1)+'. '+esc(q.complete)+'</strong><span>'+(ok?'✓ Goed':'Jouw antwoord: '+esc(entry.choice||'geen antwoord'))+'</span><span class="knownmark">'+(ok?'Goed':'Juiste lidwoord: '+esc(q.answer))+'</span></div>';
+    });
+    view.innerHTML='<div class="panel" style="text-align:center"><div class="eyebrow" style="color:#74449a">Oefening afgerond</div><h2 style="margin-top:8px">Bien joué! 🎉</h2><div class="result-number">'+articleScore+' / '+articleRound.length+'</div><p class="small-note">'+percent+'% goed beantwoord.</p><div class="progress-track" style="height:12px"><div class="progress-fill" style="width:'+percent+'%"></div></div><div class="action-row"><button class="primary" data-action="start-articles">Nog een ronde</button><button class="secondary" data-mode="home">Terug naar start</button></div></div>'+
+    '<div class="section-head"><div><h2>Alle zinnen nakijken</h2><div class="small-note">Bekijk de juiste lidwoorden en herhaal waar nodig.</div></div></div><div class="panel"><div class="wordlist">'+review+'</div></div>';
+    return;
+  }
+  const q=articleRound[articleIndex];
+  const options=shuffle(ARTICLE_OPTIONS);
+  let choices='';
+  options.forEach(option=>{
+    let cls='choice';
+    if(articleAnswered&&option===q.answer)cls+=' correct';
+    else if(articleAnswered&&option===articleChosen)cls+=' wrong';
+    choices+='<button class="'+cls+'" data-action="article-answer" data-article="'+esc(option)+'" '+(articleAnswered?'disabled':'')+'>'+esc(option)+'</button>';
+  });
+  const right=articleAnswered&&articleChosen===q.answer;
+  view.innerHTML='<div class="section-head"><div><h2>🧩 Lidwoorden oefenen</h2><div class="small-note">Zin '+(articleIndex+1)+' van '+articleRound.length+' · Score '+articleScore+'</div></div><span class="pill">'+Math.round(articleIndex/articleRound.length*100)+'% van de ronde</span></div>'+
+  '<div class="panel"><div class="panel-top"><span class="pill">Kies het Franse lidwoord</span><span>Vraag '+(articleIndex+1)+' / '+articleRound.length+'</span></div>'+
+  '<p style="margin-top:22px;font-weight:750">'+esc(q.context)+'</p><div class="quiz-prompt">'+esc(q.sentence)+'</div><div class="choices">'+choices+'</div>'+
+  (articleAnswered?'<div class="feedback '+(right?'good':'bad')+'">'+(right?'Goed gedaan! 🎉':'Nog niet helemaal.')+'</div><p style="text-align:center;margin:8px 0">De volledige zin: <b>'+esc(q.complete)+'</b></p><p class="small-note" style="text-align:center">'+esc(q.why)+'</p><div class="action-row"><button class="primary" data-action="article-next">'+(articleIndex===articleRound.length-1?'Bekijk resultaat':'Volgende zin →')+'</button></div>':'')+
+  '<div class="action-row"><button class="secondary" data-mode="home">← Stop en terug naar start</button></div></div>';
 }
 function renderCards(){
 if(cardIndex>=WORDS.length)cardIndex=0;
@@ -385,6 +465,9 @@ else if(a==='prev'){cardIndex=(cardIndex+WORDS.length-1)%WORDS.length;flipped=fa
 else if(a==='next-card'){cardIndex=(cardIndex+1)%WORDS.length;flipped=false;renderCards();}
 else if(a==='known'){mastered.add(cardIndex);saveProgress();cardIndex=(cardIndex+1)%WORDS.length;flipped=false;renderCards();}
 else if(a==='start-quiz'){startQuiz();}
+else if(a==='start-articles'){startArticles();}
+else if(a==='article-answer'&&!articleAnswered){articleChosen=b.dataset.article;articleAnswered=true;const q=articleRound[articleIndex];if(articleChosen===q.answer)articleScore++;articleHistory.push({q,choice:articleChosen});renderArticles();}
+else if(a==='article-next'){articleIndex++;articleAnswered=false;articleChosen='';renderArticles();}
 else if(a==='begin-test'){startTest(b.dataset.length);}
 else if(a==='new-test'){testActive=false;setMode('test');}
 else if(a==='cancel-test'){testActive=false;setMode('home');}
