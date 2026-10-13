@@ -1,4 +1,4 @@
-const CACHE_NAME = "frans-oefenen-v6";
+const CACHE_NAME = "frans-oefenen-v7";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", event => {
