@@ -1,4 +1,4 @@
-const CACHE_NAME = "frans-oefenen-v5";
+const CACHE_NAME = "frans-oefenen-v6";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", event => {
@@ -16,6 +16,7 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
+  if (new URL(request.url).pathname.endsWith("/prank-settings.json")) return; // Always fetch the current admin setting.
 
   if (request.mode === "navigate") {
     event.respondWith(fetch(request).then(response => {
