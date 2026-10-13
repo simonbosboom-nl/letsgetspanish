@@ -130,6 +130,37 @@ h2{letter-spacing:-.02em}
 
 .grid>.tile:nth-child(6){background:#ef3348}
 @media(max-width:640px){.grid>.tile:nth-child(6){background:#ef3348}}
+
+.direction-sides{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border-radius:22px;overflow:hidden;background:#fff;box-shadow:0 8px 28px #00000010}
+.direction-panel{padding:clamp(16px,2.2vw,28px);min-width:0}
+.direction-panel:first-child{border-right:3px solid #e6d9ff}
+.direction-heading{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.direction-heading>span{font-size:30px}.direction-heading h2{font-size:clamp(19px,2vw,25px);margin:0 0 6px}.direction-heading p{margin:0;color:#657083;line-height:1.45;font-size:.92rem}
+.direction-grid{grid-template-columns:1fr}
+.direction-grid .tile{min-height:112px}
+.direction-panel:first-child .direction-grid>.tile:nth-child(1){background:#8250d7}
+.direction-panel:first-child .direction-grid>.tile:nth-child(2){background:#20b56a}
+.direction-panel:first-child .direction-grid>.tile:nth-child(3){background:#f18413}
+.direction-panel:first-child .direction-grid>.tile:nth-child(4){background:#2c83d5}
+.direction-panel:last-child .direction-grid>.tile:nth-child(1){background:#2c83d5}
+.direction-panel:last-child .direction-grid>.tile:nth-child(2){background:#8250d7}
+.direction-panel:last-child .direction-grid>.tile:nth-child(3){background:#20b5a8}
+.direction-panel:last-child .direction-grid>.tile:nth-child(4){background:#ef3348}
+.path-promo{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.path-promo p{margin:9px 0 0;line-height:1.5;color:#657083}
+.path-summary{margin-bottom:18px}
+.path-list{max-width:860px;margin:0 auto;position:relative}
+.path-row{display:grid;grid-template-columns:56px minmax(0,1fr);gap:10px;min-height:114px}
+.path-rail{display:flex;justify-content:center;position:relative}
+.path-row:not(:last-child) .path-rail:after{content:"";position:absolute;top:49px;bottom:-13px;width:5px;border-radius:99px;background:#dcd0e8}
+.path-dot{z-index:1;width:43px;height:43px;border-radius:50%;display:grid;place-items:center;font-weight:900;border:3px solid white;box-shadow:0 0 0 3px #e2d6ee;background:#8250d7;color:white}
+.path-dot.done{background:#20b56a}.path-dot.locked{background:#d9dce3;color:#657083}
+.path-node{width:100%;text-align:left;border:0;border-radius:18px;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:17px 19px;box-shadow:0 6px 18px #00000010;min-height:90px;color:#182033}
+.path-node:disabled{opacity:.62;background:#eff0f3}.path-node strong{font-size:1.06rem}.path-node p{margin:5px 0;color:#657083}.path-node small{color:#657083;font-weight:700}
+.path-xp{white-space:nowrap;color:#59349e;font-weight:900}
+@media(max-width:720px){.direction-sides{grid-template-columns:1fr}.direction-panel:first-child{border-right:0;border-bottom:3px solid #e6d9ff}.direction-panel{padding:16px}.direction-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.direction-grid .tile{padding:15px;min-height:125px}.path-row{grid-template-columns:43px minmax(0,1fr);gap:8px}.path-node{padding:14px}.path-xp{font-size:.8rem}}
+@media(max-width:410px){.direction-grid{grid-template-columns:1fr}.direction-heading h2{font-size:19px}.path-node strong{font-size:.96rem}.path-xp{white-space:normal}}
+
 </style>
 </head>
 <body>
@@ -151,6 +182,7 @@ h2{letter-spacing:-.02em}
   <button class="navbtn" data-mode="test">📝 Toetsmodus</button>
   <button class="navbtn" data-mode="write">✍️ Schrijven</button>
   <button class="navbtn" data-mode="words">📚 Woordenlijst</button>
+  <button class="navbtn" data-mode="path">🗺️ Leerpad</button>
   <button class="navbtn" data-mode="articles">🧩 Lidwoorden</button>
 </nav>
 <div id="progressbox" class="progressbox"><span id="progress-label">0 van 24 geoefend</span><div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div></div>
@@ -278,10 +310,25 @@ const ARTICLE_QUESTIONS = [
 {context:'Je hebt het over een paar vrouwen, niet over specifieke vrouwen.',sentence:'___ femmes parlent français.',answer:'des',complete:'Des femmes parlent français.',why:'Des gebruik je voor onbepaalde meervouden: een paar vrouwen.'},
 {context:'Je hebt het over een paar docenten, niet over specifieke docenten.',sentence:'___ professeurs parlent français.',answer:'des',complete:'Des professeurs parlent français.',why:'Des gebruik je voor onbepaalde meervouden: een paar docenten.'}
 ];
+
+const PATH_STORE='frans-oefenen-path-v1';
+const FRENCH_PATH_LESSONS=[
+ {title:'1. Bonjour!',subtitle:'Begroeten en reageren',words:['bonjour','salut!','ça va?','ça va bien?','oui, ça va','au revoir','bonsoir','très bien','pas mal','oui','non','merci',"s'il vous plaît",'voilà!','excusez-moi']},
+ {title:'2. Je m’appelle…',subtitle:'Namen en personen',words:["je m'appelle ...","comment tu t'appelles?","il s'appelle","elle s'appelle","c'est",'le garçon','la fille','le prénom','le nom (de famille)','le surnom',"l'homme",'la femme','monsieur','madame']},
+ {title:'3. À l’école',subtitle:'School, woorden en getallen',words:['une école','le collège','le professeur','la professeur','un enfant','le français','zéro','un, une','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf','vingt','tu as quel âge?', "j'ai douze ans"]},
+ {title:'4. Mes loisirs',subtitle:'Sport, muziek en vrije tijd',words:['jouer au foot','elle joue au foot','habiter','il habite',"j'habite à",'danser','elle danse','chanter','il chante','jouer du piano','je joue du piano','faire du sport','parler','elle parle','je parle français','toujours','beaucoup','ensemble','un chien']},
+ {title:'5. C’est génial!',subtitle:'Handige woorden herhalen',words:['le talent','génial','formidable','chouette','super','excellent','très bien','pas mal','ça va?','ça va bien?','oui, ça va','merci','voilà!','le français','je parle français']},
+ {title:'6. Révision',subtitle:'Een gemengde herhaalronde',words:WORDS.map(w=>w.fr)}
+];
+
 const STORE='frans-oefenen-progress-v1';
 let mastered=new Set();
 try{mastered=new Set(JSON.parse(localStorage.getItem(STORE)||'[]').filter(n=>Number.isInteger(n)&&n>=0&&n<WORDS.length));}catch(e){}
+let frenchPathState={unlocked:1,completed:[],xp:0};
+try{const savedPath=JSON.parse(localStorage.getItem(PATH_STORE)||'null');if(savedPath&&Number.isInteger(savedPath.unlocked))frenchPathState={unlocked:Math.max(1,Math.min(FRENCH_PATH_LESSONS.length,savedPath.unlocked)),completed:Array.isArray(savedPath.completed)?savedPath.completed.filter(n=>Number.isInteger(n)&&n>=0&&n<FRENCH_PATH_LESSONS.length):[],xp:Number(savedPath.xp)||0};}catch(e){}
+let pathDirection='fr-nl',pathLessonIndex=0,pathRound=[],pathIndex=0,pathScore=0,pathAnswered=false,pathChosen='',pathOptions=[],pathHistory=[];
 let mode='home',direction='fr-nl',cardIndex=0,flipped=false,quizRound=[],quizIndex=0,quizScore=0,quizAnswered=false,quizOptions=[],quizChosen=-1,writeRound=[],writeIndex=0,writeChecked=false,writeTries=0,wordFilter='',testRound=[],testIndex=0,testAnswers=[],testActive=false;
+let testDirection='fr-nl';
 let articlesStarted=false,articleRound=[],articleIndex=0,articleScore=0,articleAnswered=false,articleChosen='',articleHistory=[];
 const view=document.getElementById('view');
 function saveProgress(){try{localStorage.setItem(STORE,JSON.stringify(Array.from(mastered)));}catch(e){};updateProgress();}
@@ -295,62 +342,82 @@ function directionBar(){return '<div class="direction" aria-label="Richting"><sp
 function header(title,note){return '<div class="section-head"><div><h2>'+title+'</h2><div class="small-note">'+note+'</div></div>'+directionBar()+'</div>';}
 function setMode(next){mode=next;if(next==='articles'){articlesStarted=false;articleHistory=[];}document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));render();}
 function goHome(){setMode('home');}
-function render(){updateProgress();document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));if(mode==='home')renderHome();else if(mode==='cards')renderCards();else if(mode==='quiz')renderQuiz();else if(mode==='test')renderTest();else if(mode==='write')renderWrite();else if(mode==='words')renderWords();else if(mode==='articles')renderArticles();}
+function render(){updateProgress();document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===(mode==='path-session'?'path':mode)));if(mode==='home')renderHome();else if(mode==='cards')renderCards();else if(mode==='quiz')renderQuiz();else if(mode==='test')renderTest();else if(mode==='write')renderWrite();else if(mode==='words')renderWords();else if(mode==='path')renderPath();else if(mode==='path-session')renderPathSession();}
 function renderHome(){
-view.innerHTML='<div class="section-head"><div><h2>Kies je oefening</h2><div class="small-note">Korte rondes helpen je om de woorden te onthouden.</div></div></div>'+
-'<div class="grid">'+
-'<button class="tile" data-mode="cards"><span class="emoji">🃏</span><strong>Flashcards</strong><span>Bekijk de Franse kant en draai de kaart om voor de vertaling.</span></button>'+
-'<button class="tile" data-action="start-quiz"><span class="emoji">🎯</span><strong>Meerkeuzequiz</strong><span>10 vragen. Kies de juiste vertaling of het juiste Franse woord.</span></button>'+
-'<button class="tile" data-action="start-write"><span class="emoji">✍️</span><strong>Schrijven</strong><span>Typ zelf het antwoord. Accenten hoef je niet per se te typen.</span></button>'+
-'<button class="tile" data-mode="test"><span class="emoji">📝</span><strong>Toetsmodus</strong><span>Maak een oefentoets zonder hints. Aan het einde krijg je je score en de antwoorden.</span></button>'+
-'<button class="tile" data-mode="words"><span class="emoji">📚</span><strong>Woordenlijst</strong><span>Bekijk alle Franse woorden en zoek snel iets op.</span></button>'+
-'<button class="tile" data-mode="articles"><span class="emoji">🧩</span><strong>Lidwoorden oefenen</strong><span>Vul le, la, l’, les, un, une of des in. Met woorden die je al oefent.</span></button>'+
-'</div>'+
+const tile=(emoji,title,desc,dir,target)=>'<button class="tile" data-action="direction-mode" data-dir="'+dir+'" data-target="'+target+'"><span class="emoji">'+emoji+'</span><strong>'+title+'</strong><span>'+desc+'</span></button>';
+view.innerHTML='<div class="section-head"><div><h2>Kies je oefenrichting</h2><div class="small-note">Oefen apart van Frans naar Nederlands of juist andersom.</div></div></div>'+
+'<div class="direction-sides">'+
+'<section class="direction-panel"><div class="direction-heading"><span>🇫🇷</span><div><h2>Frans → Nederlands</h2><p>Herken Franse woorden en vertaal ze naar het Nederlands.</p></div></div><div class="grid direction-grid">'+
+tile('🃏','Flashcards','Bekijk het Franse woord en onthoud de vertaling.','fr-nl','cards')+
+tile('🎯','Meerkeuzequiz','Kies de juiste Nederlandse betekenis.','fr-nl','quiz')+
+tile('✍️','Schrijven','Typ zelf de Nederlandse vertaling.','fr-nl','write')+
+'<button class="tile" data-action="direction-mode" data-dir="fr-nl" data-target="test"><span class="emoji">📝</span><strong>Toetsmodus</strong><span>Test je kennis zonder meerkeuzeopties.</span></button>'+
+'</div></section>'+
+'<section class="direction-panel"><div class="direction-heading"><span>🇳🇱</span><div><h2>Nederlands → Frans</h2><p>Vertaal Nederlandse woorden en zinnen naar het Frans.</p></div></div><div class="grid direction-grid">'+
+tile('🃏','Flashcards','Denk aan het Franse woord vóór je omdraait.','nl-fr','cards')+
+tile('🎯','Meerkeuzequiz','Kies het juiste Franse woord of de juiste zin.','nl-fr','quiz')+
+tile('✍️','Schrijven','Typ zelf de Franse vertaling.','nl-fr','write')+
+'<button class="tile" data-action="direction-mode" data-dir="nl-fr" data-target="test"><span class="emoji">📝</span><strong>Toetsmodus</strong><span>Test je kennis zonder meerkeuzeopties.</span></button>'+
+'</div></section></div>'+
+'<div class="section-head"><div><h2>🗺️ Jouw oefenpad</h2><div class="small-note">Korte lessen die je stap voor stap vrijspeelt, met punten en voortgang.</div></div></div>'+
+'<div class="panel path-promo"><div><span class="pill">Leren in kleine stappen</span><p>Voltooi een korte reeks om de volgende les vrij te spelen. Je voortgang blijft op dit apparaat bewaard.</p></div><div class="action-row"><button class="primary" data-mode="path">Open het leerpad →</button></div></div>'+
 '<div class="section-head"><div><h2>Jouw voortgang</h2><div class="small-note">Een woord telt mee zodra je het goed beantwoordt.</div></div></div>'+
 '<div class="panel"><div class="panel-top"><span>Geoefend</span><span class="pill">'+mastered.size+' / '+WORDS.length+'</span></div><div class="result-number" style="font-size:3rem">'+Math.round(mastered.size/WORDS.length*100)+'%</div><div class="progress-track" style="height:12px"><div class="progress-fill" style="width:'+(mastered.size/WORDS.length*100)+'%"></div></div><div class="action-row"><button class="secondary" data-action="reset-progress">Voortgang opnieuw instellen</button></div></div>';
 }
-function startArticles(){
-  articleRound=shuffle(ARTICLE_QUESTIONS);
-  articleIndex=0;articleScore=0;articleAnswered=false;articleChosen='';articleHistory=[];
-  articlesStarted=true;renderArticles();
+
+function saveFrenchPath(){try{localStorage.setItem(PATH_STORE,JSON.stringify(frenchPathState));}catch(e){}}
+function frenchPathPool(lesson){return lesson.words.map(name=>WORDS.findIndex(w=>w.fr===name)).filter(i=>i>=0);}
+function renderPath(){
+ const completed=new Set(frenchPathState.completed);
+ let nodes='';
+ FRENCH_PATH_LESSONS.forEach((lesson,i)=>{
+   const done=completed.has(i),locked=i>=frenchPathState.unlocked;
+   nodes+='<div class="path-row"><div class="path-rail"><span class="path-dot '+(done?'done':locked?'locked':'ready')+'">'+(done?'✓':locked?'🔒':(i+1))+'</span></div><button class="path-node" data-action="path-start" data-lesson="'+i+'" '+(locked?'disabled':'')+'><div><strong>'+lesson.title+'</strong><p>'+lesson.subtitle+'</p><small>'+Math.min(8,frenchPathPool(lesson).length)+' vragen · '+(done?'Voltooid':locked?'Nog niet vrijgespeeld':'Start les')+'</small></div><span class="path-xp">'+(done?'✓ Klaar':locked?'🔒':'+'+Math.min(8,frenchPathPool(lesson).length)*5+' XP')+'</span></button></div>';
+ });
+ view.innerHTML='<div class="section-head"><div><h2>🗺️ Jouw Franse leerpad</h2><div class="small-note">Werk les voor les naar een grotere woordenschat toe.</div></div><span class="pill">⭐ '+frenchPathState.xp+' XP</span></div>'+
+ '<div class="panel path-summary"><div class="panel-top"><span class="pill">Jouw route</span><span>'+completed.size+' / '+FRENCH_PATH_LESSONS.length+' lessen voltooid</span></div><div class="progress-track" style="height:12px"><div class="progress-fill" style="width:'+(completed.size/FRENCH_PATH_LESSONS.length*100)+'%"></div></div><div class="direction" style="margin-top:12px"><span class="small-note">Oefenrichting:</span><button data-action="path-direction" data-dir="fr-nl" class="'+(pathDirection==='fr-nl'?'selected':'')+'">🇫🇷 → 🇳🇱</button><button data-action="path-direction" data-dir="nl-fr" class="'+(pathDirection==='nl-fr'?'selected':'')+'">🇳🇱 → 🇫🇷</button></div></div>'+
+ '<div class="path-list">'+nodes+'</div><div class="action-row"><button class="secondary" data-mode="home">← Terug naar start</button></div>';
 }
-function renderArticles(){
-  if(!articlesStarted){
-    view.innerHTML='<div class="section-head"><div><h2>🧩 Franse lidwoorden</h2><div class="small-note">Oefen met bekende woorden uit je flashcards, quiz, schrijfopdrachten en woordenlijst.</div></div></div>'+
-    '<div class="panel"><div class="panel-top"><span class="pill">Mini-uitleg</span><span>30 zinnen</span></div>'+
-    '<div class="quiz-prompt" style="padding:16px 0 8px;font-size:clamp(1.4rem,4vw,2.1rem)">le · la · l’ · les · un · une · des</div>'+
-    '<p>Gebruik <b>le</b> bij een bepaald mannelijk woord, <b>la</b> bij een bepaald vrouwelijk woord en <b>l’</b> vóór een klinker of stille h. <b>Les</b> is meervoud. Voor iets niet-specifieks gebruik je <b>un</b> (mannelijk), <b>une</b> (vrouwelijk) en <b>des</b> (meervoud).</p>'+
-    '<p class="small-note">De zinnen gebruiken woorden zoals <i>garçon, fille, homme, femme, enfant, chien, école, collège, professeur, jouer au foot, danser, chanter</i> en <i>parler français</i> uit de andere oefeningen.</p>'+
-    '<div class="action-row"><button class="primary" data-action="start-articles">Start lidwoordenoefening →</button><button class="secondary" data-mode="home">← Terug naar start</button></div></div>';
-    return;
-  }
-  if(articleIndex>=articleRound.length){
-    const percent=Math.round(articleScore/articleRound.length*100);
-    let review='';
-    articleHistory.forEach((entry,i)=>{
-      const q=entry.q,ok=entry.choice===q.answer;
-      review+='<div class="wordrow"><strong>'+(i+1)+'. '+esc(q.complete)+'</strong><span>'+(ok?'✓ Goed':'Jouw antwoord: '+esc(entry.choice||'geen antwoord'))+'</span><span class="knownmark">'+(ok?'Goed':'Juiste lidwoord: '+esc(q.answer))+'</span></div>';
-    });
-    view.innerHTML='<div class="panel" style="text-align:center"><div class="eyebrow" style="color:#74449a">Oefening afgerond</div><h2 style="margin-top:8px">Bien joué! 🎉</h2><div class="result-number">'+articleScore+' / '+articleRound.length+'</div><p class="small-note">'+percent+'% goed beantwoord.</p><div class="progress-track" style="height:12px"><div class="progress-fill" style="width:'+percent+'%"></div></div><div class="action-row"><button class="primary" data-action="start-articles">Nog een ronde</button><button class="secondary" data-mode="home">Terug naar start</button></div></div>'+
-    '<div class="section-head"><div><h2>Alle zinnen nakijken</h2><div class="small-note">Bekijk de juiste lidwoorden en herhaal waar nodig.</div></div></div><div class="panel"><div class="wordlist">'+review+'</div></div>';
-    return;
-  }
-  const q=articleRound[articleIndex];
-  const options=shuffle(ARTICLE_OPTIONS);
-  let choices='';
-  options.forEach(option=>{
-    let cls='choice';
-    if(articleAnswered&&option===q.answer)cls+=' correct';
-    else if(articleAnswered&&option===articleChosen)cls+=' wrong';
-    choices+='<button class="'+cls+'" data-action="article-answer" data-article="'+esc(option)+'" '+(articleAnswered?'disabled':'')+'>'+esc(option)+'</button>';
-  });
-  const right=articleAnswered&&articleChosen===q.answer;
-  view.innerHTML='<div class="section-head"><div><h2>🧩 Lidwoorden oefenen</h2><div class="small-note">Zin '+(articleIndex+1)+' van '+articleRound.length+' · Score '+articleScore+'</div></div><span class="pill">'+Math.round(articleIndex/articleRound.length*100)+'% van de ronde</span></div>'+
-  '<div class="panel"><div class="panel-top"><span class="pill">Kies het Franse lidwoord</span><span>Vraag '+(articleIndex+1)+' / '+articleRound.length+'</span></div>'+
-  '<p style="margin-top:22px;font-weight:750">'+esc(q.context)+'</p><div class="quiz-prompt">'+esc(q.sentence)+'</div><div class="choices">'+choices+'</div>'+
-  (articleAnswered?'<div class="feedback '+(right?'good':'bad')+'">'+(right?'Goed gedaan! 🎉':'Nog niet helemaal.')+'</div><p style="text-align:center;margin:8px 0">De volledige zin: <b>'+esc(q.complete)+'</b></p><p class="small-note" style="text-align:center">'+esc(q.why)+'</p><div class="action-row"><button class="primary" data-action="article-next">'+(articleIndex===articleRound.length-1?'Bekijk resultaat':'Volgende zin →')+'</button></div>':'')+
-  '<div class="action-row"><button class="secondary" data-mode="home">← Stop en terug naar start</button></div></div>';
+function startFrenchPathLesson(index){
+ const lesson=FRENCH_PATH_LESSONS[index];if(!lesson||index>=frenchPathState.unlocked)return;
+ pathLessonIndex=index;pathRound=shuffle(frenchPathPool(lesson)).slice(0,Math.min(8,frenchPathPool(lesson).length));
+ pathIndex=0;pathScore=0;pathAnswered=false;pathChosen='';pathOptions=[];pathHistory=[];
+ direction=pathDirection;mode='path-session';render();
 }
+function makeFrenchPathOptions(correct){
+ const used=new Set([norm(correct)]),result=[correct];
+ for(const idx of shuffle(WORDS.map((w,i)=>i))){
+   const label=answerFor(WORDS[idx]),key=norm(label);
+   if(!used.has(key)){used.add(key);result.push(label);}
+   if(result.length>=4)break;
+ }
+ return shuffle(result);
+}
+function renderPathSession(){
+ const lesson=FRENCH_PATH_LESSONS[pathLessonIndex];
+ if(pathIndex>=pathRound.length){
+   const pct=Math.round(pathScore/pathRound.length*100),passed=pct>=70,already=frenchPathState.completed.includes(pathLessonIndex);
+   if(passed){
+     if(!already){frenchPathState.completed.push(pathLessonIndex);frenchPathState.xp+=pathScore*5;}
+     frenchPathState.unlocked=Math.max(frenchPathState.unlocked,Math.min(FRENCH_PATH_LESSONS.length,pathLessonIndex+2));
+     saveFrenchPath();
+   }
+   view.innerHTML='<div class="panel" style="text-align:center"><div class="eyebrow">Les afgerond</div><h2 style="margin-top:8px">'+(passed?'Bien joué! 🎉':'Bijna! 💪')+'</h2><div class="result-number">'+pathScore+' / '+pathRound.length+'</div><p class="small-note">'+pct+'% goed · '+(passed?'Je hebt de volgende les vrijgespeeld.':'Haal 70% om de volgende les vrij te spelen.')+'</p><div class="action-row"><button class="primary" data-action="'+(passed?'path-next-lesson':'path-retry')+'">'+(passed?(pathLessonIndex===FRENCH_PATH_LESSONS.length-1?'Leerpad bekijken':'Volgende les →'):'Probeer opnieuw')+'</button><button class="secondary" data-mode="path">Bekijk leerpad</button></div></div>';
+   return;
+ }
+ const w=WORDS[pathRound[pathIndex]],correct=answerFor(w);
+ if(!pathOptions.length)pathOptions=makeFrenchPathOptions(correct);
+ let choices='';
+ pathOptions.forEach(option=>{
+   const cls='choice'+(pathAnswered&&option===correct?' correct':pathAnswered&&option===pathChosen?' wrong':'');
+   choices+='<button class="'+cls+'" data-action="path-answer" data-choice="'+esc(option)+'" '+(pathAnswered?'disabled':'')+'>'+esc(option)+'</button>';
+ });
+ view.innerHTML='<div class="section-head"><div><h2>🗺️ '+lesson.title+'</h2><div class="small-note">'+lesson.subtitle+'</div></div><span class="pill">Vraag '+(pathIndex+1)+' / '+pathRound.length+'</span></div>'+
+ '<div class="panel"><div class="progress-track"><div class="progress-fill" style="width:'+(pathIndex/pathRound.length*100)+'%"></div></div><div class="panel-top"><span class="pill">'+(direction==='fr-nl'?'🇫🇷 → 🇳🇱':'🇳🇱 → 🇫🇷')+'</span><span>⭐ '+pathScore*5+' XP in deze les</span></div><div class="quiz-prompt">'+esc(promptFor(w))+'</div><div class="choices">'+choices+'</div>'+
+ (pathAnswered?'<div class="feedback '+(pathChosen===correct?'good':'bad')+'">'+(pathChosen===correct?'Goed gedaan!':'Juiste antwoord: '+esc(correct))+'</div><div class="action-row"><button class="primary" data-action="path-question-next">'+(pathIndex===pathRound.length-1?'Bekijk resultaat':'Volgende vraag →')+'</button></div>':'')+
+ '<div class="action-row"><button class="secondary" data-mode="path">← Stop en terug naar leerpad</button></div></div>';
+}
+
 function renderCards(){
 if(cardIndex>=WORDS.length)cardIndex=0;
 const w=WORDS[cardIndex];
@@ -388,9 +455,9 @@ view.innerHTML=header('Meerkeuzequiz','Vraag '+(quizIndex+1)+' van '+quizRound.l
 (quizAnswered?'<div class="feedback '+(quizChosen>=0&&quizOptions[quizChosen].id===idx?'good':'bad')+'">'+(quizOptions[quizChosen]&&quizOptions[quizChosen].id===idx?'Helemaal goed! 🎉':'Nog niet. Het juiste antwoord is: '+esc(answerFor(w)))+'</div>':'')+
 '<div class="action-row">'+(quizAnswered?'<button class="primary" data-action="quiz-next">'+(quizIndex===quizRound.length-1?'Bekijk resultaat':'Volgende vraag →')+'</button>':'')+'<button class="secondary" data-action="start-quiz">Stop en start opnieuw</button></div></div>';
 }
-function startTest(length){
+function startTest(length,dir){
   const n=Math.min(Number(length)||10,WORDS.length);
-  direction='fr-nl';
+  testDirection=dir||direction;direction=testDirection;
   testRound=shuffle(WORDS.map((w,i)=>i)).slice(0,n);
   testIndex=0;testAnswers=[];testActive=true;setMode('test');
 }
@@ -404,24 +471,24 @@ function renderTest(){
     '</div><div class="action-row"><button class="secondary" data-mode="home">← Terug naar start</button></div>';
     return;
   }
-  direction='fr-nl';
+  direction=testDirection;
   if(testIndex>=testRound.length){
     const score=testAnswers.filter(a=>a.correct).length;
     let review='';
-    testAnswers.forEach((a,i)=>{review+='<div class="wordrow"><strong>'+(i+1)+'. '+esc(WORDS[a.id].fr)+'</strong><span>Jouw antwoord: '+esc(a.answer||'Geen antwoord')+'</span><span class="knownmark">'+(a.correct?'✓ Goed':'Juiste antwoord: '+esc(WORDS[a.id].nl[0]))+'</span></div>';});
+    testAnswers.forEach((a,i)=>{review+='<div class="wordrow"><strong>'+(i+1)+'. '+esc(promptFor(WORDS[a.id]))+'</strong><span>Jouw antwoord: '+esc(a.answer||'Geen antwoord')+'</span><span class="knownmark">'+(a.correct?'✓ Goed':'Juiste antwoord: '+esc(answerFor(WORDS[a.id])))+'</span></div>';});
     view.innerHTML='<div class="panel" style="text-align:center"><div class="eyebrow" style="color:#74449a">Toets afgerond</div><h2 style="margin-top:8px">Jouw resultaat</h2><div class="result-number">'+score+' / '+testRound.length+'</div><p class="small-note">'+Math.round(score/testRound.length*100)+'% goed beantwoord.</p><div class="progress-track" style="height:12px"><div class="progress-fill" style="width:'+(score/testRound.length*100)+'%"></div></div><div class="action-row"><button class="primary" data-action="new-test">Nog een toets</button><button class="secondary" data-mode="home">Terug naar start</button></div></div>'+
     '<div class="section-head"><div><h2>Antwoorden nakijken</h2><div class="small-note">Bekijk wat je goed had en wat je nog kunt oefenen.</div></div></div><div class="panel"><div class="wordlist">'+review+'</div></div>';
     return;
   }
   const id=testRound[testIndex],w=WORDS[id];
-  view.innerHTML='<div class="section-head"><div><h2>📝 Toetsmodus</h2><div class="small-note">Frans → Nederlands · Geen hints · Geen taalwissel tijdens de toets</div></div><span class="pill">Vraag '+(testIndex+1)+' van '+testRound.length+'</span></div>'+
-    '<div class="panel"><div class="panel-top"><span class="pill">Antwoord in het Nederlands</span><span>'+Math.round(testIndex/testRound.length*100)+'% van de toets</span></div><div class="progress-track"><div class="progress-fill" style="width:'+(testIndex/testRound.length*100)+'%"></div></div><div class="quiz-prompt">'+esc(w.fr)+'</div><form id="test-form" class="write-form"><label for="test-answer" class="small-note">Wat betekent dit in het Nederlands?</label><input id="test-answer" class="write-input" type="text" autocomplete="off" autocapitalize="off" placeholder="Typ de Nederlandse vertaling..." required><div class="action-row"><button type="submit" class="primary">Beantwoord en ga verder →</button></div></form><p class="small-note" style="text-align:center">Je kunt je antwoord niet veranderen nadat je verdergaat.</p><div class="action-row"><button class="secondary" data-action="cancel-test">Toets stoppen</button></div></div>';
+  view.innerHTML='<div class="section-head"><div><h2>📝 Toetsmodus</h2><div class="small-note">'+(direction==='fr-nl'?'Frans → Nederlands':'Nederlands → Frans')+' · Geen hints · Geen taalwissel tijdens de toets</div></div><span class="pill">Vraag '+(testIndex+1)+' van '+testRound.length+'</span></div>'+
+    '<div class="panel"><div class="panel-top"><span class="pill">'+(direction==='fr-nl'?'Antwoord in het Nederlands':'Réponse en français')+'</span><span>'+Math.round(testIndex/testRound.length*100)+'% van de toets</span></div><div class="progress-track"><div class="progress-fill" style="width:'+(testIndex/testRound.length*100)+'%"></div></div><div class="quiz-prompt">'+esc(promptFor(w))+'</div><form id="test-form" class="write-form"><label for="test-answer" class="small-note">'+(direction==='fr-nl'?'Wat betekent dit in het Nederlands?':'Hoe zeg je dit in het Frans?')+'</label><input id="test-answer" class="write-input" type="text" autocomplete="off" autocapitalize="off" placeholder="'+(direction==='fr-nl'?'Typ de Nederlandse vertaling...':'Typ de Franse vertaling...')+'" required><div class="action-row"><button type="submit" class="primary">Beantwoord en ga verder →</button></div></form><p class="small-note" style="text-align:center">Je kunt je antwoord niet veranderen nadat je verdergaat.</p><div class="action-row"><button class="secondary" data-action="cancel-test">Toets stoppen</button></div></div>';
   const inp=document.getElementById('test-answer');if(inp)inp.focus();
 }
 function submitTestAnswer(value){
   if(!testActive||testIndex>=testRound.length)return;
   const id=testRound[testIndex],w=WORDS[id],answer=value.trim();
-  const acceptable=w.nl;
+  const acceptable=testDirection==='fr-nl'?w.nl:[w.fr];
   const correct=acceptable.some(a=>norm(a)===norm(answer));
   testAnswers.push({id,answer,correct});
   if(correct){mastered.add(id);saveProgress();}
@@ -459,6 +526,13 @@ view.addEventListener('click',function(e){
 const b=e.target.closest('button');if(!b)return;
 if(b.dataset.mode){setMode(b.dataset.mode);return;}
 const a=b.dataset.action;
+if(a==='direction-mode'){direction=b.dataset.dir;if(b.dataset.target==='test'){testDirection=direction;setMode('test');}else{setMode(b.dataset.target);}return;}
+if(a==='path-direction'){pathDirection=b.dataset.dir;renderPath();return;}
+if(a==='path-start'){startFrenchPathLesson(Number(b.dataset.lesson));return;}
+if(a==='path-answer'&&mode==='path-session'&&!pathAnswered){pathChosen=b.dataset.choice;pathAnswered=true;if(pathChosen===answerFor(WORDS[pathRound[pathIndex]]))pathScore++;pathHistory.push({id:pathRound[pathIndex],choice:pathChosen});renderPathSession();return;}
+if(a==='path-question-next'){pathIndex++;pathAnswered=false;pathChosen='';pathOptions=[];renderPathSession();return;}
+if(a==='path-retry'){startFrenchPathLesson(pathLessonIndex);return;}
+if(a==='path-next-lesson'){const next=Math.min(pathLessonIndex+1,FRENCH_PATH_LESSONS.length-1);if(pathLessonIndex<FRENCH_PATH_LESSONS.length-1)startFrenchPathLesson(next);else setMode('path');return;}
 if(a==='direction'){if((mode==='quiz'&&quizAnswered)||(mode==='test'&&testActive))return;direction=b.dataset.dir||(direction==='fr-nl'?'nl-fr':'fr-nl');flipped=false;if(mode==='quiz'&&quizIndex<quizRound.length){quizAnswered=false;createQuizOptions();}if(mode==='write'){writeChecked=false;writeTries=0;writeMistake=false;writeResult=false;}render();}
 else if(a==='flip'){flipped=!flipped;renderCards();}
 else if(a==='prev'){cardIndex=(cardIndex+WORDS.length-1)%WORDS.length;flipped=false;renderCards();}
@@ -468,7 +542,7 @@ else if(a==='start-quiz'){startQuiz();}
 else if(a==='start-articles'){startArticles();}
 else if(a==='article-answer'&&!articleAnswered){articleChosen=b.dataset.article;articleAnswered=true;const q=articleRound[articleIndex];if(articleChosen===q.answer)articleScore++;articleHistory.push({q,choice:articleChosen});renderArticles();}
 else if(a==='article-next'){articleIndex++;articleAnswered=false;articleChosen='';renderArticles();}
-else if(a==='begin-test'){startTest(b.dataset.length);}
+else if(a==='begin-test'){startTest(b.dataset.length,direction);}
 else if(a==='new-test'){testActive=false;setMode('test');}
 else if(a==='cancel-test'){testActive=false;setMode('home');}
 else if(a==='quiz-answer'&&!quizAnswered){quizChosen=Number(b.dataset.choice);quizAnswered=true;if(quizOptions[quizChosen].id===quizRound[quizIndex]){quizScore++;mastered.add(quizRound[quizIndex]);saveProgress();}renderQuiz();}
