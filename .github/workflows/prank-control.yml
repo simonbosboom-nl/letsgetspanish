@@ -1,0 +1,78 @@
+name: Prank control panel
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Kies de onschuldige grap voor bezoekers"
+        required: true
+        type: choice
+        default: off
+        options:
+          - off
+          - banner
+          - confetti
+          - surprise
+      target:
+        description: "Op welke oefenwebsite moet de grap te zien zijn?"
+        required: true
+        type: choice
+        default: both
+        options:
+          - both
+          - spanish
+          - french
+
+permissions:
+  contents: write
+
+jobs:
+  publish-setting:
+    # Security check: only the repository owner's GitHub account may change the public setting.
+    if: github.actor == 'simonbosboom-nl'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish the selected setting
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const mode = context.payload.inputs.mode;
+            const target = context.payload.inputs.target;
+            const messages = {
+              off: "",
+              banner: "👀 Verrassing! De taalgeest wenst je veel succes.",
+              confetti: "",
+              surprise: "🚨 Taalgeest gedetecteerd! Blijf oefenen 😄"
+            };
+            const content = JSON.stringify({
+              mode,
+              target,
+              message: messages[mode] || ""
+            }, null, 2) + "\n";
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const branch = context.payload.repository.default_branch;
+            let sha;
+            try {
+              const existing = await github.rest.repos.getContent({
+                owner, repo, path: "prank-settings.json", ref: branch
+              });
+              const current = Buffer.from(existing.data.content, existing.data.encoding).toString("utf8");
+              if (current === content) {
+                core.info("Deze instelling staat al aan; er is niets gewijzigd.");
+                return;
+              }
+              sha = existing.data.sha;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+            const payload = {
+              owner, repo,
+              path: "prank-settings.json",
+              message: "Update visitor prank setting (" + mode + ", " + target + ")",
+              content: Buffer.from(content, "utf8").toString("base64"),
+              branch
+            };
+            if (sha) payload.sha = sha;
+            await github.rest.repos.createOrUpdateFileContents(payload);
+            core.info("Instelling bijgewerkt. De Pages-deployment wordt door de repositoryworkflow opgepakt.");
