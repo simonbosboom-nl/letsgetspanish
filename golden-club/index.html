@@ -71,11 +71,22 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 .mini-hint{text-align:center;color:#786944;font-size:12px;margin:10px 0}
 .card-large{display:grid;place-items:center;min-height:220px;padding:18px;margin:15px 0;border:2px solid #e5c85e;border-radius:20px;background:linear-gradient(145deg,#fff5ca,#fffdf7);text-align:center;cursor:pointer}
 .card-large .front{font-size:clamp(30px,7vw,52px);font-weight:900;overflow-wrap:anywhere}.card-large .back{font-size:18px;font-weight:800;color:#715619;margin-top:10px}
-.drawing-canvas{display:block;width:100%;height:clamp(240px,58vw,410px);touch-action:none;border:2px dashed #c8b36e;border-radius:14px;background:#fffefa;cursor:crosshair;user-select:none}
-.draw-score{margin-top:14px;padding:16px;border:1px solid #e3cd81;border-radius:16px;text-align:center;background:linear-gradient(135deg,#fff5ca,#fffdf7)}
-.draw-score .score-number{display:block;font-size:clamp(42px,10vw,64px);line-height:1.1;font-weight:950;color:#956e12}
-.draw-score strong{display:block;font-size:18px;margin-top:6px}
-.draw-score p{margin:7px 0;color:#6f5c31;font-size:13px;line-height:1.45}
+.calligraphy-frame{position:relative;margin:14px 0;padding:25px 24px 23px;border:1px solid #d8b750;border-radius:22px;background:radial-gradient(ellipse at center,#fffdf6,#fff6d7);box-shadow:inset 0 0 0 5px #fff8df,inset 0 0 0 7px #eed47d,0 9px 22px #805b1d14;overflow:hidden}
+.calligraphy-frame:before,.calligraphy-frame:after{content:"❦";position:absolute;z-index:2;color:#c39a2d;font-size:31px;line-height:1;text-shadow:0 1px 0 #fff4c4;pointer-events:none}
+.calligraphy-frame:before{top:5px;left:7px;transform:rotate(-35deg)}
+.calligraphy-frame:after{right:7px;bottom:5px;transform:rotate(145deg)}
+.flourish{position:absolute;width:62px;height:62px;fill:none;stroke:#c8a13a;stroke-width:2.3;opacity:.9;pointer-events:none;z-index:2}
+.flourish.top-right{top:2px;right:2px}.flourish.bottom-left{bottom:2px;left:2px;transform:rotate(180deg)}
+.flourish .dot{fill:#e7c966;stroke:none}
+.drawing-canvas{display:block;position:relative;z-index:1;width:100%;height:clamp(240px,58vw,410px);touch-action:none;border:1px solid #eadcae;border-radius:14px;background:rgba(255,254,250,.94);cursor:crosshair;user-select:none;box-shadow:inset 0 0 22px #be9c3210}
+.stroke-progress{margin:8px 0 0;text-align:center;color:#78622a;font-weight:850;font-size:13px}
+.stroke-hint{text-align:center;color:#786944;font-size:12px;margin:8px 0}
+.draw-score{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.draw-score .score-card{padding:13px 8px;border:1px solid #e3cd81;border-radius:16px;text-align:center;background:linear-gradient(135deg,#fff5ca,#fffdf7)}
+.draw-score .score-number{display:block;font-size:clamp(34px,8vw,52px);line-height:1.1;font-weight:950;color:#956e12}
+.draw-score strong{display:block;font-size:15px;margin-top:6px}
+.draw-score p{grid-column:1/-1;margin:0;padding:10px 12px;border-radius:12px;background:#fff8e4;color:#6f5c31;font-size:13px;line-height:1.45}
+@media(max-width:450px){.calligraphy-frame{padding:20px 12px 18px}.flourish{width:48px;height:48px}.calligraphy-frame:before,.calligraphy-frame:after{font-size:24px}}
 .memory-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:15px}
 .memory-card{min-height:84px;border:1px solid #d6bd73;border-radius:13px;background:linear-gradient(135deg,#45320d,#70551a);color:#ffeab0;font:800 14px/1.3 system-ui;cursor:pointer;padding:7px;overflow-wrap:anywhere}
 .memory-card.open,.memory-card.matched{background:#fff3c1;color:#392a0b;border-color:#cba64a}.memory-card.matched{box-shadow:inset 0 0 0 2px #dbbd60}
@@ -160,7 +171,14 @@ function renderBoard(){
  if(game==="draw"){
   const p=DRAW_DATA[drawIndex];
   return stats(["Karakter "+(drawIndex+1)+" van "+DRAW_DATA.length,"Teken met je vinger of muis"])+
-   '<div class="question"><div class="q-label">Teken het karakter na</div><div class="prompt" style="margin-bottom:4px">'+p[0]+'</div><p class="mini-hint" style="font-size:15px;color:#725919;font-weight:850">'+p[1]+'</p><p class="mini-hint">Trek het lichte voorbeeld over. Gebruik je vinger op een touchscreen of je muis.</p><canvas id="drawingCanvas" class="drawing-canvas" aria-label="Teken het Chinese karakter na"></canvas><div class="actions" style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:12px"><button class="btn light" id="clearDrawing" type="button">🧽 Opnieuw tekenen</button><button class="btn gold" id="rateDrawing" type="button" disabled>⭐ Geef cijfer</button><button class="btn light" id="nextDrawing" type="button">Volgend karakter →</button></div><div id="drawScoreResult" class="draw-score hidden" aria-live="polite"></div></div>';
+   '<div class="question"><div class="q-label">Teken het karakter in de juiste volgorde</div><div class="prompt" style="margin-bottom:4px">'+p[0]+'</div><p class="mini-hint" style="font-size:15px;color:#725919;font-weight:850">'+p[1]+'</p><p class="mini-hint" id="drawingHint">De schrijfstreken worden geladen…</p>
+   <div class="calligraphy-frame">
+    <svg class="flourish top-right" viewBox="0 0 100 100" aria-hidden="true"><path d="M8 88 C20 68 12 50 30 39 C42 31 54 40 48 51 C43 60 32 53 37 47 M30 39 C27 19 50 7 70 17 C83 24 82 39 70 43 C59 46 54 37 61 31 M70 17 C77 7 91 10 91 23 C92 37 77 45 68 55 C54 70 60 82 78 86"/><path d="M7 67 C21 61 28 70 21 80 C15 87 7 81 12 75"/><circle class="dot" cx="30" cy="39" r="3"/><circle class="dot" cx="70" cy="17" r="3"/></svg>
+    <svg class="flourish bottom-left" viewBox="0 0 100 100" aria-hidden="true"><path d="M8 88 C20 68 12 50 30 39 C42 31 54 40 48 51 C43 60 32 53 37 47 M30 39 C27 19 50 7 70 17 C83 24 82 39 70 43 C59 46 54 37 61 31 M70 17 C77 7 91 10 91 23 C92 37 77 45 68 55 C54 70 60 82 78 86"/><path d="M7 67 C21 61 28 70 21 80 C15 87 7 81 12 75"/><circle class="dot" cx="30" cy="39" r="3"/><circle class="dot" cx="70" cy="17" r="3"/></svg>
+    <canvas id="drawingCanvas" class="drawing-canvas" aria-label="Teken het Chinese karakter na, streek voor streek"></canvas>
+   </div>
+   <p class="stroke-progress" id="strokeProgress" aria-live="polite">Streken worden geladen…</p>
+   <p class="stroke-hint">Teken elke streek apart. De goudkleurige lijn laat zien welke streek als volgende komt.</p><div class="actions" style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:12px"><button class="btn light" id="clearDrawing" type="button">🧽 Opnieuw tekenen</button><button class="btn gold" id="rateDrawing" type="button" disabled>⭐ Geef cijfers</button><button class="btn light" id="nextDrawing" type="button">Volgend karakter →</button></div><div id="drawScoreResult" class="draw-score hidden" aria-live="polite"></div></div>';
  }
  if(game==="frog"){
   let rows="";for(let row=0;row<7;row++){const step=6-row;const obstacles=shuffle(["🚗","🐍","🪵","🪨","🚙","🪷"]).slice(0,3);rows+='<div class="lane">';if(frogStep===step)rows+='<span class="frog" style="left:'+(8+step*12)+'%">🐸</span>';else rows+=obstacles.map((o,i)=>'<span class="obstacle" style="transform:translateX('+((i-1)*12)+'px)">'+o+'</span>').join("");rows+='</div>';}
