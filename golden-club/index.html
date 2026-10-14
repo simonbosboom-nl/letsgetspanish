@@ -84,9 +84,9 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 .pablo-mountains{position:absolute;bottom:46px;left:-5%;right:-5%;height:80px;background:linear-gradient(135deg,transparent 33%,#6eae91 33% 62%,transparent 62%),linear-gradient(45deg,transparent 40%,#93d5a1 40% 67%,transparent 67%);opacity:.8}
 .pablo-route{position:absolute;left:5%;right:5%;bottom:30px;height:17px;border-radius:99px;background:#7b623b;box-shadow:inset 0 4px 0 #b49a64}
 .pablo-platform{position:absolute;left:0;right:0;bottom:0;height:31px;background:repeating-linear-gradient(90deg,#4d873c 0,#4d873c 34px,#76b84a 34px,#76b84a 39px);border-top:5px solid #b5de63}
-.pablo-hero{position:absolute;bottom:39px;font-size:clamp(34px,7vw,47px);left:calc(5% + (var(--pablo-step) * 11%));z-index:2;filter:drop-shadow(0 4px 0 #0002);transition:left .4s;animation:heroRun .25s ease-in-out infinite alternate}
-.pablo-prize{position:absolute;bottom:50px;right:calc(10% + (var(--pablo-step) * 3%));font-size:25px;z-index:2;filter:drop-shadow(0 3px 0 #9c741d);animation:starShine .8s ease-in-out infinite alternate}
-.pablo-obstacle{position:absolute;bottom:43px;left:calc(33% + (var(--pablo-step) * 4%));font-size:25px;z-index:2;animation:obstacleDrift 1s ease-in-out infinite alternate}
+.pablo-hero{position:absolute;bottom:39px;font-size:clamp(34px,7vw,47px);left:5%;z-index:2;filter:drop-shadow(0 4px 0 #0002);transition:left .4s;animation:heroRun .25s ease-in-out infinite alternate}
+.pablo-prize{position:absolute;bottom:50px;left:82%;font-size:25px;z-index:2;filter:drop-shadow(0 3px 0 #9c741d);animation:starShine .8s ease-in-out infinite alternate}
+.pablo-obstacle{position:absolute;bottom:43px;left:35%;font-size:25px;z-index:2;animation:obstacleDrift 1s ease-in-out infinite alternate}
 .mini-hint{text-align:center;color:#786944;font-size:12px;margin:10px 0}
 .card-large{display:grid;place-items:center;min-height:220px;padding:18px;margin:15px 0;border:2px solid #e5c85e;border-radius:20px;background:linear-gradient(145deg,#fff5ca,#fffdf7);text-align:center;cursor:pointer}
 .card-large .front{font-size:clamp(30px,7vw,52px);font-weight:900;overflow-wrap:anywhere}.card-large .back{font-size:18px;font-weight:800;color:#715619;margin-top:10px}
@@ -231,8 +231,10 @@ function renderBoard(){
    '<div class="shield-shop"><span>🛡️ Extra schildtoren blokkeert één fout antwoord</span><button id="buildTower" class="btn light" type="button" '+(gems<20||towerShields>=3?'disabled':'')+'>Bouw schild · 20 💎</button></div></div>'+questionHTML();
  }
  if(game==="pablo"){
+  const step=Math.min(7,pabloLevel-1),heroPos=5+step*10.5;
+  const obstaclePos=[35,67,45,70,32,58,40,63][step],starPos=[83,22,75,34,80,28,68,50][step];
   return stats(["Level: "+Math.min(8,pabloLevel)+" / 8","Sterren: "+pabloStars+" / 8","Levens: "+"❤️".repeat(pabloLives||0)])+
-   '<div class="pablo-scene"><span class="pablo-cloud one">☁️</span><span class="pablo-cloud two">☁️</span><div class="pablo-mountains"></div><div class="pablo-route"></div><span class="pablo-hero" style="--pablo-step:'+Math.min(8,pabloLevel-1)+'">🦸</span><span class="pablo-prize" style="--pablo-step:'+Math.min(8,pabloLevel-1)+'">⭐</span><span class="pablo-obstacle" style="--pablo-step:'+Math.min(8,pabloLevel-1)+'">🪵</span><div class="pablo-platform"></div></div>'+
+   '<div class="pablo-scene"><span class="pablo-cloud one">☁️</span><span class="pablo-cloud two">☁️</span><div class="pablo-mountains"></div><div class="pablo-route"></div><span class="pablo-hero" style="left:'+heroPos+'%">🦸</span><span class="pablo-prize" style="left:'+starPos+'%">⭐</span><span class="pablo-obstacle" style="left:'+obstaclePos+'%">🪵</span><div class="pablo-platform"></div></div>'+
    '<p class="mini-hint">Kies de juiste vertaling om over de hindernis te springen en de ster te pakken.</p>'+questionHTML();
  }
  if(game==="memory"){
