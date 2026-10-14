@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2a210c">
+<meta name="description" content="De geheime Golden Language Club: Chinese karakters oefenen met quiz, flashcards en memory.">
+<title>Golden Language Club 👑</title>
+<style>
+:root{--gold:#d8ae44;--gold2:#f6df91;--dark:#211a08;--ink:#2f260e;--muted:#786943;--cream:#fff9e8;--paper:#fffdf6;--line:#ead79b;--green:#216944}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#fff6ce 0%,#f7edca 42%,#eee1b5 100%);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);min-height:100vh}
+a{color:inherit}
+header{background:linear-gradient(135deg,#1e190b,#443411 56%,#201909);color:#fff5cf;border-bottom:3px solid var(--gold);padding:24px 16px 22px;text-align:center}
+.kicker{font-size:11px;letter-spacing:.22em;font-weight:900;color:var(--gold2);text-transform:uppercase}
+h1{font-size:clamp(29px,6vw,48px);line-height:1.08;letter-spacing:-.04em;margin:8px 0}
+.subtitle{margin:0;color:#ead9a2;font-size:14px}
+.toplinks{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;margin-top:17px}
+.linkbtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1px solid #ac8735;border-radius:12px;padding:10px 14px;background:#fff4c9;color:#382807;text-decoration:none;font-size:13px;font-weight:850}
+.linkbtn.secondary{border-color:#8b7740;background:#382d13;color:#fff2c2}
+.wrap{max-width:990px;margin:0 auto;padding:20px 14px 100px}
+.welcome{background:linear-gradient(135deg,#fffdf6,#fff4c7);border:1px solid var(--line);border-radius:20px;padding:17px 18px;margin-bottom:17px;box-shadow:0 10px 28px #775a1420}
+.welcome h2{margin:0 0 5px;font-size:21px}
+.welcome p{margin:0;color:#66552b;line-height:1.55;font-size:14px}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:#f4e4aa;color:#6b4c0d;font-size:11px;font-weight:900;margin-bottom:8px}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:15px 0}
+.tab{border:1px solid #dfca84;border-radius:13px;background:#fffdf6;color:#5f4918;padding:12px 4px;font:800 13px system-ui;cursor:pointer;box-shadow:0 3px 10px #8060180a}
+.tab.active{background:#49350e;color:#ffedb2;border-color:#49350e}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:clamp(17px,4vw,28px);box-shadow:0 12px 34px #60450d12}
+.hidden{display:none!important}
+.progressrow{display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--muted);font-size:13px;font-weight:800}
+.track{height:8px;border-radius:99px;background:#f0e7cb;overflow:hidden;margin:10px 0 23px}
+.fill{height:100%;width:0;background:linear-gradient(90deg,#b78a1f,#f3d778);transition:width .25s}
+.prompt-label{text-transform:uppercase;letter-spacing:.15em;text-align:center;color:#88723d;font-size:11px;font-weight:900}
+.hanzi{font-size:clamp(100px,25vw,172px);line-height:1.1;text-align:center;font-weight:500;margin:14px 0;color:#30230b;font-family:"Noto Serif CJK SC","PingFang SC","Microsoft YaHei",serif}
+.prompt-sub{text-align:center;color:#79673b;font-size:14px;margin:3px 0 17px}
+.actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:16px}
+.btn{border:0;border-radius:12px;padding:12px 16px;background:#49350e;color:#fff0b6;font:850 14px system-ui;cursor:pointer;min-height:42px}
+.btn.gold{background:linear-gradient(135deg,#b88619,#f5dc86,#c89c2e);color:#3b2907}
+.btn.light{background:#f4e8bc;color:#5b4210;border:1px solid #e5d094}
+.btn:disabled{opacity:.5;cursor:default}
+.feedback{min-height:28px;text-align:center;font-weight:850;color:#725111;margin:14px 0 0}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:650px;margin:14px auto 0}
+.choice{border:1px solid #e6d29a;border-radius:14px;min-height:56px;padding:12px;background:#fffdf6;color:#3e300e;text-align:center;font:750 15px/1.3 system-ui;cursor:pointer}
+.choice:hover{border-color:#b48a27;background:#fff6d8}
+.choice.correct{border-color:#54a878;background:#e7f7ec;color:#185c37}
+.choice.wrong{border-color:#dc958b;background:#fff0ed;color:#9c2920}
+.cardRow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:16px}
+.studyCard{min-height:114px;border:1px solid #e4cf90;border-radius:16px;background:linear-gradient(145deg,#fffdf5,#fff4ca);padding:12px 7px;color:#32250c;text-align:center;cursor:pointer}
+.studyCard .big{display:block;font:500 clamp(38px,7vw,60px)/1.15 "Noto Serif CJK SC","PingFang SC","Microsoft YaHei",serif;margin-bottom:6px}
+.studyCard .small{display:block;color:#79673b;font-size:12px;font-weight:750}
+.memory-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;max-width:650px;margin:18px auto 0}
+.memory-card{min-height:86px;border:1px solid #d6bd73;border-radius:13px;background:linear-gradient(135deg,#45320d,#70551a);color:#ffeab0;font:800 15px system-ui;cursor:pointer;padding:8px;overflow-wrap:anywhere}
+.memory-card .memory-char{font:500 36px/1.2 "Noto Serif CJK SC","PingFang SC","Microsoft YaHei",serif}
+.memory-card.flipped,.memory-card.matched{background:#fff3c1;color:#392a0b;border-color:#cba64a}
+.memory-card.matched{box-shadow:inset 0 0 0 2px #dbbd60}
+.section-title{margin:0 0 5px;font-size:23px}
+.section-text{margin:0;color:#76653a;font-size:14px;line-height:1.5}
+.list-tools{margin:15px 0;display:flex;gap:9px;flex-wrap:wrap}
+.search{flex:1;min-width:180px;padding:12px 14px;border:1px solid #e0ce99;border-radius:12px;background:white;color:#30230b;font:inherit}
+.character-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.list-item{border:1px solid #e5d39f;border-radius:13px;background:#fffdf6;min-height:94px;padding:10px;text-align:center}
+.list-item .char{font:500 42px/1.2 "Noto Serif CJK SC","PingFang SC","Microsoft YaHei",serif}
+.list-item .meaning{font-size:12px;font-weight:800;color:#796337}
+.footer-note{text-align:center;color:#816f44;font-size:12px;margin-top:19px;line-height:1.5}
+@media(max-width:680px){.cardRow{grid-template-columns:repeat(3,minmax(0,1fr))}.character-list{grid-template-columns:repeat(3,minmax(0,1fr))}.memory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:390px){.cardRow{grid-template-columns:repeat(2,minmax(0,1fr))}.choices{grid-template-columns:1fr}.memory-grid{gap:6px}.memory-card{min-height:75px;padding:5px;font-size:13px}.hanzi{font-size:112px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="kicker">✦ Secret Edition · Gold Access ✦</div>
+  <h1>👑 Golden Language Club</h1>
+  <p class="subtitle">Een aparte speelwereld voor Chinese karakters — zonder pinyin.</p>
+  <nav class="toplinks" aria-label="Normale taaloefeningen">
+    <a class="linkbtn" href="../">🇪🇸 Gewoon Spaans oefenen</a>
+    <a class="linkbtn secondary" href="../frans-oefenen/">🇫🇷 Gewoon Frans oefenen</a>
+  </nav>
+</header>
+<main class="wrap">
+  <section class="welcome">
+    <div class="badge">✨ CLUBBONUS ONTGRENDELD</div>
+    <h2>Welkom in de gouden club!</h2>
+    <p>Leer Chinese karakters met drie oefengames: kies de betekenis, draai flashcards om en speel memory. De Chinese kant toont alleen het karakter zelf — geen pinyin. Je kunt altijd terug naar je gewone Spaanse of Franse oefeningen via de knoppen bovenaan.</p>
+  </section>
+  <nav class="tabs" aria-label="Oefengames">
+    <button class="tab active" data-mode="quiz">🎯 Karakterquiz</button>
+    <button class="tab" data-mode="cards">🀄 Flashcards</button>
+    <button class="tab" data-mode="memory">🧠 Memory</button>
+    <button class="tab" data-mode="list">📚 Tekens bekijken</button>
+  </nav>
+  <section id="quizPanel" class="panel">
+    <div class="progressrow"><span id="quizCounter">Vraag 1</span><span id="quizScore">Goed: 0 · Fout: 0</span></div>
+    <div class="track"><div id="quizProgress" class="fill"></div></div>
+    <div class="prompt-label">Welk karakter betekent dit?</div>
+    <div id="quizChar" class="hanzi">山</div>
+    <p class="prompt-sub">Kies de juiste Nederlandse betekenis.</p>
+    <div id="quizChoices" class="choices"></div>
+    <p id="quizFeedback" class="feedback" aria-live="polite"></p>
+    <div class="actions"><button id="quizNext" class="btn gold" disabled>Volgende →</button><button id="quizRestart" class="btn light">🔄 Nieuwe ronde</button></div>
+  </section>
+  <section id="cardsPanel" class="panel hidden">
+    <div class="progressrow"><span id="cardCounter">Karakter 1</span><span id="cardProgress">Flashcards</span></div>
+    <div class="track"><div id="cardBar" class="fill"></div></div>
+    <div id="flashChar" class="hanzi">水</div>
+    <p id="flashMeaning" class="prompt-sub">Denk na en onthul daarna de betekenis.</p>
+    <div class="actions"><button id="showMeaning" class="btn gold">👀 Toon betekenis</button><button id="nextCard" class="btn light">Volgende kaart →</button><button id="shuffleCards" class="btn light">🔀 Schudden</button></div>
+  </section>
+  <section id="memoryPanel" class="panel hidden">
+    <div class="progressrow"><span id="memoryStatus">Zoek de paren</span><span id="memoryMoves">Pogingen: 0</span></div>
+    <p class="section-text" style="margin-top:12px">Tik steeds op één Chinees karakter en de bijbehorende Nederlandse betekenis.</p>
+    <div id="memoryGrid" class="memory-grid"></div>
+    <div class="actions"><button id="newMemory" class="btn gold">🔄 Nieuw memoryspel</button></div>
+    <p id="memoryFeedback" class="feedback" aria-live="polite"></p>
+  </section>
+  <section id="listPanel" class="panel hidden">
+    <h2 class="section-title">Alle Chinese karakters</h2>
+    <p class="section-text">Bekijk de losse tekens en hun Nederlandse betekenis. Geen pinyin of uitspraaktranscriptie.</p>
+    <div class="list-tools"><input id="search" class="search" placeholder="Zoek een karakter of betekenis…" aria-label="Zoek in karakters"><button id="shuffleList" class="btn light">🔀 Willekeurige volgorde</button></div>
+    <div id="characterList" class="character-list"></div>
+  </section>
+  <div class="footer-note">Gouden club · Je voortgang van de games is tijdelijk tijdens deze sessie. <br>Terug naar gewone oefeningen kan op elk moment via de knoppen bovenaan.</div>
+</main>
+<script src="../account.js?v=4"></script>
+<script>
+(function(){
+"use strict";
+const DATA=[
+{c:"一",m:"één"},{c:"二",m:"twee"},{c:"三",m:"drie"},{c:"十",m:"tien"},
+{c:"人",m:"mens"},{c:"口",m:"mond"},{c:"日",m:"zon / dag"},{c:"月",m:"maan / maand"},
+{c:"山",m:"berg"},{c:"水",m:"water"},{c:"火",m:"vuur"},{c:"木",m:"boom / hout"},
+{c:"田",m:"veld"},{c:"大",m:"groot"},{c:"小",m:"klein"},{c:"中",m:"midden"},
+{c:"上",m:"boven"},{c:"下",m:"onder"},{c:"天",m:"hemel"},{c:"女",m:"vrouw"},
+{c:"子",m:"kind"},{c:"好",m:"goed"},{c:"学",m:"leren"},{c:"生",m:"leven"},
+{c:"我",m:"ik"},{c:"你",m:"jij"},{c:"他",m:"hij"},{c:"她",m:"zij"},
+{c:"是",m:"zijn / is"},{c:"不",m:"niet"},{c:"有",m:"hebben"},{c:"家",m:"huis / gezin"},
+{c:"手",m:"hand"},{c:"目",m:"oog"},{c:"耳",m:"oor"},{c:"心",m:"hart"},
+{c:"门",m:"deur"},{c:"书",m:"boek"},{c:"鱼",m:"vis"},{c:"马",m:"paard"},
+{c:"鸟",m:"vogel"},{c:"牛",m:"koe"},{c:"羊",m:"schaap"},{c:"米",m:"rijst"},
+{c:"雨",m:"regen"},{c:"电",m:"elektriciteit"},{c:"石",m:"steen"},{c:"金",m:"goud / metaal"},
+{c:"开",m:"open"},{c:"关",m:"dicht"},{c:"来",m:"komen"},{c:"去",m:"gaan"},
+{c:"见",m:"zien"}
+];
+const $=id=>document.getElementById(id);
+let mode="quiz",quizDeck=[],qi=0,good=0,wrong=0,answered=false;
+let cardDeck=[],ci=0,revealed=false;
+let memoryDeck=[],first=null,locked=false,matches=0,moves=0;
+const shuffle=arr=>{const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const norm=s=>String(s).trim().toLowerCase();
+function switchMode(next){mode=next;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.mode===next));$("quizPanel").classList.toggle("hidden",next!=="quiz");$("cardsPanel").classList.toggle("hidden",next!=="cards");$("memoryPanel").classList.toggle("hidden",next!=="memory");$("listPanel").classList.toggle("hidden",next!=="list");if(next==="quiz"&&!quizDeck.length)startQuiz();if(next==="cards"&&!cardDeck.length)startCards();if(next==="memory"&&!memoryDeck.length)startMemory();if(next==="list")renderList();}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchMode(b.dataset.mode)));
+function startQuiz(){quizDeck=shuffle(DATA).slice(0,10);qi=0;good=0;wrong=0;showQuiz();}
+function showQuiz(){answered=false;const item=quizDeck[qi];$("quizCounter").textContent="Vraag "+(qi+1)+" van "+quizDeck.length;$("quizScore").textContent="Goed: "+good+" · Fout: "+wrong;$("quizProgress").style.width=(qi/quizDeck.length*100)+"%";$("quizChar").textContent=item.c;$("quizFeedback").textContent="";$("quizNext").disabled=true;$("quizNext").textContent=qi===quizDeck.length-1?"Resultaat bekijken ✓":"Volgende →";const distractors=shuffle(DATA.filter(x=>x.c!==item.c)).slice(0,3).map(x=>x.m);const options=shuffle([item.m,...distractors]);$("quizChoices").innerHTML="";options.forEach(option=>{const b=document.createElement("button");b.type="button";b.className="choice";b.textContent=option;b.addEventListener("click",()=>{if(answered)return;answered=true;const correct=norm(option)===norm(item.m);if(correct)good++;else wrong++;Array.from($("quizChoices").children).forEach(button=>{button.disabled=true;if(norm(button.textContent)===norm(item.m))button.classList.add("correct");else if(button===b)button.classList.add("wrong");});$("quizScore").textContent="Goed: "+good+" · Fout: "+wrong;$("quizProgress").style.width=((qi+1)/quizDeck.length*100)+"%";$("quizFeedback").textContent=correct?"Goed gedaan! ✨":"Bijna! De betekenis is: "+item.m;$("quizNext").disabled=false;});$("quizChoices").appendChild(b);});}
+$("quizNext").addEventListener("click",()=>{if(!answered)return;if(qi===quizDeck.length-1){const score=good+" van "+quizDeck.length;const panel=$("quizPanel");panel.querySelector(".prompt-label").textContent="RONDE AFGEROND";$("quizChar").textContent="🏆";$("quizChoices").innerHTML="";$("quizFeedback").textContent="Je had "+score+" goed. Speel opnieuw om meer karakters te leren.";$("quizNext").disabled=true;$("quizNext").textContent="Ronde afgerond";$("quizProgress").style.width="100%";}else{qi++;showQuiz();}});
+$("quizRestart").addEventListener("click",()=>{ $("quizPanel").querySelector(".prompt-label").textContent="Welk karakter betekent dit?";startQuiz();});
+function startCards(){cardDeck=shuffle(DATA);ci=0;revealed=false;showCard();}
+function showCard(){const item=cardDeck[ci];$("flashChar").textContent=item.c;$("flashMeaning").textContent=revealed?item.m:"Denk na en onthul daarna de betekenis.";$("cardCounter").textContent="Karakter "+(ci+1)+" van "+cardDeck.length;$("cardBar").style.width=(ci/cardDeck.length*100)+"%";$("showMeaning").disabled=revealed;}
+$("showMeaning").addEventListener("click",()=>{revealed=true;showCard();});
+$("nextCard").addEventListener("click",()=>{ci=(ci+1)%cardDeck.length;revealed=false;showCard();});
+$("shuffleCards").addEventListener("click",()=>startCards());
+function startMemory(){const chosen=shuffle(DATA).slice(0,6);memoryDeck=shuffle(chosen.flatMap((item,index)=>[{id:item.c,type:"char",text:item.c},{id:item.c,type:"meaning",text:item.m}]));first=null;locked=false;matches=0;moves=0;$("memoryStatus").textContent="Zoek 6 paren";$("memoryMoves").textContent="Pogingen: 0";$("memoryFeedback").textContent="";$("memoryGrid").innerHTML="";memoryDeck.forEach((item,index)=>{const b=document.createElement("button");b.type="button";b.className="memory-card";b.dataset.index=String(index);b.textContent="✦";b.setAttribute("aria-label","Verborgen memorykaart");b.addEventListener("click",()=>flipMemory(index,b));$("memoryGrid").appendChild(b);});}
+function flipMemory(index,button){if(locked||button.classList.contains("flipped")||button.classList.contains("matched"))return;const item=memoryDeck[index];button.classList.add("flipped");button.textContent="";if(item.type==="char"){const span=document.createElement("span");span.className="memory-char";span.textContent=item.text;button.appendChild(span);}else button.textContent=item.text;if(!first){first={index,button,item};return;}moves++;$("memoryMoves").textContent="Pogingen: "+moves;const match=first.item.id===item.id&&first.item.type!==item.type;if(match){first.button.classList.add("matched");button.classList.add("matched");matches++;$("memoryStatus").textContent="Paren: "+matches+" van 6";$("memoryFeedback").textContent=matches===6?"Alles gevonden! 🏆":"Goed paar! ✨";first=null;if(matches===6)$("memoryStatus").textContent="Gewonnen in "+moves+" pogingen!";return;}locked=true;const prev=first;first=null;window.setTimeout(()=>{prev.button.classList.remove("flipped");prev.button.textContent="✦";button.classList.remove("flipped");button.textContent="✦";locked=false;$("memoryFeedback").textContent="Geen paar — probeer opnieuw.";},750);}
+$("newMemory").addEventListener("click",startMemory);
+function renderList(){const query=norm($("search").value||"");const rows=DATA.filter(x=>norm(x.c).includes(query)||norm(x.m).includes(query));$("characterList").innerHTML="";rows.forEach(item=>{const div=document.createElement("div");div.className="list-item";const character=document.createElement("div");character.className="char";character.textContent=item.c;const meaning=document.createElement("div");meaning.className="meaning";meaning.textContent=item.m;div.append(character,meaning);$("characterList").appendChild(div);});}
+$("search").addEventListener("input",renderList);
+$("shuffleList").addEventListener("click",()=>{DATA.sort(()=>Math.random()-.5);renderList();});
+startQuiz();startCards();startMemory();renderList();
+})();
+</script>
+</body>
+</html>
