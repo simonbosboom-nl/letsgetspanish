@@ -67,6 +67,17 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 .race-line{height:47px;margin:8px 0;border-radius:7px;background:repeating-linear-gradient(90deg,#59646b 0,#59646b 24px,#e3cf6c 24px,#e3cf6c 29px);background-size:53px 100%;position:relative;box-shadow:inset 0 0 0 2px #ffffff29;animation:roadRoll .65s linear infinite}
 .race-car{position:absolute;top:1px;font-size:31px;transition:left .35s;filter:drop-shadow(0 2px 1px #0006);animation:carBounce .23s ease-in-out infinite alternate}
 .race-label{font-size:12px;font-weight:900;color:#3d4d23}
+
+.frogger-world{border:2px solid #d2ba73;border-radius:17px;overflow:hidden;margin:14px 0;background:#4e853e;box-shadow:0 8px 18px #55400d17}
+.frogger-bank{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:54px;padding:8px 13px;background:repeating-linear-gradient(135deg,#80bd63 0,#80bd63 22px,#91ca71 22px,#91ca71 44px);color:#20491f;font-size:12px;font-weight:950}
+.frogger-bank.start{background:repeating-linear-gradient(135deg,#4f953e 0,#4f953e 22px,#69ac48 22px,#69ac48 44px);color:#f8f2ca}
+.frogger-lane{position:relative;height:64px;overflow:hidden;border-top:1px solid #ffffff2b;background:repeating-linear-gradient(0deg,#55636c 0,#55636c 28px,#607078 28px,#607078 56px)}
+.frogger-lane:nth-child(even){background:repeating-linear-gradient(0deg,#5e6d73 0,#5e6d73 28px,#69777c 28px,#69777c 56px)}
+.frogger-hazard,.frogger-player{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:29px;z-index:2;filter:drop-shadow(0 3px 0 #0004);transition:left .12s}
+.frogger-word{position:absolute;top:50%;transform:translate(-50%,-50%);z-index:1;min-width:60px;max-width:96px;padding:6px 7px;border:2px solid #d9ba55;border-radius:9px;background:#fff4c4;color:#3d2a05;font-size:clamp(11px,2vw,14px);font-weight:950;text-align:center;box-shadow:0 3px 0 #8c712f77;overflow-wrap:anywhere}
+.frogger-word.target{background:#fff4c4}
+.arcade-controls{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;margin:10px 0}
+.arcade-controls .btn{min-width:54px}
 .race-slots{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin:12px 0}
 .race-slot{display:grid;place-items:center;min-width:38px;min-height:44px;border:2px solid #e0c46d;border-radius:10px;background:#fffdf6;color:#47330d;font-size:22px;font-weight:900}
 .race-letters{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0}
@@ -188,6 +199,7 @@ let frogStep=0,frogLives=3,playerProgress=0,opponentProgress=0,waves=0,explorerL
 let memoryDeck=[],memoryFirst=null,memoryPending=null,memoryMatches=0,memoryMoves=0;
 let flashDeck=[],flashIndex=0,flashRevealed=false,drawIndex=0,drawingState=null,drawHasMarks=false,drawnStrokes=[],currentStroke=null,drawSetupToken=0;
 const strokeDataCache={};
+let frogArcade=null;
 const shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
 const norm=s=>String(s||"").trim().toLocaleLowerCase();
 function promptOf(p){return direction==="toDutch"?p[0]:p[1]}
@@ -237,6 +249,70 @@ function chooseRaceTile(index){
 
 function stats(arr){return '<div class="stats">'+arr.map(x=>'<span class="stat">'+x+'</span>').join("")+'</div>';}
 function questionHTML(){return '<div class="question"><div class="q-label">Kies het juiste antwoord · '+LANGS[lang].name+'</div><div class="prompt">'+promptOf(item)+'</div><div class="choices">'+options.map((x,i)=>'<button class="choice" data-choice="'+i+'" type="button" '+(ended?'disabled':'')+'>'+x+'</button>').join("")+'</div><p class="feedback" aria-live="polite">'+feedback+'</p></div>';}
+
+function newFrogRound(){
+ const pair=chooseGamePair(),decoys=shuffle(gameWordPool().filter(p=>p!==pair&&answerOf(p)!==answerOf(pair))).slice(0,3);
+ const list=shuffle([pair].concat(decoys)),cols=[1,3,5,7],rows=[1,2,3,4];
+ return {pair,choices:list.map((p,i)=>({text:answerOf(p),row:rows[i],col:cols[i],correct:p===pair,used:false}))};
+}
+function makeFrogArcade(){
+ return {round:1,score:0,lives:3,x:4,y:5,gotWord:false,feedback:"Zoek de juiste vertaling tussen het verkeer en spring naar de overkant.",level:newFrogRound(),
+  hazards:[{row:1,col:0,dir:1,emoji:"🚗"},{row:2,col:4,dir:-1,emoji:"🚙"},{row:3,col:8,dir:1,emoji:"🐍"},{row:4,col:2,dir:-1,emoji:"🪵"}]};
+}
+function renderFrogBoard(){
+ const s=frogArcade;
+ const lanes=[];
+ lanes.push('<div class="frogger-bank"><span>🏁 FINISH</span><span>Breng Froggie naar de overkant</span></div>');
+ for(let row=1;row<=4;row++){
+  const hazards=s.hazards.filter(h=>h.row===row).map(h=>'<span class="frogger-hazard" style="left:calc('+((h.col+.5)/9*100)+'%);animation-delay:-'+(h.col%3)*.25+'s">'+h.emoji+'</span>').join("");
+  const tokens=s.level.choices.filter(t=>!t.used&&t.row===row).map(t=>'<span class="frogger-word '+(t.correct?"target":"")+'" style="left:calc('+((t.col+.5)/9*100)+'%)">'+t.text+'</span>').join("");
+  const frog=s.y===row?'<span class="frogger-player" style="left:calc('+((s.x+.5)/9*100)+'%)">🐸</span>':"";
+  lanes.push('<div class="frogger-lane" data-road-row="'+row+'">'+hazards+tokens+frog+'</div>');
+ }
+ lanes.push('<div class="frogger-bank start"><span>🌿 START</span><span>Score: '+s.score+' / 7 · Levens: '+'❤️'.repeat(s.lives)+'</span>'+(s.y===5?'<span class="frogger-player" style="left:calc('+((s.x+.5)/9*100)+'%)">🐸</span>':"")+'</div>');
+ return stats(["Oversteken: "+s.score+" / 7","Levens: "+"❤️".repeat(s.lives)])+
+  '<div class="question"><div class="q-label">Vind het juiste woord</div><div class="prompt">'+promptOf(s.level.pair)+'</div><p class="feedback" id="frogFeedback">'+s.feedback+'</p><p class="mini-hint">Beweeg met de pijltjes, ontwijk verkeer en gevaren. Pak eerst de juiste woordtegel, daarna bereik je de finish.</p></div>'+
+  '<div class="frogger-world">'+lanes.join("")+'</div><div class="arcade-controls"><button class="btn light" data-frog-move="left">←</button><button class="btn gold" data-frog-move="up">↑ Spring</button><button class="btn light" data-frog-move="down">↓</button><button class="btn light" data-frog-move="right">→</button></div>';
+}
+function frogLoseLife(message){
+ const s=frogArcade;s.lives--;s.x=4;s.y=5;s.feedback=message;
+ if(s.lives<=0){frogLives=0;ended=true;renderGame();return;}
+ renderGame();
+}
+function frogStepMove(dir){
+ if(game!=="frog"||ended||!frogArcade)return;
+ const s=frogArcade;
+ if(dir==="left")s.x=Math.max(0,s.x-1);
+ else if(dir==="right")s.x=Math.min(8,s.x+1);
+ else if(dir==="up")s.y=Math.max(0,s.y-1);
+ else if(dir==="down")s.y=Math.min(5,s.y+1);
+ // Traffic advances whenever Froggie hops.
+ s.hazards.forEach(h=>h.col=(h.col+h.dir+9)%9);
+ const hit=s.hazards.some(h=>h.row===s.y&&h.col===s.x);
+ if(hit){frogLoseLife("🚗 Oeps! Je raakte een obstakel. Probeer een andere route.");return;}
+ for(const t of s.level.choices){
+  if(t.used||t.row!==s.y||t.col!==s.x)continue;
+  t.used=true;
+  if(t.correct){s.gotWord=true;s.level.choices.forEach(x=>{if(!x.correct)x.used=true;});s.feedback="✅ Goed gevonden! Bereik nu de finish bovenaan.";}
+  else{s.lives--;s.x=4;s.y=5;s.feedback="❌ Niet de juiste vertaling. Je verliest een leven.";if(s.lives<=0){frogLives=0;ended=true;renderGame();return;}}
+  break;
+ }
+ if(s.y===0){
+  if(!s.gotWord){s.y=1;s.feedback="Pak eerst de juiste woordtegel!";}
+  else{
+   s.score++;frogStep=s.score;
+   if(s.score>=7){ended=true;renderGame();return;}
+   s.round++;s.x=4;s.y=5;s.gotWord=false;s.level=newFrogRound();s.feedback="🌼 Goed! Volgende woord klaar.";
+  }
+ }
+ renderGame();
+}
+window.addEventListener("keydown",e=>{
+ if(game!=="frog"||ended)return;
+ const map={ArrowLeft:"left",ArrowRight:"right",ArrowUp:"up",ArrowDown:"down"};
+ if(map[e.key]){e.preventDefault();frogStepMove(map[e.key]);}
+});
+
 function renderBoard(){
  if(game==="draw"){
   const p=DRAW_DATA[drawIndex];
@@ -261,10 +337,7 @@ function renderBoard(){
   ];
   return stats(["Karakter "+(drawIndex+1)+" van "+DRAW_DATA.length,"Teken elke streek apart"])+fragments.join("");
  }
- if(game==="frog"){
-  let rows="";for(let row=0;row<7;row++){const step=6-row;const obstacles=shuffle(["🚗","🐍","🪵","🪨","🚙","🪷"]).slice(0,3);rows+='<div class="lane">';if(frogStep===step)rows+='<span class="frog" style="left:'+(8+step*12)+'%">🐸</span>';else rows+=obstacles.map((o,i)=>'<span class="obstacle" style="transform:translateX('+((i-1)*12)+'px)">'+o+'</span>').join("");rows+='</div>';}
-  return '<div class="board"><div class="bank">🏁 OVERKANT <span>Doel: 7 sprongen</span></div>'+rows+'<div class="bank" style="background:#85bb6e">🌿 START <span>Spring met juiste antwoorden</span></div></div>'+stats(["Sprongen: "+frogStep+" / 7","Levens: "+"❤️".repeat(frogLives||0)])+questionHTML();
- }
+ if(game==="frog")return renderFrogBoard();
  if(game==="race")return renderRaceBoard();
  if(game==="explorer"){
   const towerHtml=Array.from({length:Math.min(6,towerLevel)},(_,i)=>'<div class="tower-token"><span>🏹</span><small>TORen '+(i+1)+'</small></div>').join("");
@@ -308,7 +381,7 @@ function renderGame(){
 }
 function startGame(which){
  if(which==="draw"&&lang!=="zh")return;
- game=which;ended=false;feedback="";frogStep=0;frogLives=3;playerProgress=0;opponentProgress=0;waves=0;explorerLives=3;towerLevel=1;gems=0;towerShields=0;pabloLevel=1;pabloLives=3;pabloStars=0;raceCoins=0;raceCarLevel=1;raceWordsDone=0;raceMistakes=0;racePuzzle=null;memoryFirst=null;memoryPending=null;memoryMatches=0;memoryMoves=0;flashRevealed=false;drawIndex=0;
+ game=which;ended=false;feedback="";frogStep=0;frogLives=3;playerProgress=0;opponentProgress=0;waves=0;explorerLives=3;towerLevel=1;gems=0;towerShields=0;pabloLevel=1;pabloLives=3;pabloStars=0;frogStep=0;frogArcade=null;raceCoins=0;raceCarLevel=1;raceWordsDone=0;raceMistakes=0;racePuzzle=null;memoryFirst=null;memoryPending=null;memoryMatches=0;memoryMoves=0;flashRevealed=false;drawIndex=0;
  $("gameMenu").classList.add("hidden");$("playArea").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});
  if(game==="draw"){
   drawIndex=0;
@@ -316,6 +389,7 @@ function startGame(which){
   memoryDeck=shuffle(shuffle(DATA[lang]).slice(0,6).flatMap((p,i)=>[{id:i,text:p[0],type:"foreign",open:false,matched:false},{id:i,text:p[1],type:"dutch",open:false,matched:false}]));
  }else if(game==="cards"){flashDeck=shuffle(DATA[lang]);flashIndex=0;}
  else if(game==="race"){makeRacePuzzle();}
+ else if(game==="frog"){frogArcade=makeFrogArcade();}
  else makeQuestion();
  renderGame();
  if(game==="draw")setupDrawingCanvas();
@@ -511,6 +585,7 @@ $("directionToggle").addEventListener("click",()=>{
 document.querySelectorAll(".game-card").forEach(b=>b.addEventListener("click",()=>startGame(b.dataset.game)));
 $("backToGames").addEventListener("click",()=>{$("playArea").classList.add("hidden");$("gameMenu").classList.remove("hidden");game="";window.scrollTo({top:0,behavior:"smooth"});});
 $("gameBody").addEventListener("click",e=>{
+ const frogButton=e.target.closest("[data-frog-move]");if(frogButton){frogStepMove(frogButton.dataset.frogMove);return;}
  if(e.target.closest("#buildTower")){
   if(gems>=20&&towerShields<3){gems-=20;towerShields++;feedback="🛡️ Schildtoren gebouwd! De volgende fout wordt geblokkeerd.";}
   else if(towerShields>=3){feedback="Je hebt al drie schildtorens.";}
