@@ -67,6 +67,13 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 .race-line{height:47px;margin:8px 0;border-radius:7px;background:repeating-linear-gradient(90deg,#59646b 0,#59646b 24px,#e3cf6c 24px,#e3cf6c 29px);background-size:53px 100%;position:relative;box-shadow:inset 0 0 0 2px #ffffff29;animation:roadRoll .65s linear infinite}
 .race-car{position:absolute;top:1px;font-size:31px;transition:left .35s;filter:drop-shadow(0 2px 1px #0006);animation:carBounce .23s ease-in-out infinite alternate}
 .race-label{font-size:12px;font-weight:900;color:#3d4d23}
+.race-slots{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin:12px 0}
+.race-slot{display:grid;place-items:center;min-width:38px;min-height:44px;border:2px solid #e0c46d;border-radius:10px;background:#fffdf6;color:#47330d;font-size:22px;font-weight:900}
+.race-letters{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.race-letter{min-width:48px;min-height:52px;border:2px solid #d9bf6b;border-radius:13px;background:linear-gradient(145deg,#fff2b7,#f2d267);color:#4d3706;font:900 20px system-ui;cursor:pointer;box-shadow:0 3px 0 #b88a25}
+.race-letter.used{opacity:.25;box-shadow:none;transform:translateY(3px)}
+.race-shop{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px;color:#745719;font-size:12px;font-weight:850}
+
 .explore-board{display:flex;justify-content:space-around;align-items:center;gap:10px;min-height:155px;border-radius:17px;padding:15px;background:radial-gradient(circle at 40% 60%,#c9ed83,#6cae48 64%,#417a39);font-size:clamp(38px,10vw,70px);margin:12px 0;border:1px solid #8fc365}
 .explore-board .castle{filter:drop-shadow(0 5px 0 #315b24)}.blobs{display:flex;flex-direction:column;gap:3px;font-size:25px}
 .explore-map{padding:13px;border:2px solid #86b654;border-radius:18px;margin:13px 0;background:radial-gradient(circle at 20% 20%,#a9d86f,#5e9d48 72%,#427b39);box-shadow:inset 0 0 0 4px #d4ebad}
@@ -170,7 +177,7 @@ fr:[
 ["jouer au foot","voetballen"],["elle joue au foot","zij voetbalt"],["habiter","wonen"],["le talent","het talent"],["danser","dansen"],["elle danse","zij danst"],["chanter","zingen"],["il chante","hij zingt"],["jouer du piano","piano spelen"],["je joue du piano","ik speel piano"],["faire du sport","sporten"],["il habite","hij woont"],["parler","spreken"],["elle parle","zij spreekt"],["il s'appelle","hij heet"],["elle s'appelle","zij heet"],["c'est","het is"],["un chien","een hond"],["le français","het Frans"],["je parle français","ik spreek Frans"],["un enfant","een kind"],["toujours","altijd"],["beaucoup","veel"],["ensemble","samen"],["huit","acht"],["neuf","negen"],["dix","tien"],["bonjour","goedendag"],["ça va?","hoe gaat het?"],["ça va bien?","gaat het goed?"],["oui, ça va","ja, het gaat goed"],["salut!","hoi"],["je m'appelle ...","ik heet ..."],["comment tu t'appelles?","hoe heet jij?"],["au revoir","tot ziens"],["très bien","heel goed"],["excellent","uitstekend"],["pas mal","niet slecht"],["oui","ja"],["non","nee"],["merci","bedankt"],["monsieur","meneer"],["madame","mevrouw"],["zéro","nul"],["un, une","een"],["deux","twee"],["trois","drie"],["quatre","vier"],["cinq","vijf"],["six","zes"],["sept","zeven"],["bonsoir","goedenavond"],["s'il vous plaît","alstublieft"],["voilà!","ziezo"],["le garçon","de jongen"],["la fille","het meisje"],["excusez-moi","pardon"],["le prénom","de voornaam"],["le nom (de famille)","de achternaam"],["le surnom","de bijnaam"],["l'homme","de man"],["la femme","de vrouw"],["génial","geweldig"],["formidable","fantastisch"],["chouette","leuk"],["super","super"],["j'habite à","ik woon in"],["une école","een school"],["le collège","de middelbare school"],["le professeur","de docent"],["la professeur","de docente"],["onze","elf"],["douze","twaalf"],["treize","dertien"],["quatorze","veertien"],["quinze","vijftien"],["seize","zestien"],["dix-sept","zeventien"],["dix-huit","achttien"],["dix-neuf","negentien"],["vingt","twintig"],["tu as quel âge?","hoe oud ben je?"],["j'ai douze ans","ik ben twaalf jaar oud"]
 ],
 zh:[
-["一","één"],["二","twee"],["三","drie"],["十","tien"],["人","mens"],["口","mond"],["日","zon / dag"],["月","maan / maand"],["山","berg"],["水","water"],["火","vuur"],["木","boom / hout"],["田","veld"],["大","groot"],["小","klein"],["中","midden"],["上","boven"],["下","onder"],["天","hemel"],["女","vrouw"],["子","kind"],["好","goed"],["学","leren"],["生","leven"],["我","ik"],["你","jij"],["他","hij"],["她","zij"],["是","zijn / is"],["不","niet"],["有","hebben"],["家","huis / gezin"],["手","hand"],["目","oog"],["耳","oor"],["心","hart"],["门","deur"],["书","boek"],["鱼","vis"],["马","paard"],["鸟","vogel"],["牛","koe"],["羊","schaap"],["米","rijst"],["雨","regen"],["电","elektriciteit"],["石","steen"],["金","goud / metaal"],["开","open"],["关","dicht"],["来","komen"],["去","gaan"],["见","zien"],["叫","heten / noemen"],["吗","vraagdeeltje voor een ja/nee-vraag"],["呢","vraagdeeltje (en jij? / hoe zit het?)"]
+["一","één"],["二","twee"],["三","drie"],["十","tien"],["人","mens"],["口","mond"],["日","zon / dag"],["月","maan / maand"],["山","berg"],["水","water"],["火","vuur"],["木","boom / hout"],["田","veld"],["大","groot"],["小","klein"],["中","midden"],["上","boven"],["下","onder"],["天","hemel"],["女","vrouw"],["子","kind"],["好","goed"],["学","leren"],["生","leven"],["我","ik"],["你","jij"],["他","hij"],["她","zij"],["是","zijn / is"],["不","niet"],["有","hebben"],["家","huis / gezin"],["手","hand"],["目","oog"],["耳","oor"],["心","hart"],["门","deur"],["书","boek"],["鱼","vis"],["马","paard"],["鸟","vogel"],["牛","koe"],["羊","schaap"],["米","rijst"],["雨","regen"],["电","elektriciteit"],["石","steen"],["金","goud / metaal"],["开","open"],["关","dicht"],["来","komen"],["去","gaan"],["见","zien"],["叫","heten / noemen"],["吗","vraagdeeltje voor een ja/nee-vraag"],["呢","vraagdeeltje (en jij? / hoe zit het?)"],["你好","hallo"],["你好吗","hoe gaat het met je"],["我叫","ik heet"],["他是","hij is"],["她是","zij is"],["不是","is niet"],["不好","niet goed"],["再见","tot ziens"],["谢谢","bedankt"],["朋友","vriend"],["学生","leerling"],["老师","docent"],["中国","China"],["大家","iedereen"]
 ]};
 const LANGS={es:{name:"Spaans",flag:"🇪🇸"},fr:{name:"Frans",flag:"🇫🇷"},zh:{name:"Chinees",flag:"🀄"}};
 const DRAW_DATA=[["我","ik"],["你","jij"],["他","hij"],["她","zij"],["叫","heten / noemen"],["好","goed"],["吗","vraagdeeltje voor een ja/nee-vraag"],["呢","vraagdeeltje (en jij? / hoe zit het?)"],["不","niet"]];
@@ -187,6 +194,47 @@ function promptOf(p){return direction==="toDutch"?p[0]:p[1]}
 function answerOf(p){return direction==="toDutch"?p[1]:p[0]}
 
 function makeQuestion(){const data=DATA[lang];item=data[Math.floor(Math.random()*data.length)];const correct=answerOf(item);const others=shuffle(data.filter(p=>answerOf(p)!==correct).map(answerOf).filter((v,i,a)=>a.indexOf(v)===i)).slice(0,3);options=shuffle([correct].concat(others));}
+
+let racePuzzle=null,raceCoins=0,raceCarLevel=1,raceWordsDone=0,raceMistakes=0;
+function wordOnly(s){return /^[A-Za-zÀ-ÖØ-öø-ÿ\u4e00-\u9fff]+$/.test(String(s||""));}
+function gameWordPool(){
+ return DATA[lang].filter(p=>{const t=answerOf(p),n=Array.from(t).length;return wordOnly(t)&&n>=2&&n<=8&&p[0]&&p[1];});
+}
+function chooseGamePair(){const pool=gameWordPool();const source=pool.length?pool:DATA[lang].filter(p=>p[0]&&p[1]);return source[Math.floor(Math.random()*source.length)];}
+function makeRacePuzzle(){
+ const pair=chooseGamePair(),target=Array.from(answerOf(pair)),source=gameWordPool().map(p=>Array.from(answerOf(p))).flat(),decoys=[];
+ for(let i=0;i<Math.max(3,Math.min(5,target.length));i++){
+  const other=source.filter(ch=>!target.includes(ch));
+  decoys.push(other.length?other[Math.floor(Math.random()*other.length)]:target[Math.floor(Math.random()*target.length)]);
+ }
+ const tiles=shuffle(target.map((ch,i)=>({id:"t"+i+"_"+Math.random().toString(36).slice(2),ch,used:false})).concat(decoys.map((ch,i)=>({id:"d"+i+"_"+Math.random().toString(36).slice(2),ch,used:false}))));
+ racePuzzle={pair,target,tiles,filled:[],clue:promptOf(pair),answer:answerOf(pair)};
+}
+function renderRaceBoard(){
+ if(!racePuzzle)makeRacePuzzle();
+ const slots=racePuzzle.target.map((ch,i)=>'<span class="race-slot">'+(racePuzzle.filled[i]||"＿")+'</span>').join("");
+ const tiles=racePuzzle.tiles.map((t,i)=>'<button type="button" class="race-letter '+(t.used?"used":"")+'" data-race-tile="'+i+'" '+(t.used?"disabled":"")+'>'+t.ch+'</button>').join("");
+ return stats(["Jij: "+Math.min(100,playerProgress)+"%","Rivaal: "+Math.min(100,opponentProgress)+"%","Munten: "+raceCoins+" 🪙","Auto-upgrade: "+raceCarLevel])+
+  '<div class="race-track"><div class="race-label">🏁 JOUW AUTO</div><div class="race-line"><span class="race-car" style="left:'+(2+Math.min(100,playerProgress)*.85)+'%">🏎️</span></div><div class="race-label">🤖 TEGENSTANDER</div><div class="race-line"><span class="race-car" style="left:'+(2+Math.min(100,opponentProgress)*.85)+'%">🚙</span></div><div class="race-label">FINISH → · '+raceWordsDone+' woorden goed</div></div>'+
+  '<div class="question"><div class="q-label">Maak het woord · '+LANGS[lang].name+'</div><div class="prompt">'+racePuzzle.clue+'</div><p class="mini-hint">Tik op de letters/tekens in de juiste volgorde. Elk goed teken geeft snelheid.</p><div class="race-slots">'+slots+'</div><div class="race-letters">'+tiles+'</div><p class="feedback" aria-live="polite">'+feedback+'</p><div class="race-shop"><span>🏎️ Betere motor: '+(raceCarLevel>=4?"MAX":"25 🪙")+'</span><button id="upgradeRaceCar" class="btn light" type="button" '+(raceCoins<25||raceCarLevel>=4?"disabled":"")+'>Motor upgraden</button><button id="resetRaceWord" class="btn light" type="button">↶ Opnieuw</button></div></div>';
+}
+function chooseRaceTile(index){
+ if(!racePuzzle||ended)return;const tile=racePuzzle.tiles[index];if(!tile||tile.used)return;
+ const expected=racePuzzle.target[racePuzzle.filled.length];
+ if(tile.ch===expected){
+  tile.used=true;racePuzzle.filled.push(tile.ch);playerProgress=Math.min(100,playerProgress+(2+raceCarLevel*.3));feedback="✅ Goed teken! Je auto versnelt.";
+  if(racePuzzle.filled.length>=racePuzzle.target.length){
+   raceWordsDone++;raceCoins+=10+raceCarLevel*2;playerProgress=Math.min(100,playerProgress+15+raceCarLevel*2);opponentProgress=Math.min(100,opponentProgress+10+Math.floor(Math.random()*7));
+   feedback="🏁 Woord compleet! Je krijgt "+(10+raceCarLevel*2)+" munten.";
+   if(playerProgress>=100||opponentProgress>=100){ended=true;renderGame();return;}
+   makeRacePuzzle();
+  }
+ }else{
+  tile.used=true;raceMistakes++;opponentProgress=Math.min(100,opponentProgress+4);feedback="❌ Dat is niet het volgende teken. De tegenstander haalt je in.";
+ }
+ renderGame();
+}
+
 function stats(arr){return '<div class="stats">'+arr.map(x=>'<span class="stat">'+x+'</span>').join("")+'</div>';}
 function questionHTML(){return '<div class="question"><div class="q-label">Kies het juiste antwoord · '+LANGS[lang].name+'</div><div class="prompt">'+promptOf(item)+'</div><div class="choices">'+options.map((x,i)=>'<button class="choice" data-choice="'+i+'" type="button" '+(ended?'disabled':'')+'>'+x+'</button>').join("")+'</div><p class="feedback" aria-live="polite">'+feedback+'</p></div>';}
 function renderBoard(){
@@ -217,9 +265,7 @@ function renderBoard(){
   let rows="";for(let row=0;row<7;row++){const step=6-row;const obstacles=shuffle(["🚗","🐍","🪵","🪨","🚙","🪷"]).slice(0,3);rows+='<div class="lane">';if(frogStep===step)rows+='<span class="frog" style="left:'+(8+step*12)+'%">🐸</span>';else rows+=obstacles.map((o,i)=>'<span class="obstacle" style="transform:translateX('+((i-1)*12)+'px)">'+o+'</span>').join("");rows+='</div>';}
   return '<div class="board"><div class="bank">🏁 OVERKANT <span>Doel: 7 sprongen</span></div>'+rows+'<div class="bank" style="background:#85bb6e">🌿 START <span>Spring met juiste antwoorden</span></div></div>'+stats(["Sprongen: "+frogStep+" / 7","Levens: "+"❤️".repeat(frogLives||0)])+questionHTML();
  }
- if(game==="race"){
-  return stats(["Jij: "+Math.min(100,playerProgress)+"%","Tegenstander: "+Math.min(100,opponentProgress)+"%"])+ '<div class="race-track"><div class="race-label">🏁 JOUW AUTO</div><div class="race-line"><span class="race-car" style="left:'+(2+Math.min(100,playerProgress)*0.85)+'%">🏎️</span></div><div class="race-label">🤖 TEGENSTANDER</div><div class="race-line"><span class="race-car" style="left:'+(2+Math.min(100,opponentProgress)*0.85)+'%">🚙</span></div><div class="race-label">FINISH →</div></div>'+questionHTML();
- }
+ if(game==="race")return renderRaceBoard();
  if(game==="explorer"){
   const towerHtml=Array.from({length:Math.min(6,towerLevel)},(_,i)=>'<div class="tower-token"><span>🏹</span><small>TORen '+(i+1)+'</small></div>').join("");
   const slotsHtml=Array.from({length:Math.max(0,6-Math.min(6,towerLevel))},()=>'<div class="tower-slot">＋<small>VRIJE PLEK</small></div>').join("");
@@ -262,13 +308,14 @@ function renderGame(){
 }
 function startGame(which){
  if(which==="draw"&&lang!=="zh")return;
- game=which;ended=false;feedback="";frogStep=0;frogLives=3;playerProgress=0;opponentProgress=0;waves=0;explorerLives=3;towerLevel=1;gems=0;towerShields=0;pabloLevel=1;pabloLives=3;pabloStars=0;memoryFirst=null;memoryPending=null;memoryMatches=0;memoryMoves=0;flashRevealed=false;drawIndex=0;
+ game=which;ended=false;feedback="";frogStep=0;frogLives=3;playerProgress=0;opponentProgress=0;waves=0;explorerLives=3;towerLevel=1;gems=0;towerShields=0;pabloLevel=1;pabloLives=3;pabloStars=0;raceCoins=0;raceCarLevel=1;raceWordsDone=0;raceMistakes=0;racePuzzle=null;memoryFirst=null;memoryPending=null;memoryMatches=0;memoryMoves=0;flashRevealed=false;drawIndex=0;
  $("gameMenu").classList.add("hidden");$("playArea").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});
  if(game==="draw"){
   drawIndex=0;
  }else if(game==="memory"){
   memoryDeck=shuffle(shuffle(DATA[lang]).slice(0,6).flatMap((p,i)=>[{id:i,text:p[0],type:"foreign",open:false,matched:false},{id:i,text:p[1],type:"dutch",open:false,matched:false}]));
  }else if(game==="cards"){flashDeck=shuffle(DATA[lang]);flashIndex=0;}
+ else if(game==="race"){makeRacePuzzle();}
  else makeQuestion();
  renderGame();
  if(game==="draw")setupDrawingCanvas();
@@ -470,6 +517,9 @@ $("gameBody").addEventListener("click",e=>{
   else{feedback="Je hebt nog 20 edelstenen nodig.";}
   renderGame();return;
  }
+ const raceTile=e.target.closest("[data-race-tile]");if(raceTile){chooseRaceTile(Number(raceTile.dataset.raceTile));return;}
+ if(e.target.closest("#upgradeRaceCar")){if(raceCoins>=25&&raceCarLevel<4){raceCoins-=25;raceCarLevel++;feedback="🏎️ Motor geüpgraded! Elk goed teken geeft nu meer snelheid.";}renderGame();return;}
+ if(e.target.closest("#resetRaceWord")){makeRacePuzzle();feedback="Nieuw woord klaar!";renderGame();return;}
  const choice=e.target.closest("[data-choice]");if(choice){answerQuestion(Number(choice.dataset.choice));return;}
  const mem=e.target.closest("[data-memory]");if(mem){onMemoryClick(Number(mem.dataset.memory));return;}
  if(e.target.closest("#flipCard")){flashRevealed=!flashRevealed;renderGame();return;}
