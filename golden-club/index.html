@@ -96,6 +96,11 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 .explore-path{position:relative;display:flex;align-items:center;justify-content:space-between;gap:7px;min-height:82px;border:4px dashed #d9c79a;border-radius:40px;padding:12px 10px;background:linear-gradient(90deg,#68705d,#85826c,#66745d);box-shadow:inset 0 0 0 3px #ffffff24}
 .explore-path .enemy{font-size:25px;filter:drop-shadow(0 3px 0 #0003);animation:blobWiggle .7s ease-in-out infinite alternate}
 .explore-path .fortress{font-size:44px;filter:drop-shadow(0 4px 0 #29491b)}
+
+.explore-regions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:9px 0;color:#315624;font-size:12px;font-weight:900}
+.explore-tiles{display:flex;gap:5px}.explore-tile{display:grid;place-items:center;width:25px;height:25px;border:1px solid #7ca74c;border-radius:7px;background:#ffffff42;color:#315624;font-weight:950}
+.explore-tile.visited{background:#f7e7a2;border-color:#c39e32}.explore-tile.current{background:#2f7538;color:#fff7d7;border-color:#245b2b}
+.explore-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:9px}.explore-actions .btn{min-height:37px;padding:8px 11px;font-size:12px}
 .tower-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:10px 0}
 .tower-token,.tower-slot{display:flex;min-height:68px;align-items:center;justify-content:center;flex-direction:column;gap:2px;border:1px solid #d5e7a4;border-radius:11px;background:#f6f7d7;color:#315624;box-shadow:0 3px 0 #3e6b3020}
 .tower-token span{font-size:24px}.tower-token small,.tower-slot small{font-size:10px;font-weight:900}.tower-slot{border-style:dashed;background:#ffffff28;color:#e7f4d5;font-size:24px}
@@ -199,7 +204,7 @@ const DRAW_DATA=[["我","ik"],["你","jij"],["他","hij"],["她","zij"],["叫","
 const GAMES={draw:{title:"Karakters tekenen",desc:"Trek het Chinese karakter over op het tekenvlak."},frog:{title:"Tiny Froggie",desc:"Spring over de obstakels door de juiste vertaling te kiezen."},race:{title:"Garden Race",desc:"Geef je auto een boost met goede antwoorden en finish als eerste."},explorer:{title:"The Explorer",desc:"Bouw een verdediging, koop schildtorens en overleef acht golven."},pablo:{title:"Super Pablo",desc:"Ren door acht levels, verzamel sterren en ontwijk hindernissen."},memory:{title:"Memory Quest",desc:"Vind de zes woord-betekenisparen."},cards:{title:"Flashcard Quest",desc:"Draai de kaarten om en leer woorden op je eigen tempo."}};
 const $=id=>document.getElementById(id);
 let lang="zh",direction="toDutch",game="",item=null,options=[],feedback="",ended=false;
-let frogStep=0,frogLives=3,playerProgress=0,opponentProgress=0,waves=0,explorerLives=3,towerLevel=1,gems=0,towerShields=0,pabloLevel=1,pabloLives=3,pabloStars=0;
+let frogStep=0,frogLives=3,playerProgress=0,opponentProgress=0,waves=0,explorerLives=3,towerLevel=1,gems=0,towerShields=0,heroLevel=1,exploredThisWave=false,regionsFound=0,pabloLevel=1,pabloLives=3,pabloStars=0;
 let memoryDeck=[],memoryFirst=null,memoryPending=null,memoryMatches=0,memoryMoves=0;
 let flashDeck=[],flashIndex=0,flashRevealed=false,drawIndex=0,drawingState=null,drawHasMarks=false,drawnStrokes=[],currentStroke=null,drawSetupToken=0;
 const strokeDataCache={};
@@ -457,14 +462,20 @@ function renderBoard(){
  if(game==="frog")return renderFrogBoard();
  if(game==="race")return renderRaceBoard();
  if(game==="explorer"){
-  const towerHtml=Array.from({length:Math.min(6,towerLevel)},(_,i)=>'<div class="tower-token"><span>🏹</span><small>TORen '+(i+1)+'</small></div>').join("");
+  const towerHtml=Array.from({length:Math.min(6,towerLevel)},(_,i)=>'<div class="tower-token"><span>🏹</span><small>TOREN '+(i+1)+'</small></div>').join("");
   const slotsHtml=Array.from({length:Math.max(0,6-Math.min(6,towerLevel))},()=>'<div class="tower-slot">＋<small>VRIJE PLEK</small></div>').join("");
-  const enemies=Array.from({length:Math.min(4,1+Math.floor(waves/2))},(_,i)=>'<span class="enemy" style="animation-delay:'+(i*.14)+'s">👾</span>').join("");
-  return stats(["Golf: "+waves+" / 8","Torenlevel: "+towerLevel,"Edelstenen: "+gems,"Schildtorens: "+towerShields,"❤️".repeat(explorerLives||0)])+
+  const enemies=Array.from({length:Math.min(5,1+Math.floor(waves/2))},(_,i)=>'<span class="enemy" style="animation-delay:'+(i*.14)+'s">👾</span>').join("");
+  const areas=Array.from({length:6},(_,i)=>'<span class="explore-tile '+(i<regionsFound?"visited":i===regionsFound?"current":"")+'">'+(i<regionsFound?"✓":i===regionsFound?"?":"·")+'</span>').join("");
+  return stats(["Golf: "+waves+" / 8","Torenlevel: "+towerLevel,"Held level: "+heroLevel,"Edelstenen: "+gems,"Schilden: "+towerShields,"❤️".repeat(explorerLives||0)])+
    '<div class="explore-map"><div class="map-banner"><span>🗺️ BOSPAD · GOLF '+Math.min(8,waves+1)+'</span><span>Bescherm het kasteel!</span></div>'+
    '<div class="explore-path">'+enemies+'<span style="font-size:26px">🌲</span><span class="fortress">🏰</span></div>'+
+   '<div class="explore-regions"><strong>Ontdekte gebieden</strong><div class="explore-tiles">'+areas+'</div></div>'+
    '<div class="tower-row">'+towerHtml+slotsHtml+'</div>'+
-   '<div class="shield-shop"><span>🛡️ Extra schildtoren blokkeert één fout antwoord</span><button id="buildTower" class="btn light" type="button" '+(gems<20||towerShields>=3?'disabled':'')+'>Bouw schild · 20 💎</button></div></div>'+questionHTML();
+   '<div class="explore-actions">'+
+   '<button id="exploreRegion" class="btn light" type="button" '+(exploredThisWave?'disabled':'')+'>🧭 Verken gebied · +8 💎</button>'+
+   '<button id="buildTower" class="btn gold" type="button" '+(gems<20||towerLevel>=6?'disabled':'')+'>🏹 Bouw toren · 20 💎</button>'+
+   '<button id="upgradeHero" class="btn light" type="button" '+(gems<30||heroLevel>=5?'disabled':'')+'>🛡️ Verbeter held · 30 💎</button>'+
+   '</div></div>'+questionHTML();
  }
  if(game==="pablo")return renderPabloBoard();
  if(game==="memory"){
@@ -494,7 +505,7 @@ function renderGame(){
 function startGame(which){
  if(which==="draw"&&lang!=="zh")return;
  if(pabloFrameId)cancelAnimationFrame(pabloFrameId);pabloFrameId=0;pabloLastTime=0;pabloKeys={left:false,right:false};pabloArcade=null;
- game=which;ended=false;feedback="";frogStep=0;frogLives=3;playerProgress=0;opponentProgress=0;waves=0;explorerLives=3;towerLevel=1;gems=0;towerShields=0;pabloLevel=1;pabloLives=3;pabloStars=0;frogStep=0;frogArcade=null;raceCoins=0;raceCarLevel=1;raceWordsDone=0;raceMistakes=0;racePuzzle=null;memoryFirst=null;memoryPending=null;memoryMatches=0;memoryMoves=0;flashRevealed=false;drawIndex=0;
+ game=which;ended=false;feedback="";frogStep=0;frogLives=3;playerProgress=0;opponentProgress=0;waves=0;explorerLives=3;towerLevel=1;gems=0;towerShields=0;heroLevel=1;exploredThisWave=false;regionsFound=0;pabloLevel=1;pabloLives=3;pabloStars=0;frogStep=0;frogArcade=null;raceCoins=0;raceCarLevel=1;raceWordsDone=0;raceMistakes=0;racePuzzle=null;memoryFirst=null;memoryPending=null;memoryMatches=0;memoryMoves=0;flashRevealed=false;drawIndex=0;
  $("gameMenu").classList.add("hidden");$("playArea").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});
  if(game==="draw"){
   drawIndex=0;
@@ -518,9 +529,9 @@ function answerQuestion(index){
   if(chosen===correct){playerProgress+=22;feedback="⚡ Goed! Turbo-boost!";}else{opponentProgress+=17;feedback="🤖 De tegenstander rijdt voorbij! Antwoord: "+correct;}
   if(playerProgress>=100||opponentProgress>=100)ended=true;
  }else if(game==="explorer"){
-  if(chosen===correct){waves++;towerLevel=Math.min(6,towerLevel+1);gems+=10;feedback="✨ Goed! De torens verdedigen het kasteel en je krijgt 10 edelstenen.";}
-  else if(towerShields>0){towerShields--;feedback="🛡️ Je schildtoren blokkeerde de aanval! Antwoord: "+correct;}
-  else{explorerLives--;feedback="💥 Een blob kwam langs de verdediging. Antwoord: "+correct;if(explorerLives<=0)ended=true;}
+  if(chosen===correct){waves++;gems+=8+heroLevel*2;exploredThisWave=false;feedback="✨ Goed! Je verdediging houdt stand. Je vindt bouwmaterialen voor de volgende golf.";}
+  else if(towerShields>0){towerShields--;feedback="🛡️ Een gebouwde toren blokkeert de blob! Antwoord: "+correct;}
+  else{explorerLives--;feedback="💥 Een blob komt langs je verdediging. Antwoord: "+correct;if(explorerLives<=0)ended=true;}
   if(waves>=8)ended=true;
  }else if(game==="pablo"){
   if(chosen===correct){pabloStars++;pabloLevel++;feedback="⭐ Goed! Super Pablo springt verder en pakt een ster.";}
@@ -700,12 +711,17 @@ document.querySelectorAll(".game-card").forEach(b=>b.addEventListener("click",()
 $("backToGames").addEventListener("click",()=>{$("playArea").classList.add("hidden");$("gameMenu").classList.remove("hidden");game="";window.scrollTo({top:0,behavior:"smooth"});});
 $("gameBody").addEventListener("click",e=>{
  const frogButton=e.target.closest("[data-frog-move]");if(frogButton){frogStepMove(frogButton.dataset.frogMove);return;}
- const pabloButton=e.target.closest("[data-pablo-control]");
- if(pabloButton){const key=pabloButton.dataset.pabloControl;if(key==="left"||key==="right")pabloKeys[key]=true;if(key==="jump"&&pabloArcade&&pabloArcade.player.onGround)pabloArcade.player.vy=-545;return;}
+ const pabloButton=e.target.closest("[data-pablo-control]");if(pabloButton)return;
+ if(e.target.closest("#exploreRegion")){
+  if(!exploredThisWave){exploredThisWave=true;regionsFound++;gems+=8;feedback="🧭 Gebied verkend! Je hebt 8 edelstenen gevonden."; }
+  renderGame();return;
+ }
  if(e.target.closest("#buildTower")){
-  if(gems>=20&&towerShields<3){gems-=20;towerShields++;feedback="🛡️ Schildtoren gebouwd! De volgende fout wordt geblokkeerd.";}
-  else if(towerShields>=3){feedback="Je hebt al drie schildtorens.";}
-  else{feedback="Je hebt nog 20 edelstenen nodig.";}
+  if(gems>=20&&towerLevel<6){gems-=20;towerLevel++;towerShields=Math.min(3,towerShields+1);feedback="🏹 Toren gebouwd! Een toekomstige aanval wordt geblokkeerd.";}
+  renderGame();return;
+ }
+ if(e.target.closest("#upgradeHero")){
+  if(gems>=30&&heroLevel<5){gems-=30;heroLevel++;feedback="🛡️ Je held is sterker geworden! Goede antwoorden leveren meer materialen op.";}
   renderGame();return;
  }
  const raceTile=e.target.closest("[data-race-tile]");if(raceTile){chooseRaceTile(Number(raceTile.dataset.raceTile));return;}
@@ -723,6 +739,7 @@ $("gameBody").addEventListener("click",e=>{
  if(e.target.closest("#playAgain")){startGame(game);return;}
  if(e.target.closest("#backEnd")){$("backToGames").click();return;}
 });
+$("gameBody").addEventListener("pointerdown",e=>{const b=e.target.closest("[data-pablo-control]");if(!b)return;e.preventDefault();const key=b.dataset.pabloControl;if(key==="left"||key==="right")pabloKeys[key]=true;if(key==="jump"&&pabloArcade&&pabloArcade.player.onGround)pabloArcade.player.vy=-545;});
 $("gameBody").addEventListener("pointerup",e=>{const b=e.target.closest("[data-pablo-control]");if(b&&b.dataset.pabloControl in pabloKeys)pabloKeys[b.dataset.pabloControl]=false;});
 $("gameBody").addEventListener("pointercancel",()=>{pabloKeys.left=false;pabloKeys.right=false;});
 
