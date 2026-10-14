@@ -70,6 +70,7 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 .mini-hint{text-align:center;color:#786944;font-size:12px;margin:10px 0}
 .card-large{display:grid;place-items:center;min-height:220px;padding:18px;margin:15px 0;border:2px solid #e5c85e;border-radius:20px;background:linear-gradient(145deg,#fff5ca,#fffdf7);text-align:center;cursor:pointer}
 .card-large .front{font-size:clamp(30px,7vw,52px);font-weight:900;overflow-wrap:anywhere}.card-large .back{font-size:18px;font-weight:800;color:#715619;margin-top:10px}
+.drawing-canvas{display:block;width:100%;height:clamp(240px,58vw,410px);touch-action:none;border:2px dashed #c8b36e;border-radius:14px;background:#fffefa;cursor:crosshair;user-select:none}
 .memory-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:15px}
 .memory-card{min-height:84px;border:1px solid #d6bd73;border-radius:13px;background:linear-gradient(135deg,#45320d,#70551a);color:#ffeab0;font:800 14px/1.3 system-ui;cursor:pointer;padding:7px;overflow-wrap:anywhere}
 .memory-card.open,.memory-card.matched{background:#fff3c1;color:#392a0b;border-color:#cba64a}.memory-card.matched{box-shadow:inset 0 0 0 2px #dbbd60}
@@ -112,6 +113,7 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
   <button class="game-card" data-game="explorer"><div class="art explorer"><span class="decor" style="left:14px;top:9px">✨</span><span class="emoji">🏰</span><span class="decor" style="right:14px;bottom:8px">🟣</span></div><div class="game-copy"><h3>The Explorer</h3><p>Verdedig je toren tegen blobs, verzamel kracht en overleef acht golven.</p><span class="tag">Avontuur</span></div></button>
   <button class="game-card" data-game="memory"><div class="art memory"><span class="decor" style="left:14px;top:9px">🧠</span><span class="emoji">🃏</span><span class="decor" style="right:13px;bottom:8px">⭐</span></div><div class="game-copy"><h3>Memory Quest</h3><p>Vind de paren: het Spaanse, Franse of Chinese woord en de Nederlandse betekenis.</p><span class="tag">Memory</span></div></button>
   <button class="game-card" data-game="cards"><div class="art cards"><span class="decor" style="left:14px;top:9px">📚</span><span class="emoji">🎴</span><span class="decor" style="right:14px;bottom:8px">💡</span></div><div class="game-copy"><h3>Flashcard Quest</h3><p>Draai kaarten om, test jezelf en leer woorden op je eigen tempo.</p><span class="tag">Kaartspel</span></div></button>
+  <button class="game-card hidden" data-game="draw" id="drawGameCard"><div class="art" style="background:linear-gradient(145deg,#c5e5da,#73ac9b)"><span class="decor" style="left:14px;top:9px">✍️</span><span class="emoji">我</span><span class="decor" style="right:14px;bottom:8px">🖌️</span></div><div class="game-copy"><h3>Karakters tekenen</h3><p>Oefen de Chinese tekens door ze op het tekenvlak over te trekken.</p><span class="tag">Alleen Chinees</span></div></button>
  </section>
  <section id="playArea" class="play-area hidden">
   <div class="play-head"><div><h2 id="gameTitle">Tiny Froggie</h2><p id="gameDesc"></p></div><button id="backToGames" class="btn light" type="button">← Alle games</button></div>
@@ -131,24 +133,30 @@ fr:[
 ["jouer au foot","voetballen"],["elle joue au foot","zij voetbalt"],["habiter","wonen"],["le talent","het talent"],["danser","dansen"],["elle danse","zij danst"],["chanter","zingen"],["il chante","hij zingt"],["jouer du piano","piano spelen"],["je joue du piano","ik speel piano"],["faire du sport","sporten"],["il habite","hij woont"],["parler","spreken"],["elle parle","zij spreekt"],["il s'appelle","hij heet"],["elle s'appelle","zij heet"],["c'est","het is"],["un chien","een hond"],["le français","het Frans"],["je parle français","ik spreek Frans"],["un enfant","een kind"],["toujours","altijd"],["beaucoup","veel"],["ensemble","samen"],["huit","acht"],["neuf","negen"],["dix","tien"],["bonjour","goedendag"],["ça va?","hoe gaat het?"],["ça va bien?","gaat het goed?"],["oui, ça va","ja, het gaat goed"],["salut!","hoi"],["je m'appelle ...","ik heet ..."],["comment tu t'appelles?","hoe heet jij?"],["au revoir","tot ziens"],["très bien","heel goed"],["excellent","uitstekend"],["pas mal","niet slecht"],["oui","ja"],["non","nee"],["merci","bedankt"],["monsieur","meneer"],["madame","mevrouw"],["zéro","nul"],["un, une","een"],["deux","twee"],["trois","drie"],["quatre","vier"],["cinq","vijf"],["six","zes"],["sept","zeven"],["bonsoir","goedenavond"],["s'il vous plaît","alstublieft"],["voilà!","ziezo"],["le garçon","de jongen"],["la fille","het meisje"],["excusez-moi","pardon"],["le prénom","de voornaam"],["le nom (de famille)","de achternaam"],["le surnom","de bijnaam"],["l'homme","de man"],["la femme","de vrouw"],["génial","geweldig"],["formidable","fantastisch"],["chouette","leuk"],["super","super"],["j'habite à","ik woon in"],["une école","een school"],["le collège","de middelbare school"],["le professeur","de docent"],["la professeur","de docente"],["onze","elf"],["douze","twaalf"],["treize","dertien"],["quatorze","veertien"],["quinze","vijftien"],["seize","zestien"],["dix-sept","zeventien"],["dix-huit","achttien"],["dix-neuf","negentien"],["vingt","twintig"],["tu as quel âge?","hoe oud ben je?"],["j'ai douze ans","ik ben twaalf jaar oud"]
 ],
 zh:[
-["一","één"],["二","twee"],["三","drie"],["十","tien"],["人","mens"],["口","mond"],["日","zon / dag"],["月","maan / maand"],["山","berg"],["水","water"],["火","vuur"],["木","boom / hout"],["田","veld"],["大","groot"],["小","klein"],["中","midden"],["上","boven"],["下","onder"],["天","hemel"],["女","vrouw"],["子","kind"],["好","goed"],["学","leren"],["生","leven"],["我","ik"],["你","jij"],["他","hij"],["她","zij"],["是","zijn / is"],["不","niet"],["有","hebben"],["家","huis / gezin"],["手","hand"],["目","oog"],["耳","oor"],["心","hart"],["门","deur"],["书","boek"],["鱼","vis"],["马","paard"],["鸟","vogel"],["牛","koe"],["羊","schaap"],["米","rijst"],["雨","regen"],["电","elektriciteit"],["石","steen"],["金","goud / metaal"],["开","open"],["关","dicht"],["来","komen"],["去","gaan"],["见","zien"]
+["一","één"],["二","twee"],["三","drie"],["十","tien"],["人","mens"],["口","mond"],["日","zon / dag"],["月","maan / maand"],["山","berg"],["水","water"],["火","vuur"],["木","boom / hout"],["田","veld"],["大","groot"],["小","klein"],["中","midden"],["上","boven"],["下","onder"],["天","hemel"],["女","vrouw"],["子","kind"],["好","goed"],["学","leren"],["生","leven"],["我","ik"],["你","jij"],["他","hij"],["她","zij"],["是","zijn / is"],["不","niet"],["有","hebben"],["家","huis / gezin"],["手","hand"],["目","oog"],["耳","oor"],["心","hart"],["门","deur"],["书","boek"],["鱼","vis"],["马","paard"],["鸟","vogel"],["牛","koe"],["羊","schaap"],["米","rijst"],["雨","regen"],["电","elektriciteit"],["石","steen"],["金","goud / metaal"],["开","open"],["关","dicht"],["来","komen"],["去","gaan"],["见","zien"],["叫","heten / noemen"],["吗","vraagdeeltje voor een ja/nee-vraag"],["呢","vraagdeeltje (en jij? / hoe zit het?)"]
 ]};
 const LANGS={es:{name:"Spaans",flag:"🇪🇸"},fr:{name:"Frans",flag:"🇫🇷"},zh:{name:"Chinees",flag:"🀄"}};
-const GAMES={frog:{title:"Tiny Froggie",desc:"Spring over de obstakels door de juiste vertaling te kiezen."},race:{title:"Language Race",desc:"Geef je auto een boost met goede antwoorden en finish als eerste."},explorer:{title:"The Explorer",desc:"Verdedig je toren tegen blobs en overleef acht golven."},memory:{title:"Memory Quest",desc:"Vind de zes woord-betekenisparen."},cards:{title:"Flashcard Quest",desc:"Draai de kaarten om en leer woorden op je eigen tempo."}};
+const DRAW_DATA=[["我","ik"],["你","jij"],["他","hij"],["她","zij"],["叫","heten / noemen"],["好","goed"],["吗","vraagdeeltje voor een ja/nee-vraag"],["呢","vraagdeeltje (en jij? / hoe zit het?)"],["不","niet"]];
+const GAMES={draw:{title:"Karakters tekenen",desc:"Trek het Chinese karakter over op het tekenvlak."},frog:{title:"Tiny Froggie",desc:"Spring over de obstakels door de juiste vertaling te kiezen."},race:{title:"Language Race",desc:"Geef je auto een boost met goede antwoorden en finish als eerste."},explorer:{title:"The Explorer",desc:"Verdedig je toren tegen blobs en overleef acht golven."},memory:{title:"Memory Quest",desc:"Vind de zes woord-betekenisparen."},cards:{title:"Flashcard Quest",desc:"Draai de kaarten om en leer woorden op je eigen tempo."}};
 const $=id=>document.getElementById(id);
 let lang="es",direction="toDutch",game="",item=null,options=[],feedback="",ended=false;
 let frogStep=0,frogLives=3,playerProgress=0,opponentProgress=0,waves=0,explorerLives=3,towerLevel=1,gems=0;
 let memoryDeck=[],memoryFirst=null,memoryPending=null,memoryMatches=0,memoryMoves=0;
-let flashDeck=[],flashIndex=0,flashRevealed=false;
+let flashDeck=[],flashIndex=0,flashRevealed=false,drawIndex=0,drawingState=null;
 const shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
 const norm=s=>String(s||"").trim().toLocaleLowerCase();
 function promptOf(p){return direction==="toDutch"?p[0]:p[1]}
 function answerOf(p){return direction==="toDutch"?p[1]:p[0]}
-function setLanguage(next){lang=next;document.querySelectorAll(".lang").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));$("directionLabel").textContent="Oefenrichting: "+(direction==="toDutch"?LANGS[lang].name+" → Nederlands":"Nederlands → "+LANGS[lang].name);if(game)startGame(game);}
+function setLanguage(next){lang=next;document.querySelectorAll(".lang").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));$("directionLabel").textContent="Oefenrichting: "+(direction==="toDutch"?LANGS[lang].name+" → Nederlands":"Nederlands → "+LANGS[lang].name);$("drawGameCard").classList.toggle("hidden",lang!=="zh");if(game&&game==="draw"&&lang!=="zh"){$("backToGames").click();}else if(game)startGame(game);}
 function makeQuestion(){const data=DATA[lang];item=data[Math.floor(Math.random()*data.length)];const correct=answerOf(item);const others=shuffle(data.filter(p=>answerOf(p)!==correct).map(answerOf).filter((v,i,a)=>a.indexOf(v)===i)).slice(0,3);options=shuffle([correct].concat(others));}
 function stats(arr){return '<div class="stats">'+arr.map(x=>'<span class="stat">'+x+'</span>').join("")+'</div>';}
 function questionHTML(){return '<div class="question"><div class="q-label">Kies het juiste antwoord · '+LANGS[lang].name+'</div><div class="prompt">'+promptOf(item)+'</div><div class="choices">'+options.map((x,i)=>'<button class="choice" data-choice="'+i+'" type="button" '+(ended?'disabled':'')+'>'+x+'</button>').join("")+'</div><p class="feedback" aria-live="polite">'+feedback+'</p></div>';}
 function renderBoard(){
+ if(game==="draw"){
+  const p=DRAW_DATA[drawIndex];
+  return stats(["Karakter "+(drawIndex+1)+" van "+DRAW_DATA.length,"Teken met je vinger of muis"])+
+   '<div class="question"><div class="q-label">Teken het karakter na</div><div class="prompt" style="margin-bottom:4px">'+p[0]+'</div><p class="mini-hint" style="font-size:15px;color:#725919;font-weight:850">'+p[1]+'</p><p class="mini-hint">Trek het lichte voorbeeld over. Gebruik je vinger op een touchscreen of je muis.</p><canvas id="drawingCanvas" class="drawing-canvas" aria-label="Teken het Chinese karakter na"></canvas><div class="actions" style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:12px"><button class="btn light" id="clearDrawing" type="button">🧽 Opnieuw tekenen</button><button class="btn gold" id="nextDrawing" type="button">Volgend karakter →</button></div></div>';
+ }
  if(game==="frog"){
   let rows="";for(let row=0;row<7;row++){const step=6-row;const obstacles=shuffle(["🚗","🐍","🪵","🪨","🚙","🪷"]).slice(0,3);rows+='<div class="lane">';if(frogStep===step)rows+='<span class="frog" style="left:'+(8+step*12)+'%">🐸</span>';else rows+=obstacles.map((o,i)=>'<span class="obstacle" style="transform:translateX('+((i-1)*12)+'px)">'+o+'</span>').join("");rows+='</div>';}
   return '<div class="board"><div class="bank">🏁 OVERKANT <span>Doel: 7 sprongen</span></div>'+rows+'<div class="bank" style="background:#85bb6e">🌿 START <span>Spring met juiste antwoorden</span></div></div>'+stats(["Sprongen: "+frogStep+" / 7","Levens: "+"❤️".repeat(frogLives||0)])+questionHTML();
@@ -182,16 +190,20 @@ function renderGame(){
  $("gameBody").innerHTML=renderBoard();
 }
 function startGame(which){
- game=which;ended=false;feedback="";frogStep=0;frogLives=3;playerProgress=0;opponentProgress=0;waves=0;explorerLives=3;towerLevel=1;gems=0;memoryFirst=null;memoryPending=null;memoryMatches=0;memoryMoves=0;flashRevealed=false;
+ if(which==="draw"&&lang!=="zh")return;
+ game=which;ended=false;feedback="";frogStep=0;frogLives=3;playerProgress=0;opponentProgress=0;waves=0;explorerLives=3;towerLevel=1;gems=0;memoryFirst=null;memoryPending=null;memoryMatches=0;memoryMoves=0;flashRevealed=false;drawIndex=0;
  $("gameMenu").classList.add("hidden");$("playArea").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});
- if(game==="memory"){
+ if(game==="draw"){
+  drawIndex=0;
+ }else if(game==="memory"){
   memoryDeck=shuffle(shuffle(DATA[lang]).slice(0,6).flatMap((p,i)=>[{id:i,text:p[0],type:"foreign",open:false,matched:false},{id:i,text:p[1],type:"dutch",open:false,matched:false}]));
  }else if(game==="cards"){flashDeck=shuffle(DATA[lang]);flashIndex=0;}
  else makeQuestion();
  renderGame();
+ if(game==="draw")setupDrawingCanvas();
 }
 function answerQuestion(index){
- if(ended)return;const chosen=options[index],correct=answerOf(item);
+ if(ended||game==="draw")return;const chosen=options[index],correct=answerOf(item);
  document.querySelectorAll("#gameBody .choice").forEach(b=>b.disabled=true);
  if(game==="frog"){
   if(chosen===correct){frogStep++;feedback="✅ Goed! Froggie springt verder!";}else{frogLives--;feedback="❌ Het juiste antwoord is: "+correct;if(frogLives<=0)ended=true;}
@@ -204,6 +216,23 @@ function answerQuestion(index){
   if(waves>=8)ended=true;
  }
  if(!ended)makeQuestion();renderGame();
+}
+function setupDrawingCanvas(){
+ const canvas=$("drawingCanvas");if(!canvas)return;
+ const rect=canvas.getBoundingClientRect(),ratio=Math.max(1,window.devicePixelRatio||1);
+ canvas.width=Math.floor(rect.width*ratio);canvas.height=Math.floor(rect.height*ratio);
+ const ctx=canvas.getContext("2d");ctx.setTransform(ratio,0,0,ratio,0,0);
+ ctx.fillStyle="#fffefa";ctx.fillRect(0,0,rect.width,rect.height);
+ ctx.fillStyle="#e4dcc4";ctx.textAlign="center";ctx.textBaseline="middle";
+ ctx.font=Math.min(rect.height*.76,rect.width*.48)+'px "KaiTi","STKaiti","Noto Serif CJK SC","PingFang SC","Microsoft YaHei",serif';
+ ctx.fillText(DRAW_DATA[drawIndex][0],rect.width/2,rect.height/2);
+ ctx.strokeStyle="#2f260e";ctx.lineWidth=8;ctx.lineCap="round";ctx.lineJoin="round";
+ let drawing=false;
+ const position=e=>{const r=canvas.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top};};
+ canvas.onpointerdown=e=>{drawing=true;canvas.setPointerCapture(e.pointerId);const p=position(e);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+.1,p.y+.1);ctx.stroke();};
+ canvas.onpointermove=e=>{if(!drawing)return;const p=position(e);ctx.lineTo(p.x,p.y);ctx.stroke();};
+ const stop=()=>{drawing=false;ctx.beginPath();};
+ canvas.onpointerup=stop;canvas.onpointercancel=stop;canvas.onpointerleave=e=>{if(e.buttons===0)stop();};
 }
 function onMemoryClick(index){
  const card=memoryDeck[index];if(!card||card.matched)return;
@@ -218,6 +247,7 @@ function onMemoryClick(index){
  renderGame();
 }
 document.querySelectorAll(".lang").forEach(b=>b.addEventListener("click",()=>setLanguage(b.dataset.lang)));
+$("drawGameCard").classList.toggle("hidden",lang!=="zh");
 $("directionToggle").addEventListener("click",()=>{direction=direction==="toDutch"?"toForeign":"toDutch";$("directionLabel").textContent="Oefenrichting: "+(direction==="toDutch"?LANGS[lang].name+" → Nederlands":"Nederlands → "+LANGS[lang].name);if(game)startGame(game);});
 document.querySelectorAll(".game-card").forEach(b=>b.addEventListener("click",()=>startGame(b.dataset.game)));
 $("backToGames").addEventListener("click",()=>{$("playArea").classList.add("hidden");$("gameMenu").classList.remove("hidden");game="";window.scrollTo({top:0,behavior:"smooth"});});
@@ -225,6 +255,8 @@ $("gameBody").addEventListener("click",e=>{
  const choice=e.target.closest("[data-choice]");if(choice){answerQuestion(Number(choice.dataset.choice));return;}
  const mem=e.target.closest("[data-memory]");if(mem){onMemoryClick(Number(mem.dataset.memory));return;}
  if(e.target.closest("#flipCard")){flashRevealed=!flashRevealed;renderGame();return;}
+ if(e.target.closest("#clearDrawing")){setupDrawingCanvas();return;}
+ if(e.target.closest("#nextDrawing")){drawIndex=(drawIndex+1)%DRAW_DATA.length;renderGame();setupDrawingCanvas();return;}
  if(e.target.closest("#nextCard")){flashIndex=(flashIndex+1)%flashDeck.length;flashRevealed=false;renderGame();return;}
  if(e.target.closest("#prevCard")){flashIndex=(flashIndex+flashDeck.length-1)%flashDeck.length;flashRevealed=false;renderGame();return;}
  if(e.target.closest("#shuffleDeck")){flashDeck=shuffle(DATA[lang]);flashIndex=0;flashRevealed=false;renderGame();return;}
