@@ -68,6 +68,10 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 .race-car{position:absolute;top:1px;font-size:31px;transition:left .35s;filter:drop-shadow(0 2px 1px #0006);animation:carBounce .23s ease-in-out infinite alternate}
 .race-label{font-size:12px;font-weight:900;color:#3d4d23}
 
+
+.arcade-canvas-wrap{position:relative;width:100%;aspect-ratio:9/5;border:2px solid #d8bf6e;border-radius:17px;overflow:hidden;margin:12px 0;background:#e4f3bd;box-shadow:0 7px 17px #5b45141a}
+.arcade-canvas{display:block;width:100%;height:100%;touch-action:none}
+.pablo-slots{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;margin:8px 0;color:#674a09;font-size:clamp(18px,4vw,25px);font-weight:950;letter-spacing:.07em}
 .frogger-world{border:2px solid #d2ba73;border-radius:17px;overflow:hidden;margin:14px 0;background:#4e853e;box-shadow:0 8px 18px #55400d17}
 .frogger-bank{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:54px;padding:8px 13px;background:repeating-linear-gradient(135deg,#80bd63 0,#80bd63 22px,#91ca71 22px,#91ca71 44px);color:#20491f;font-size:12px;font-weight:950}
 .frogger-bank.start{background:repeating-linear-gradient(135deg,#4f953e 0,#4f953e 22px,#69ac48 22px,#69ac48 44px);color:#f8f2ca}
@@ -199,7 +203,7 @@ let frogStep=0,frogLives=3,playerProgress=0,opponentProgress=0,waves=0,explorerL
 let memoryDeck=[],memoryFirst=null,memoryPending=null,memoryMatches=0,memoryMoves=0;
 let flashDeck=[],flashIndex=0,flashRevealed=false,drawIndex=0,drawingState=null,drawHasMarks=false,drawnStrokes=[],currentStroke=null,drawSetupToken=0;
 const strokeDataCache={};
-let frogArcade=null;
+let frogArcade=null,pabloArcade=null,pabloFrameId=0,pabloLastTime=0,pabloKeys={left:false,right:false};
 const shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
 const norm=s=>String(s||"").trim().toLocaleLowerCase();
 function promptOf(p){return direction==="toDutch"?p[0]:p[1]}
@@ -313,6 +317,119 @@ window.addEventListener("keydown",e=>{
  if(map[e.key]){e.preventDefault();frogStepMove(map[e.key]);}
 });
 
+
+function makePabloArcade(){
+ const pair=randomPair(),target=Array.from(answerOf(pair)),tokens=[];
+ const span=target.length>1?690/(target.length-1):0;
+ const heights=[350,315,333,292,350,310,330,300];
+ target.forEach((ch,i)=>tokens.push({x:105+i*span,y:heights[i%heights.length],ch,index:i,correct:true,used:false}));
+ const source=gameWordPool().map(p=>Array.from(answerOf(p))).flat(),decoys=[];
+ const candidates=source.filter(ch=>!target.includes(ch));
+ for(let i=0;i<Math.min(4,Math.max(2,target.length));i++){
+  if(!candidates.length)break;
+  decoys.push({x:170+i*175,y:[258,238,270,248][i%4],ch:candidates[Math.floor(Math.random()*candidates.length)],index:-1,correct:false,used:false});
+ }
+ return {pair,target,tokens:shuffle(tokens.concat(decoys)),player:{x:38,y:394,vy:0,onGround:true,w:30,h:36},collected:0,invulnerable:0,feedback:"Gebruik ← → om te lopen en ↑ of spatie om te springen. Verzamel de letters/tekens in volgorde.",platforms:[{x:0,y:430,w:900},{x:150,y:365,w:130},{x:335,y:335,w:130},{x:520,y:365,w:130},{x:700,y:345,w:150}],obstacles:[{x:225,w:38},{x:450,w:42},{x:675,w:38}]};
+}
+function renderPabloBoard(){
+ const s=pabloArcade;
+ return '<div class="question"><div class="q-label">Super Pablo · verzamel fruitletters</div><div class="prompt" id="pabloPrompt">'+(s?promptOf(s.pair):"…")+'</div><p class="mini-hint">Spring over kisten, pak de juiste letters/tekens in de goede volgorde en voltooi acht levels.</p><div class="pablo-slots" id="pabloSlots">'+(s?s.target.map((ch,i)=>i<s.collected?ch:"＿").join(" "):"")+'</div><p class="feedback" id="pabloFeedback">'+(s?s.feedback:"")+'</p></div><div class="arcade-canvas-wrap"><canvas class="arcade-canvas" id="pabloCanvas" aria-label="Super Pablo platformspel"></canvas></div><div class="arcade-controls"><button class="btn light" data-pablo-control="left">← Houd vast</button><button class="btn gold" data-pablo-control="jump">↑ Spring</button><button class="btn light" data-pablo-control="right">Houd vast →</button></div><p class="mini-hint" id="pabloStatus">Level '+pabloLevel+' / 8 · Sterren: '+pabloStars+' · Levens: '+'❤️'.repeat(pabloLives)+'</p>';
+}
+function updatePabloHud(){
+ if(!pabloArcade)return;
+ const prompt=$("pabloPrompt"),slots=$("pabloSlots"),feedbackEl=$("pabloFeedback"),status=$("pabloStatus");
+ if(prompt)prompt.textContent=promptOf(pabloArcade.pair);
+ if(slots)slots.textContent=pabloArcade.target.map((ch,i)=>i<pabloArcade.collected?ch:"＿").join(" ");
+ if(feedbackEl)feedbackEl.textContent=pabloArcade.feedback;
+ if(status)status.textContent="Level "+pabloLevel+" / 8 · Sterren: "+pabloStars+" · Levens: "+"❤️".repeat(pabloLives);
+}
+function losePabloLife(message){
+ if(!pabloArcade||pabloArcade.invulnerable>0)return;
+ pabloLives--;pabloArcade.feedback=message;pabloArcade.player.x=38;pabloArcade.player.y=394;pabloArcade.player.vy=0;pabloArcade.player.onGround=true;pabloArcade.invulnerable=1.1;
+ if(pabloLives<=0){ended=true;if(pabloFrameId)cancelAnimationFrame(pabloFrameId);pabloFrameId=0;renderGame();return;}
+ updatePabloHud();
+}
+function pabloCollisions(){
+ const s=pabloArcade;if(!s||ended)return;
+ const p=s.player;
+ if(s.invulnerable>0)s.invulnerable=Math.max(0,s.invulnerable-1/60);
+ for(const o of s.obstacles){
+  if(Math.abs(p.x-o.x)<(o.w/2+p.w/2)&&p.y+p.h>398){losePabloLife("💥 Je botste tegen een kist. Spring eroverheen!");return;}
+ }
+ for(const t of s.tokens){
+  if(t.used)continue;
+  if(Math.abs(p.x-t.x)<24&&Math.abs((p.y+p.h/2)-t.y)<27){
+   if(t.correct&&t.index===s.collected){
+    t.used=true;s.collected++;pabloStars++;s.feedback="⭐ Goed teken! Nog "+(s.target.length-s.collected)+" te pakken.";
+    if(s.collected>=s.target.length){
+     pabloLevel++;
+     if(pabloLevel>8){ended=true;if(pabloFrameId)cancelAnimationFrame(pabloFrameId);pabloFrameId=0;renderGame();return;}
+     pabloArcade=makePabloArcade();updatePabloHud();return;
+    }
+    updatePabloHud();return;
+   }
+   if(!t.correct)t.used=true;
+   losePabloLife(t.correct?"❌ Je pakte een teken in de verkeerde volgorde.":"❌ Dat teken hoort niet in het woord.");
+   return;
+  }
+ }
+}
+function drawPabloFrame(now){
+ if(game!=="pablo"||!pabloArcade)return;
+ const canvas=$("pabloCanvas");if(!canvas)return;
+ const rect=canvas.getBoundingClientRect(),ratio=Math.max(1,window.devicePixelRatio||1);
+ if(canvas.width!==Math.floor(rect.width*ratio)||canvas.height!==Math.floor(rect.height*ratio)){canvas.width=Math.floor(rect.width*ratio);canvas.height=Math.floor(rect.height*ratio);}
+ const ctx=canvas.getContext("2d");ctx.setTransform(canvas.width/900,0,0,canvas.height/500,0,0);
+ const dt=Math.min(.035,pabloLastTime?(now-pabloLastTime)/1000:1/60);pabloLastTime=now;
+ const s=pabloArcade,p=s.player;
+ ctx.clearRect(0,0,900,500);
+ const sky=ctx.createLinearGradient(0,0,0,500);sky.addColorStop(0,"#88d9ff");sky.addColorStop(.65,"#e0f6ff");sky.addColorStop(.66,"#abd879");sky.addColorStop(1,"#579c44");
+ ctx.fillStyle=sky;ctx.fillRect(0,0,900,500);
+ ctx.font="34px system-ui";ctx.fillText("☁️",75+(now/100%60),68);ctx.fillText("☁️",675-(now/120%65),105);
+ // Rolling hills and platforms
+ ctx.fillStyle="#9ad18a";ctx.beginPath();ctx.moveTo(0,310);ctx.quadraticCurveTo(200,240,360,320);ctx.quadraticCurveTo(580,225,900,310);ctx.lineTo(900,500);ctx.lineTo(0,500);ctx.closePath();ctx.fill();
+ ctx.fillStyle="#4f923b";ctx.fillRect(0,430,900,70);
+ ctx.fillStyle="#8e603a";ctx.strokeStyle="#694226";ctx.lineWidth=3;
+ s.platforms.slice(1).forEach(pl=>{ctx.fillRect(pl.x,pl.y,pl.w,15);ctx.strokeRect(pl.x,pl.y,pl.w,15);ctx.fillStyle="#64b04c";ctx.fillRect(pl.x,pl.y,pl.w,5);ctx.fillStyle="#8e603a";});
+ ctx.fillStyle="#4f923b";for(let x=0;x<900;x+=38)ctx.fillRect(x,430,27,7);
+ // Fruit tiles contain the character/letter the learner must collect.
+ s.tokens.forEach(t=>{
+  if(t.used)return;
+  ctx.beginPath();ctx.fillStyle=t.correct?"#ffcf50":"#d5ecff";ctx.strokeStyle=t.correct?"#b27a19":"#6f9ab7";ctx.lineWidth=3;ctx.arc(t.x,t.y,20,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.font="bold 22px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#2e220b";ctx.fillText(t.ch,t.x,t.y);
+ });
+ // Hazards that are jumped over
+ s.obstacles.forEach((o,i)=>{ctx.fillStyle="#9a6437";ctx.fillRect(o.x-o.w/2,398,o.w,32);ctx.strokeStyle="#ca9458";ctx.lineWidth=3;ctx.strokeRect(o.x-o.w/2,398,o.w,32);ctx.font="20px system-ui";ctx.fillText(i===1?"📦":"🪵",o.x,394);});
+ // Physics and platform landing
+ if(pabloKeys.left)p.x-=245*dt;if(pabloKeys.right)p.x+=245*dt;p.x=Math.max(16,Math.min(884,p.x));
+ const previousBottom=p.y+p.h;p.vy+=1180*dt;p.y+=p.vy*dt;p.onGround=false;
+ for(const pl of s.platforms){
+  if(p.x+p.w/2>pl.x&&p.x-p.w/2<pl.x+pl.w&&p.vy>=0&&previousBottom<=pl.y&&p.y+p.h>=pl.y){
+   p.y=pl.y-p.h;p.vy=0;p.onGround=true;break;
+  }
+ }
+ if(p.y>480){losePabloLife("Je viel van het platform. Probeer opnieuw!");}
+ ctx.save();if(s.invulnerable>0&&Math.floor(now/90)%2)ctx.globalAlpha=.45;
+ ctx.font="38px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("🦸",p.x,p.y+p.h/2);ctx.restore();
+ pabloCollisions();
+ pabloFrameId=requestAnimationFrame(drawPabloFrame);
+}
+function startPabloFrame(){
+ pabloLastTime=0;updatePabloHud();pabloFrameId=requestAnimationFrame(drawPabloFrame);
+}
+window.addEventListener("keydown",e=>{
+ if(game!=="pablo"||ended)return;
+ if(e.key==="ArrowLeft"){pabloKeys.left=true;e.preventDefault();}
+ if(e.key==="ArrowRight"){pabloKeys.right=true;e.preventDefault();}
+ if(e.key==="ArrowUp"||e.key===" "){
+  e.preventDefault();if(pabloArcade&&pabloArcade.player.onGround)pabloArcade.player.vy=-545;
+ }
+});
+window.addEventListener("keyup",e=>{
+ if(e.key==="ArrowLeft")pabloKeys.left=false;
+ if(e.key==="ArrowRight")pabloKeys.right=false;
+});
+
 function renderBoard(){
  if(game==="draw"){
   const p=DRAW_DATA[drawIndex];
@@ -349,13 +466,7 @@ function renderBoard(){
    '<div class="tower-row">'+towerHtml+slotsHtml+'</div>'+
    '<div class="shield-shop"><span>🛡️ Extra schildtoren blokkeert één fout antwoord</span><button id="buildTower" class="btn light" type="button" '+(gems<20||towerShields>=3?'disabled':'')+'>Bouw schild · 20 💎</button></div></div>'+questionHTML();
  }
- if(game==="pablo"){
-  const step=Math.min(7,pabloLevel-1),heroPos=5+step*10.5;
-  const obstaclePos=[35,67,45,70,32,58,40,63][step],starPos=[83,22,75,34,80,28,68,50][step];
-  return stats(["Level: "+Math.min(8,pabloLevel)+" / 8","Sterren: "+pabloStars+" / 8","Levens: "+"❤️".repeat(pabloLives||0)])+
-   '<div class="pablo-scene"><span class="pablo-cloud one">☁️</span><span class="pablo-cloud two">☁️</span><div class="pablo-mountains"></div><div class="pablo-route"></div><span class="pablo-hero" style="left:'+heroPos+'%">🦸</span><span class="pablo-prize" style="left:'+starPos+'%">⭐</span><span class="pablo-obstacle" style="left:'+obstaclePos+'%">🪵</span><div class="pablo-platform"></div></div>'+
-   '<p class="mini-hint">Kies de juiste vertaling om over de hindernis te springen en de ster te pakken.</p>'+questionHTML();
- }
+ if(game==="pablo")return renderPabloBoard();
  if(game==="memory"){
   return stats(["Paren: "+memoryMatches+" / 6","Pogingen: "+memoryMoves])+ '<p class="mini-hint">Tik twee kaartjes aan om een woord en de Nederlandse betekenis te koppelen.</p><div class="memory-grid">'+memoryDeck.map((c,i)=>'<button class="memory-card '+((c.open||c.matched)?"open ":"")+(c.matched?"matched":"")+'" data-memory="'+i+'" type="button">'+((c.open||c.matched)?c.text:"✦")+'</button>').join("")+'</div><p class="feedback">'+feedback+'</p>';
  }
@@ -378,9 +489,11 @@ function renderGame(){
   $("gameBody").innerHTML=renderEnd(title,body);return;
  }
  $("gameBody").innerHTML=renderBoard();
+ if(game==="pablo"){startPabloFrame();}
 }
 function startGame(which){
  if(which==="draw"&&lang!=="zh")return;
+ if(pabloFrameId)cancelAnimationFrame(pabloFrameId);pabloFrameId=0;pabloLastTime=0;pabloKeys={left:false,right:false};pabloArcade=null;
  game=which;ended=false;feedback="";frogStep=0;frogLives=3;playerProgress=0;opponentProgress=0;waves=0;explorerLives=3;towerLevel=1;gems=0;towerShields=0;pabloLevel=1;pabloLives=3;pabloStars=0;frogStep=0;frogArcade=null;raceCoins=0;raceCarLevel=1;raceWordsDone=0;raceMistakes=0;racePuzzle=null;memoryFirst=null;memoryPending=null;memoryMatches=0;memoryMoves=0;flashRevealed=false;drawIndex=0;
  $("gameMenu").classList.add("hidden");$("playArea").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});
  if(game==="draw"){
@@ -390,6 +503,7 @@ function startGame(which){
  }else if(game==="cards"){flashDeck=shuffle(DATA[lang]);flashIndex=0;}
  else if(game==="race"){makeRacePuzzle();}
  else if(game==="frog"){frogArcade=makeFrogArcade();}
+ else if(game==="pablo"){pabloArcade=makePabloArcade();pabloKeys={left:false,right:false};}
  else makeQuestion();
  renderGame();
  if(game==="draw")setupDrawingCanvas();
@@ -586,6 +700,8 @@ document.querySelectorAll(".game-card").forEach(b=>b.addEventListener("click",()
 $("backToGames").addEventListener("click",()=>{$("playArea").classList.add("hidden");$("gameMenu").classList.remove("hidden");game="";window.scrollTo({top:0,behavior:"smooth"});});
 $("gameBody").addEventListener("click",e=>{
  const frogButton=e.target.closest("[data-frog-move]");if(frogButton){frogStepMove(frogButton.dataset.frogMove);return;}
+ const pabloButton=e.target.closest("[data-pablo-control]");
+ if(pabloButton){const key=pabloButton.dataset.pabloControl;if(key==="left"||key==="right")pabloKeys[key]=true;if(key==="jump"&&pabloArcade&&pabloArcade.player.onGround)pabloArcade.player.vy=-545;return;}
  if(e.target.closest("#buildTower")){
   if(gems>=20&&towerShields<3){gems-=20;towerShields++;feedback="🛡️ Schildtoren gebouwd! De volgende fout wordt geblokkeerd.";}
   else if(towerShields>=3){feedback="Je hebt al drie schildtorens.";}
@@ -607,6 +723,8 @@ $("gameBody").addEventListener("click",e=>{
  if(e.target.closest("#playAgain")){startGame(game);return;}
  if(e.target.closest("#backEnd")){$("backToGames").click();return;}
 });
+$("gameBody").addEventListener("pointerup",e=>{const b=e.target.closest("[data-pablo-control]");if(b&&b.dataset.pabloControl in pabloKeys)pabloKeys[b.dataset.pabloControl]=false;});
+$("gameBody").addEventListener("pointercancel",()=>{pabloKeys.left=false;pabloKeys.right=false;});
 
 })();
 </script>
