@@ -1,4 +1,4 @@
-const CACHE_NAME = "spaans-tool-pwa-v14";
+const CACHE_NAME = "spaans-tool-pwa-v15";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon.svg", "./golden-club/index.html"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
