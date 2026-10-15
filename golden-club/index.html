@@ -90,6 +90,9 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 
 .race-canvas-wrap{width:100%;aspect-ratio:900/490;max-height:540px;border:3px solid #c6ab57;border-radius:19px;overflow:hidden;margin:12px 0;background:#5d9a4c;box-shadow:0 7px 18px #4a370f22}
 .race-canvas{display:block;width:100%;height:100%;touch-action:manipulation}
+[data-race-lane].selected{background:linear-gradient(145deg,#fff0a5,#e2b638);color:#483300;border-color:#9d791a}
+.explorer-move-controls{margin:6px 0 10px}
+.explorer-move-controls .btn{min-width:44px;min-height:40px}
 .race-slot.filled{background:#e6f5d9;border-color:#62a54a;color:#2d6935}
 
 .race-slots{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin:12px 0}
@@ -232,7 +235,7 @@ function answerOf(p){return direction==="toDutch"?p[1]:p[0]}
 function makeQuestion(){const data=DATA[lang];item=data[Math.floor(Math.random()*data.length)];const correct=answerOf(item);const others=shuffle(data.filter(p=>answerOf(p)!==correct).map(answerOf).filter((v,i,a)=>a.indexOf(v)===i)).slice(0,3);options=shuffle([correct].concat(others));}
 
 let racePuzzle=null,raceCoins=0,raceCarLevel=1,raceWordsDone=0,raceMistakes=0;
-let raceFrameId=0,raceLastTime=0,raceAngle=0,raceOpponentProgress=0,raceLane=0,raceBoost=0,raceWonWords=0;
+let raceFrameId=0,raceLastTime=0,raceAngle=0,raceOpponentProgress=0,raceLane=0,raceVisualLane=0,raceBoost=0,raceWonWords=0;
 function wordOnly(s){return /^[A-Za-zÀ-ÖØ-öø-ÿ\u4e00-\u9fff]+$/.test(String(s||""));}
 function gameWordPool(){
  return DATA[lang].filter(p=>{const t=answerOf(p),n=Array.from(t).length;return wordOnly(t)&&n>=2&&n<=8&&p[0]&&p[1];});
@@ -240,13 +243,19 @@ function gameWordPool(){
 function chooseGamePair(){const pool=gameWordPool();const source=pool.length?pool:DATA[lang].filter(p=>p[0]&&p[1]);return source[Math.floor(Math.random()*source.length)];}
 function makeRacePuzzle(){
  const pair=chooseGamePair(),target=Array.from(answerOf(pair));
- const tiles=[],spacing=2*Math.PI*.72/Math.max(1,target.length);
- target.forEach((ch,i)=>tiles.push({id:"target-"+i,ch,order:i,correct:true,used:false,lane:i%2,angle:.18+i*spacing,lapTarget:.18+i*spacing}));
+ const base=(Number.isFinite(raceAngle)?raceAngle:0)+.62;
+ const spacing=Math.min(.48,2.85/Math.max(1,target.length-1));
+ const tiles=[];
+ target.forEach((ch,i)=>{
+  const angle=base+i*spacing;
+  tiles.push({id:"target-"+i,ch,order:i,correct:true,used:false,lane:i%2,angle,lapTarget:angle});
+ });
  const decoySource=gameWordPool().map(p=>Array.from(answerOf(p))).flat().filter(ch=>!target.includes(ch));
- for(let i=0;i<Math.max(4,Math.min(7,target.length+2));i++){
+ const decoyCount=Math.max(4,Math.min(7,target.length+2));
+ for(let i=0;i<decoyCount;i++){
   const ch=decoySource.length?decoySource[Math.floor(Math.random()*decoySource.length)]:target[(i+1)%target.length];
-  const angle=.09+i*(2*Math.PI*.74/Math.max(4,Math.min(7,target.length+2)));
-  tiles.push({id:"decoy-"+i,ch,order:-1,correct:false,used:false,lane:(i+1)%2,angle,lapTarget:angle});
+  const angle=base+.18+i*(Math.min(2.5,spacing*target.length)/Math.max(1,decoyCount));
+  tiles.push({id:"decoy-"+i,ch,order:-1,correct:false,used:false,lane:i%2===0?1:0,angle,lapTarget:angle});
  }
  racePuzzle={pair,target,tiles,filled:[],clue:promptOf(pair),answer:answerOf(pair)};
 }
@@ -260,7 +269,7 @@ function renderRaceBoard(){
   '<p class="mini-hint">Vermijd de blauwe afleiders. Verzamel drie woorden vóór de tegenstander en verdien munten voor motorupgrades.</p>';
 }
 function positionOnRace(angle,lane){
- const radiusX=lane===0?260:333,radiusY=lane===0?108:170;
+ const radiusX=260+Math.max(0,Math.min(1,lane))*36,radiusY=108+Math.max(0,Math.min(1,lane))*34;
  const theta=-Math.PI/2+(angle%(2*Math.PI));
  return {x:450+Math.cos(theta)*radiusX,y:245+Math.sin(theta)*radiusY,theta};
 }
@@ -276,7 +285,7 @@ function drawRaceCar(ctx,pos,color,label){
  ctx.font="bold 12px system-ui";ctx.fillStyle="#fff";ctx.textAlign="center";ctx.shadowColor="#18212a";ctx.shadowBlur=3;ctx.fillText(label,pos.x,pos.y-25);ctx.shadowBlur=0;
 }
 function startRaceFrame(){
- raceLastTime=0;raceLane=0;raceBoost=0;raceWonWords=raceWordsDone;
+ raceLastTime=0;raceVisualLane=raceLane;raceWonWords=raceWordsDone;
  raceFrameId=requestAnimationFrame(drawRaceFrame);
 }
 function drawRaceFrame(now){
@@ -287,6 +296,7 @@ function drawRaceFrame(now){
  const ctx=canvas.getContext("2d");ctx.setTransform(canvas.width/900,0,0,canvas.height/490,0,0);
  const dt=Math.min(.04,raceLastTime?(now-raceLastTime)/1000:1/60);raceLastTime=now;
  raceAngle+=(.47+(raceCarLevel-1)*.055+raceBoost)*dt;
+ raceVisualLane+=(raceLane-raceVisualLane)*Math.min(1,dt*7);
  raceBoost=Math.max(0,raceBoost-dt*.33);
  opponentProgress=Math.min(100,opponentProgress+dt*3.05);
  playerProgress=Math.min(100,((raceWordsDone+(racePuzzle?racePuzzle.filled.length/Math.max(1,racePuzzle.target.length):0))/3)*100);
@@ -341,8 +351,9 @@ function drawRaceFrame(now){
   }
  }
  const status=$("raceStatus");if(status)status.textContent="Woord "+(raceWordsDone+1)+" / 3 · "+Math.round(playerProgress)+"% · Rivaal "+Math.round(opponentProgress)+"% · "+raceCoins+" munten";
- const player=positionOnRace(raceAngle,raceLane);
- const opponent=positionOnRace((raceAngle*.74+1.25)%(2*Math.PI),0);
+ document.querySelectorAll("[data-race-lane]").forEach(b=>{const selected=Number(b.dataset.raceLane)===raceLane;b.classList.toggle("selected",selected);b.setAttribute("aria-pressed",selected?"true":"false");});
+ const player=positionOnRace(raceAngle,raceVisualLane);
+ const opponent=positionOnRace((raceAngle*.74+1.25)%(2*Math.PI),.5);
  drawRaceCar(ctx,opponent,"#e47734","RIVAAL");
  drawRaceCar(ctx,player,"#3bd58b","JIJ");
  ctx.fillStyle="#f8f2d0";ctx.textAlign="center";ctx.font="bold 15px system-ui";ctx.fillText("GARDEN RACE",450,239);
@@ -528,7 +539,7 @@ function makePabloArcade(){
 }
 function renderPabloBoard(){
  const s=pabloArcade;
- return '<div class="question"><div class="q-label">Super Pablo · verzamel de juiste fruitletters/tekens</div><div class="prompt" id="pabloPrompt">'+(s?promptOf(s.pair):"…")+'</div><p class="mini-hint">Spring over kisten en verzamel de juiste fruitletters/tekens in de goede volgorde. Voltooi acht levels.</p><div class="pablo-slots" id="pabloSlots">'+(s?s.target.map((ch,i)=>i<s.collected?ch:"＿").join(" "):"")+'</div><p class="feedback" id="pabloFeedback">'+(s?s.feedback:"")+'</p></div><div class="arcade-canvas-wrap"><canvas class="arcade-canvas" id="pabloCanvas" aria-label="Super Pablo platformspel"></canvas></div><div class="arcade-controls"><button class="btn light" data-pablo-control="left">← Houd vast</button><button class="btn gold" data-pablo-control="jump">↑ Spring</button><button class="btn light" data-pablo-control="right">Houd vast →</button></div><p class="mini-hint" id="pabloStatus">Level '+pabloLevel+' / 8 · Sterren: '+pabloStars+' · Levens: '+'❤️'.repeat(pabloLives)+'</p>';
+ return '<div class="question"><div class="q-label">Super Pablo · verzamel de juiste fruitletters/tekens</div><div class="prompt" id="pabloPrompt">'+(s?promptOf(s.pair):"…")+'</div><p class="mini-hint">Spring over kisten en verzamel de juiste fruitletters/tekens in de goede volgorde. Voltooi acht levels.</p><div class="pablo-slots" id="pabloSlots">'+(s?s.target.map((ch,i)=>i<s.collected?ch:"＿").join(" "):"")+'</div><p class="feedback" id="pabloFeedback">'+(s?s.feedback:"")+'</p></div><div class="arcade-canvas-wrap"><canvas class="arcade-canvas" id="pabloCanvas" aria-label="Super Pablo platformspel"></canvas></div><div class="arcade-controls"><button class="btn light" data-pablo-control="left">← Loop</button><button class="btn gold" data-pablo-control="jump">↑ Spring</button><button class="btn light" data-pablo-control="right">Loop →</button></div><p class="mini-hint" id="pabloStatus">Level '+pabloLevel+' / 8 · Sterren: '+pabloStars+' · Levens: '+'❤️'.repeat(pabloLives)+'</p>';
 }
 function updatePabloHud(){
  if(!pabloArcade)return;
@@ -792,11 +803,15 @@ function drawExplorerFrame(now){
  // Hero follows the most recent click / direction-key target.
  const dx=explorerTarget.x-explorerHero.x,dy=explorerTarget.y-explorerHero.y,d=Math.hypot(dx,dy);
  if(d>2){const step=Math.min(d,165*dt);explorerHero.x+=dx/d*step;explorerHero.y+=dy/d*step;}
+ ctx.strokeStyle="#fff2a6";ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();ctx.arc(explorerTarget.x,explorerTarget.y,21,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
  drawExplorerHero(ctx,explorerHero.x,explorerHero.y,heroLevel,now);
+ const explorerStatus=$("explorerStatus");if(explorerStatus)explorerStatus.textContent="Golf "+(waves+1)+" · Levens "+explorerLives+" · Edelstenen "+gems+" · Torens "+explorerTowers.length;
  if(explorerPlaceMode){ctx.strokeStyle="#f4d45d";ctx.lineWidth=3;ctx.setLineDash([8,8]);ctx.beginPath();ctx.arc(explorerHero.x,explorerHero.y,45,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
  if(explorerEnemies.length===0&&!ended){
-  waves=Math.max(waves,1);
-  // Don't automatically complete the wave until the learner answers a word correctly.
+  waves++;
+  if(waves>=8){ended=true;renderGame();return;}
+  gems+=8;exploredThisWave=false;feedback="✅ Golf voltooid! De volgende golf blobs komt eraan.";
+  spawnExplorerWave();renderGame();return;
  }
  explorerFrameId=requestAnimationFrame(drawExplorerFrame);
 }
@@ -844,6 +859,8 @@ function renderBoard(){
   return stats(["Golf: "+Math.min(8,waves+1)+" / 8","Heldlevel: "+heroLevel,"Edelstenen: "+gems,"Torens: "+explorerTowers.length,"❤️".repeat(explorerLives||0)])+
    '<div class="explore-map"><div class="map-banner"><span>🗺️ BOSPAD · GOLF '+Math.min(8,waves+1)+'</span><span>Verplaats je held · plaats torens</span></div>'+
    '<div class="explorer-canvas-wrap"><canvas id="explorerCanvas" class="explorer-canvas" aria-label="Verken het veld, beweeg je held en plaats verdedigende torens"></canvas></div>'+
+   '<p id="explorerStatus" class="mini-hint">Golf '+(waves+1)+' · Edelstenen '+gems+' · Torens '+explorerTowers.length+' · Verplaats de held met de kaart of pijltjes.</p>'+
+   '<div class="arcade-controls explorer-move-controls"><button class="btn light" data-explorer-move="left">←</button><button class="btn light" data-explorer-move="up">↑</button><button class="btn light" data-explorer-move="down">↓</button><button class="btn light" data-explorer-move="right">→</button></div>'+
    '<div class="explore-regions"><strong>Ontdekte gebieden</strong><div class="explore-tiles">'+areas+'</div></div>'+
    '<div class="explore-actions">'+
    '<button id="exploreRegion" class="btn light" type="button" '+(exploredThisWave?'disabled':'')+'>🧭 Verken gebied · +8 💎</button>'+
@@ -1127,7 +1144,22 @@ $("gameBody").addEventListener("click",e=>{
   return;
  }
  const frogButton=e.target.closest("[data-frog-move]");if(frogButton){frogStepMove(frogButton.dataset.frogMove);return;}
- const pabloButton=e.target.closest("[data-pablo-control]");if(pabloButton)return;
+ const explorerMove=e.target.closest("[data-explorer-move]");
+ if(explorerMove&&game==="explorer"){
+  const d={left:[-58,0],right:[58,0],up:[0,-58],down:[0,58]}[explorerMove.dataset.explorerMove];
+  if(d){explorerTarget.x=Math.max(25,Math.min(875,explorerTarget.x+d[0]));explorerTarget.y=Math.max(30,Math.min(470,explorerTarget.y+d[1]));}
+  return;
+ }
+ const pabloButton=e.target.closest("[data-pablo-control]");
+ if(pabloButton){
+  if(game==="pablo"&&pabloArcade&&!ended){
+   const key=pabloButton.dataset.pabloControl;
+   if(key==="left")pabloArcade.player.x=Math.max(16,pabloArcade.player.x-42);
+   else if(key==="right")pabloArcade.player.x=Math.min(884,pabloArcade.player.x+42);
+   else if(key==="jump"&&pabloArcade.player.onGround)pabloArcade.player.vy=-545;
+  }
+  return;
+ }
  if(e.target.closest("#exploreRegion")){
   if(!exploredThisWave){exploredThisWave=true;regionsFound++;gems+=8;feedback="🧭 Gebied verkend! Je hebt 8 edelstenen gevonden."; }
   renderGame();return;
