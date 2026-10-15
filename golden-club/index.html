@@ -241,12 +241,12 @@ function chooseGamePair(){const pool=gameWordPool();const source=pool.length?poo
 function makeRacePuzzle(){
  const pair=chooseGamePair(),target=Array.from(answerOf(pair));
  const tiles=[],spacing=2*Math.PI*.72/Math.max(1,target.length);
- target.forEach((ch,i)=>tiles.push({id:"target-"+i,ch,order:i,correct:true,used:false,lane:(i+raceCarLevel)%2,angle:.12+i*spacing,lapTarget:.12+i*spacing}));
+ target.forEach((ch,i)=>tiles.push({id:"target-"+i,ch,order:i,correct:true,used:false,lane:i%2,angle:.18+i*spacing,lapTarget:.18+i*spacing}));
  const decoySource=gameWordPool().map(p=>Array.from(answerOf(p))).flat().filter(ch=>!target.includes(ch));
  for(let i=0;i<Math.max(4,Math.min(7,target.length+2));i++){
   const ch=decoySource.length?decoySource[Math.floor(Math.random()*decoySource.length)]:target[(i+1)%target.length];
-  const angle=.08+i*(2*Math.PI*.78/Math.max(4,Math.min(7,target.length+2)));
-  tiles.push({id:"decoy-"+i,ch,order:-1,correct:false,used:false,lane:(i+raceCarLevel+1)%2,angle,lapTarget:angle});
+  const angle=.09+i*(2*Math.PI*.74/Math.max(4,Math.min(7,target.length+2)));
+  tiles.push({id:"decoy-"+i,ch,order:-1,correct:false,used:false,lane:(i+1)%2,angle,lapTarget:angle});
  }
  racePuzzle={pair,target,tiles,filled:[],clue:promptOf(pair),answer:answerOf(pair)};
 }
@@ -694,8 +694,8 @@ function spawnExplorerWave(){
  const count=Math.min(10,3+waves);
  explorerEnemies=[];
  for(let i=0;i<count;i++){
-  const progress=-i*.075,point=explorerRoutePosition(0);
-  explorerEnemies.push({progress,x:point.x,y:point.y,hp:1+Math.floor(waves/3),maxHp:1+Math.floor(waves/3),speed:22+waves*1.5+(i%3)*4,r:15+(i%2)*2,phase:i*.7,attackCooldown:0});
+  const progress=-i*.09,point=explorerRoutePosition(0);
+  explorerEnemies.push({progress,x:930+i*24,y:point.y,hp:1+Math.floor(waves/3),maxHp:1+Math.floor(waves/3),speed:22+waves*1.5+(i%3)*4,r:15+(i%2)*2,phase:i*.7,attackCooldown:0});
  }
  explorerShots=[];
 }
@@ -778,6 +778,7 @@ function drawExplorerFrame(now){
  for(const e of explorerEnemies){
   if(e.hp<=0)continue;
   e.progress+=e.speed*dt/900;
+  if(e.progress<0){e.x=930+Math.abs(e.progress)*180;e.y=250;continue;}
   if(e.progress>=1){
    e.hp=0;explorerLives--;
    feedback="💥 Een blob bereikte het kasteel!";
@@ -849,7 +850,7 @@ function renderBoard(){
    '<button id="buildTower" class="btn gold" type="button" '+(gems<20||explorerTowers.length>=8?'disabled':'')+'>'+ (explorerPlaceMode?"Klik op het veld…":"🏹 Plaats toren · 20 💎")+'</button>'+
    '<button id="upgradeHero" class="btn light" type="button" '+(gems<30||heroLevel>=5?'disabled':'')+'>🛡️ Verbeter held · 30 💎</button>'+
    '</div><p class="mini-hint" id="explorerHint">'+(explorerPlaceMode?"Klik op een plek in het veld om de toren neer te zetten.":"Klik op het veld om je held daarheen te sturen. Torens schieten automatisch op blobs.")+'</p></div>'+
-   '<div class="question"><div class="q-label">Verdedig het kasteel · '+LANGS[lang].name+'</div>'+questionHTML()+'</div>';
+   '<p class="mini-hint">Verdedig het kasteel · '+LANGS[lang].name+' · Kies het juiste antwoord om je held te laten aanvallen.</p>'+questionHTML();
  }
  if(game==="pablo")return renderPabloBoard();
  if(game==="memory"){
