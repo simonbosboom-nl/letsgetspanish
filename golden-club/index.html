@@ -880,7 +880,7 @@ function startGame(which){
  }else if(game==="cards"){flashDeck=shuffle(DATA[lang]);flashIndex=0;}
  else if(game==="race"){raceAngle=0;raceLane=0;raceBoost=0;raceOpponentProgress=0;makeRacePuzzle();}
  else if(game==="frog"){frogArcade=makeFrogArcade();}
- else if(game==="explorer"){explorerHero={x:130,y:265};explorerTarget={x:130,y:265};explorerPlaceMode=false;explorerTowers=[];explorerShots=[];spawnExplorerWave();}
+ else if(game==="explorer"){explorerHero={x:130,y:265};explorerTarget={x:130,y:265};explorerPlaceMode=false;explorerTowers=[];explorerShots=[];spawnExplorerWave();makeQuestion();}
  else if(game==="pablo"){pabloArcade=makePabloArcade();pabloKeys={left:false,right:false};}
  else makeQuestion();
  renderGame();
