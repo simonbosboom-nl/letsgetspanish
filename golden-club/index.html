@@ -268,13 +268,32 @@ function renderRaceBoard(){
   '<div class="arcade-controls"><button class="btn light" data-race-lane="0">↖ Binnenbaan</button><button class="btn gold" data-race-lane="1">↗ Buitenbaan</button><button class="btn light" id="upgradeRaceCar" type="button" '+(raceCoins<25||raceCarLevel>=4?"disabled":"")+'>🏎️ Motorupgrade · 25 🪙</button></div>'+
   '<p class="mini-hint">Vermijd de blauwe afleiders. Verzamel drie woorden vóór de tegenstander en verdien munten voor motorupgrades.</p>';
 }
+function raceTrackPoint(angle){
+ const a=angle%(2*Math.PI);
+ return {
+  x:450+300*Math.cos(a)+24*Math.sin(2*a),
+  y:245+130*Math.sin(a)+25*Math.sin(3*a),
+  dx:-300*Math.sin(a)+48*Math.cos(2*a),
+  dy:130*Math.cos(a)+75*Math.cos(3*a)
+ };
+}
+function traceRaceTrack(ctx,scaleX=1,scaleY=1){
+ ctx.beginPath();
+ const steps=240;
+ for(let i=0;i<=steps;i++){
+  const p=raceTrackPoint(i*2*Math.PI/steps);
+  const x=450+(p.x-450)*scaleX,y=245+(p.y-245)*scaleY;
+  if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+ }
+ ctx.closePath();
+}
 function positionOnRace(angle,lane){
- const radiusX=260+Math.max(0,Math.min(1,lane))*36,radiusY=108+Math.max(0,Math.min(1,lane))*34;
- const theta=-Math.PI/2+(angle%(2*Math.PI));
- return {x:450+Math.cos(theta)*radiusX,y:245+Math.sin(theta)*radiusY,theta};
+ const p=raceTrackPoint(angle),len=Math.hypot(p.dx,p.dy)||1;
+ const nx=-p.dy/len,ny=p.dx/len,offset=(Math.max(0,Math.min(1,lane))-.5)*46;
+ return {x:p.x+nx*offset,y:p.y+ny*offset,theta:Math.atan2(p.dy,p.dx)};
 }
 function drawRaceCar(ctx,pos,color,label){
- ctx.save();ctx.translate(pos.x,pos.y);ctx.rotate(pos.theta+Math.PI/2);
+ ctx.save();ctx.translate(pos.x,pos.y);ctx.rotate(pos.theta);
  ctx.fillStyle="#202b31";ctx.beginPath();ctx.roundRect(-20,-13,40,26,7);ctx.fill();
  ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(-17,-12,34,23,7);ctx.fill();
  ctx.fillStyle="#d9eef1";ctx.beginPath();ctx.roundRect(-10,-9,20,10,4);ctx.fill();
@@ -305,14 +324,26 @@ function drawRaceFrame(now){
  const grass=ctx.createLinearGradient(0,0,900,490);grass.addColorStop(0,"#8ac66a");grass.addColorStop(1,"#3e7f3d");ctx.fillStyle=grass;ctx.fillRect(0,0,900,490);
  // Decorative garden plants around a wide oval asphalt race circuit.
  for(let i=0;i<48;i++){const x=(i*197)%900,y=(i*113)%490;ctx.fillStyle=i%2?"#2f7b3d":"#d0e49d";ctx.beginPath();ctx.arc(x,y,4+(i%4),0,Math.PI*2);ctx.fill();}
- ctx.strokeStyle="#ece4c6";ctx.lineWidth=126;ctx.beginPath();ctx.ellipse(450,245,324,158,0,0,Math.PI*2);ctx.stroke();
- ctx.strokeStyle="#4d565d";ctx.lineWidth=116;ctx.beginPath();ctx.ellipse(450,245,324,158,0,0,Math.PI*2);ctx.stroke();
- ctx.strokeStyle="#f7e6a8";ctx.lineWidth=3;ctx.setLineDash([20,18]);ctx.beginPath();ctx.ellipse(450,245,295,130,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
- // Inner garden island
- ctx.fillStyle="#76b557";ctx.beginPath();ctx.ellipse(450,245,238,80,0,0,Math.PI*2);ctx.fill();
- ctx.fillStyle="#4d913f";for(let i=0;i<20;i++){const a=i*Math.PI*2/20;ctx.beginPath();ctx.ellipse(450+Math.cos(a)*210,245+Math.sin(a)*58,12,5,a,0,Math.PI*2);ctx.fill();}
- // Finish stripe across the top of the road.
- ctx.save();ctx.translate(450,80);for(let x=-44;x<44;x+=11)for(let y=0;y<19;y+=9){ctx.fillStyle=((x+44)/11+y/9)%2?"#fff":"#242a2e";ctx.fillRect(x,y,11,9);}ctx.restore();
+ // Winding garden road with a pale verge, asphalt and a dashed centre lane.
+ traceRaceTrack(ctx,1,1);ctx.strokeStyle="#e8d9b0";ctx.lineWidth=132;ctx.lineJoin="round";ctx.lineCap="round";ctx.stroke();
+ traceRaceTrack(ctx,1,1);ctx.strokeStyle="#4d565d";ctx.lineWidth=116;ctx.lineJoin="round";ctx.lineCap="round";ctx.stroke();
+ traceRaceTrack(ctx,1,1);ctx.strokeStyle="#f5e8b0";ctx.lineWidth=3;ctx.setLineDash([20,18]);ctx.lineJoin="round";ctx.stroke();ctx.setLineDash([]);
+ // A smaller winding green garden inside the course.
+ traceRaceTrack(ctx,.62,.48);ctx.fillStyle="#78b95a";ctx.fill();
+ ctx.fillStyle="#468a3d";
+ for(let i=0;i<27;i++){
+  const a=i*Math.PI*2/27,p=raceTrackPoint(a),x=450+(p.x-450)*.48,y=245+(p.y-245)*.31;
+  ctx.beginPath();ctx.ellipse(x,y,10,5,a,0,Math.PI*2);ctx.fill();
+ }
+ ctx.fillStyle="#d3e8a6";
+ for(let i=0;i<12;i++){
+  const a=i*Math.PI*2/12,p=raceTrackPoint(a+.12),x=450+(p.x-450)*.4,y=245+(p.y-245)*.27;
+  ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
+ }
+ // Checkered stripe placed perpendicular to the top section of the winding road.
+ ctx.save();ctx.translate(450,142);
+ for(let y=-42;y<42;y+=10)for(let x=-10;x<10;x+=10){ctx.fillStyle=((y+42)/10+x/10)%2?"#fff":"#242a2e";ctx.fillRect(x,y,10,10);}
+ ctx.restore();
  // Spawned glyphs sit directly on the circuit; collect the current golden glyph only.
  if(racePuzzle){
   for(const t of racePuzzle.tiles){
@@ -1156,8 +1187,8 @@ $("gameBody").addEventListener("click",e=>{
  if(pabloButton){
   if(game==="pablo"&&pabloArcade&&!ended){
    const key=pabloButton.dataset.pabloControl;
-   if(key==="left")pabloArcade.player.x=Math.max(16,pabloArcade.player.x-42);
-   else if(key==="right")pabloArcade.player.x=Math.min(884,pabloArcade.player.x+42);
+   if(key==="left")pabloArcade.player.x=Math.max(16,pabloArcade.player.x-58);
+   else if(key==="right")pabloArcade.player.x=Math.min(884,pabloArcade.player.x+58);
    else if(key==="jump"&&pabloArcade.player.onGround)pabloArcade.player.vy=-545;
   }
   return;
