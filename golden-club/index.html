@@ -253,8 +253,8 @@ function makeRacePuzzle(){
 function renderRaceBoard(){
  if(!racePuzzle)makeRacePuzzle();
  const slots=racePuzzle.target.map((ch,i)=>'<span class="race-slot '+(i<racePuzzle.filled.length?"filled":"")+'">'+(racePuzzle.filled[i]||"＿")+'</span>').join("");
- return stats(["Woorden: "+raceWordsDone+" / 3","Progress: "+Math.round(playerProgress)+"%","Rivaal: "+Math.round(opponentProgress)+"%","Munten: "+raceCoins+" 🪙","Motor: "+raceCarLevel])+
-  '<div class="question"><div class="q-label">Race het woord · '+LANGS[lang].name+'</div><div class="prompt">'+racePuzzle.clue+'</div><div class="race-slots">'+slots+'</div><p class="mini-hint">Rijd over de gouden letters/tekens in de juiste volgorde. Gebruik ↑/↓ of de knoppen om van baan te wisselen. Blauwe tekens zijn afleiders.</p><p id="raceFeedback" class="feedback" aria-live="polite">'+feedback+'</p></div>'+
+ return stats(["Woorden: "+raceWordsDone+" / 3","Progress: "+Math.round(playerProgress)+"%","Rivaal: "+Math.round(opponentProgress)+"%","Munten: "+raceCoins+" 🪙","Motor: "+raceCarLevel])+'<p id="raceStatus" class="mini-hint">Start je motor en verzamel het gouden teken.</p>'+
+  '<div class="question"><div class="q-label">Race het woord · '+LANGS[lang].name+'</div><div class="prompt" id="racePrompt">'+racePuzzle.clue+'</div><div class="race-slots" id="raceSlots">'+slots+'</div><p class="mini-hint">Rijd over de gouden letters/tekens in de juiste volgorde. Gebruik ↑/↓ of de knoppen om van baan te wisselen. Blauwe tekens zijn afleiders.</p><p id="raceFeedback" class="feedback" aria-live="polite">'+feedback+'</p></div>'+
   '<div class="race-canvas-wrap"><canvas id="raceCanvas" class="race-canvas" aria-label="Top-down racebaan met twee rijstroken en letters"></canvas></div>'+
   '<div class="arcade-controls"><button class="btn light" data-race-lane="0">↖ Binnenbaan</button><button class="btn gold" data-race-lane="1">↗ Buitenbaan</button><button class="btn light" id="upgradeRaceCar" type="button" '+(raceCoins<25||raceCarLevel>=4?"disabled":"")+'>🏎️ Motorupgrade · 25 🪙</button></div>'+
   '<p class="mini-hint">Vermijd de blauwe afleiders. Verzamel drie woorden vóór de tegenstander en verdien munten voor motorupgrades.</p>';
@@ -322,7 +322,7 @@ function drawRaceFrame(now){
       if(racePuzzle.filled.length>=racePuzzle.target.length){
        raceWordsDone++;raceCoins+=10;feedback="🏁 Woord compleet! Je krijgt bonusmunten.";
        if(raceWordsDone>=3){playerProgress=100;ended=true;renderGame();return;}
-       makeRacePuzzle();
+       makeRacePuzzle();renderGame();return;
       }
      }else{
       if(!t.correct){raceMistakes++;raceCoins=Math.max(0,raceCoins-2);opponentProgress=Math.min(100,opponentProgress+3);feedback="Oeps, afleider! Je verliest snelheid en 2 munten.";}
@@ -336,9 +336,11 @@ function drawRaceFrame(now){
     const fb=$("raceFeedback");if(fb)fb.textContent=feedback;
     const slots=$("gameBody").querySelectorAll?$("gameBody").querySelectorAll(".race-slot"):[];
     if(slots&&slots.length)slots.forEach((el,i)=>{el.textContent=racePuzzle.filled[i]||"＿";el.classList.toggle("filled",i<racePuzzle.filled.length);});
+    break;
    }
   }
  }
+ const status=$("raceStatus");if(status)status.textContent="Woord "+(raceWordsDone+1)+" / 3 · "+Math.round(playerProgress)+"% · Rivaal "+Math.round(opponentProgress)+"% · "+raceCoins+" munten";
  const player=positionOnRace(raceAngle,raceLane);
  const opponent=positionOnRace((raceAngle*.74+1.25)%(2*Math.PI),0);
  drawRaceCar(ctx,opponent,"#e47734","RIVAAL");
@@ -677,11 +679,23 @@ window.addEventListener("keyup",e=>{
 });
 
 
+function explorerRoutePosition(progress){
+ const segments=[
+  [[860,250],[750,235],[760,95],[610,110]],
+  [[610,110],[470,125],[535,385],[370,382]],
+  [[370,382],[220,380],[275,160],[100,180]]
+ ];
+ const scaled=Math.max(0,Math.min(2.999,progress*3)),idx=Math.floor(scaled),t=scaled-idx,s=segments[idx];
+ const u=1-t;
+ return {x:u*u*u*s[0][0]+3*u*u*t*s[1][0]+3*u*t*t*s[2][0]+t*t*t*s[3][0],
+         y:u*u*u*s[0][1]+3*u*u*t*s[1][1]+3*u*t*t*s[2][1]+t*t*t*s[3][1]};
+}
 function spawnExplorerWave(){
  const count=Math.min(10,3+waves);
  explorerEnemies=[];
  for(let i=0;i<count;i++){
-  explorerEnemies.push({x:890+i*44,y:[95,170,245,320,395][i%5],hp:1+Math.floor(waves/3),maxHp:1+Math.floor(waves/3),speed:25+waves*2+(i%3)*5,r:15+(i%2)*2,phase:i*.7,attackCooldown:0});
+  const progress=-i*.075,point=explorerRoutePosition(0);
+  explorerEnemies.push({progress,x:point.x,y:point.y,hp:1+Math.floor(waves/3),maxHp:1+Math.floor(waves/3),speed:22+waves*1.5+(i%3)*4,r:15+(i%2)*2,phase:i*.7,attackCooldown:0});
  }
  explorerShots=[];
 }
@@ -760,18 +774,20 @@ function drawExplorerFrame(now){
   else{b.x+=dx/d*step;b.y+=dy/d*step;}
   ctx.fillStyle="#ffe65b";ctx.beginPath();ctx.arc(b.x,b.y,4,0,Math.PI*2);ctx.fill();ctx.shadowBlur=10;ctx.shadowColor="#ffe65b";ctx.shadowBlur=0;
  }
- // Blobs crawl along the road towards the castle.
+ // Blobs walk the winding path. Reaching the castle costs one life.
  for(const e of explorerEnemies){
   if(e.hp<=0)continue;
-  e.x-=e.speed*dt;
-  if(e.x<95){
-   e.x=95;e.y=180;
-   if(e.attackCooldown<=0){e.attackCooldown=1.4;explorerLives--;if(explorerLives<=0){ended=true;renderGame();return;}}
-   else e.attackCooldown-=dt;
-  }else if(e.attackCooldown>0)e.attackCooldown-=dt;
-  drawBlob(ctx,e,now);
+  e.progress+=e.speed*dt/900;
+  if(e.progress>=1){
+   e.hp=0;explorerLives--;
+   feedback="💥 Een blob bereikte het kasteel!";
+   if(explorerLives<=0){ended=true;renderGame();return;}
+   continue;
+  }
+  const point=explorerRoutePosition(Math.max(0,e.progress));e.x=point.x;e.y=point.y;
  }
  explorerEnemies=explorerEnemies.filter(e=>e.hp>0);
+ for(const e of explorerEnemies)drawBlob(ctx,e,now);
  // Hero follows the most recent click / direction-key target.
  const dx=explorerTarget.x-explorerHero.x,dy=explorerTarget.y-explorerHero.y,d=Math.hypot(dx,dy);
  if(d>2){const step=Math.min(d,165*dt);explorerHero.x+=dx/d*step;explorerHero.y+=dy/d*step;}
