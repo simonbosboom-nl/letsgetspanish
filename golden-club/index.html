@@ -71,6 +71,11 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 
 .arcade-canvas-wrap{position:relative;width:100%;aspect-ratio:9/5;border:2px solid #d8bf6e;border-radius:17px;overflow:hidden;margin:12px 0;background:#e4f3bd;box-shadow:0 7px 17px #5b45141a}
 .arcade-canvas{display:block;width:100%;height:100%;touch-action:none}
+
+.frog-canvas-wrap{aspect-ratio:9/5;max-height:530px;background:#578d44}
+.frog-canvas{touch-action:none}
+.arcade-controls .btn:active{transform:translateY(2px);filter:brightness(.95)}
+
 .pablo-slots{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;margin:8px 0;color:#674a09;font-size:clamp(18px,4vw,25px);font-weight:950;letter-spacing:.07em}
 .frogger-world{border:2px solid #d2ba73;border-radius:17px;overflow:hidden;margin:14px 0;background:#4e853e;box-shadow:0 8px 18px #55400d17}
 .frogger-bank{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:54px;padding:8px 13px;background:repeating-linear-gradient(135deg,#80bd63 0,#80bd63 22px,#91ca71 22px,#91ca71 44px);color:#20491f;font-size:12px;font-weight:950}
@@ -81,7 +86,7 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 .frogger-word{position:absolute;top:50%;transform:translate(-50%,-50%);z-index:1;min-width:60px;max-width:96px;padding:6px 7px;border:2px solid #d9ba55;border-radius:9px;background:#fff4c4;color:#3d2a05;font-size:clamp(11px,2vw,14px);font-weight:950;text-align:center;box-shadow:0 3px 0 #8c712f77;overflow-wrap:anywhere}
 .frogger-word.target{background:#fff4c4}
 .arcade-controls{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;margin:10px 0}
-.arcade-controls .btn{min-width:54px}
+.arcade-controls .btn{min-width:54px;touch-action:none;user-select:none;-webkit-user-select:none}
 .race-slots{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin:12px 0}
 .race-slot{display:grid;place-items:center;min-width:38px;min-height:44px;border:2px solid #e0c46d;border-radius:10px;background:#fffdf6;color:#47330d;font-size:22px;font-weight:900}
 .race-letters{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0}
@@ -208,7 +213,7 @@ let frogStep=0,frogLives=3,playerProgress=0,opponentProgress=0,waves=0,explorerL
 let memoryDeck=[],memoryFirst=null,memoryPending=null,memoryMatches=0,memoryMoves=0;
 let flashDeck=[],flashIndex=0,flashRevealed=false,drawIndex=0,drawingState=null,drawHasMarks=false,drawnStrokes=[],currentStroke=null,drawSetupToken=0;
 const strokeDataCache={};
-let frogArcade=null,pabloArcade=null,pabloFrameId=0,pabloLastTime=0,pabloKeys={left:false,right:false};
+let frogArcade=null,frogFrameId=0,pabloArcade=null,pabloFrameId=0,pabloLastTime=0,pabloKeys={left:false,right:false};
 const shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
 const norm=s=>String(s||"").trim().toLocaleLowerCase();
 function promptOf(p){return direction==="toDutch"?p[0]:p[1]}
@@ -265,28 +270,124 @@ function newFrogRound(){
  return {pair,choices:list.map((p,i)=>({text:answerOf(p),row:rows[i],col:cols[i],correct:p===pair,used:false}))};
 }
 function makeFrogArcade(){
- return {round:1,score:0,lives:3,x:4,y:5,gotWord:false,feedback:"Zoek de juiste vertaling tussen het verkeer en spring naar de overkant.",level:newFrogRound(),
-  hazards:[{row:1,col:0,dir:1,emoji:"🚗"},{row:2,col:4,dir:-1,emoji:"🚙"},{row:3,col:8,dir:1,emoji:"🐍"},{row:4,col:2,dir:-1,emoji:"🪵"}]};
+ return {round:1,score:0,lives:3,x:4,y:5,gotWord:false,invulnerable:0,lastTime:0,
+  feedback:"Use de pijltjes of knoppen: ontwijk verkeer, pak de juiste woordtegel en bereik de overkant.",
+  level:newFrogRound(),
+  hazards:[
+   {row:1,x:70,dir:1,speed:105,type:"car",color:"#dd4b36"},
+   {row:2,x:740,dir:-1,speed:150,type:"car",color:"#f0a72e"},
+   {row:3,x:280,dir:1,speed:120,type:"snake",color:"#38a35a"},
+   {row:4,x:660,dir:-1,speed:95,type:"log",color:"#98623a"}
+  ]};
+}
+function frogY(row){
+ if(row===0)return 38;if(row===5)return 480;return 76+row*88;
 }
 function renderFrogBoard(){
  const s=frogArcade;
- const lanes=[];
- lanes.push('<div class="frogger-bank"><span>🏁 FINISH</span><span>Breng Froggie naar de overkant</span></div>');
- for(let row=1;row<=4;row++){
-  const hazards=s.hazards.filter(h=>h.row===row).map(h=>'<span class="frogger-hazard" style="left:calc('+((h.col+.5)/9*100)+'%);animation-delay:-'+(h.col%3)*.25+'s">'+h.emoji+'</span>').join("");
-  const tokens=s.level.choices.filter(t=>!t.used&&t.row===row).map(t=>'<span class="frogger-word '+(t.correct?"target":"")+'" style="left:calc('+((t.col+.5)/9*100)+'%)">'+t.text+'</span>').join("");
-  const frog=s.y===row?'<span class="frogger-player" style="left:calc('+((s.x+.5)/9*100)+'%)">🐸</span>':"";
-  lanes.push('<div class="frogger-lane" data-road-row="'+row+'">'+hazards+tokens+frog+'</div>');
- }
- lanes.push('<div class="frogger-bank start"><span>🌿 START</span><span>Score: '+s.score+' / 7 · Levens: '+'❤️'.repeat(s.lives)+'</span>'+(s.y===5?'<span class="frogger-player" style="left:calc('+((s.x+.5)/9*100)+'%)">🐸</span>':"")+'</div>');
  return stats(["Oversteken: "+s.score+" / 7","Levens: "+"❤️".repeat(s.lives)])+
-  '<div class="question"><div class="q-label">Vind het juiste woord</div><div class="prompt">'+promptOf(s.level.pair)+'</div><p class="feedback" id="frogFeedback">'+s.feedback+'</p><p class="mini-hint">Beweeg met de pijltjes, ontwijk verkeer en gevaren. Pak eerst de juiste woordtegel, daarna bereik je de finish.</p></div>'+
-  '<div class="frogger-world">'+lanes.join("")+'</div><div class="arcade-controls"><button class="btn light" data-frog-move="left">←</button><button class="btn gold" data-frog-move="up">↑ Spring</button><button class="btn light" data-frog-move="down">↓</button><button class="btn light" data-frog-move="right">→</button></div>';
+  '<div class="question"><div class="q-label">Vind de juiste vertaling op de weg</div><div class="prompt" id="frogPrompt">'+promptOf(s.level.pair)+'</div><p class="feedback" id="frogFeedback">'+s.feedback+'</p><p class="mini-hint">Beweeg met ← → ↑ ↓. Het verkeer beweegt vanzelf. Pak de juiste woordtegel en steek daarna de weg over.</p></div>'+
+  '<div class="arcade-canvas-wrap frog-canvas-wrap"><canvas id="frogCanvas" class="arcade-canvas frog-canvas" aria-label="Tiny Froggie, steek de weg over"></canvas></div>'+
+  '<div class="arcade-controls" aria-label="Froggie-besturing"><button class="btn light" data-frog-move="left">←</button><button class="btn gold" data-frog-move="up">↑ Spring</button><button class="btn light" data-frog-move="down">↓</button><button class="btn light" data-frog-move="right">→</button></div>'+
+  '<p class="mini-hint" id="frogStatus">Ronde '+s.round+' · '+(s.gotWord?"Goed woord gevonden! Naar de finish!":"Zoek de juiste tegel.")+'</p>';
 }
+function frogHud(){
+ const s=frogArcade;if(!s)return;
+ const prompt=$("frogPrompt"),feedbackEl=$("frogFeedback"),status=$("frogStatus");
+ if(prompt)prompt.textContent=promptOf(s.level.pair);
+ if(feedbackEl)feedbackEl.textContent=s.feedback;
+ if(status)status.textContent="Ronde "+s.round+" · "+(s.gotWord?"Goed woord gevonden! Bereik de finish!":"Zoek de juiste woordtegel.")+" · Score "+s.score+"/7";
+}
+function drawRoadCar(ctx,x,y,color,dir){
+ ctx.save();ctx.translate(x,y);ctx.scale(dir,1);
+ ctx.fillStyle="#242d34";ctx.beginPath();ctx.ellipse(-14,14,8,5,0,0,Math.PI*2);ctx.ellipse(14,14,8,5,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(-29,-10,58,25,7);ctx.fill();
+ ctx.fillStyle="#d7f2f6";ctx.beginPath();ctx.roundRect(-13,-17,28,14,5);ctx.fill();
+ ctx.fillStyle="#f8efb8";ctx.fillRect(24,-2,5,6);
+ ctx.fillStyle="#4b5962";ctx.fillRect(-8,-14,2,10);ctx.restore();
+}
+function drawTinyFrog(ctx,x,y,blink){
+ // Original vector frog sprite (no copied game art).
+ ctx.save();ctx.translate(x,y);
+ ctx.strokeStyle="#226c3a";ctx.lineWidth=4;ctx.lineCap="round";
+ ctx.beginPath();ctx.moveTo(-10,10);ctx.lineTo(-20,17);ctx.lineTo(-25,15);ctx.moveTo(10,10);ctx.lineTo(20,17);ctx.lineTo(25,15);ctx.stroke();
+ ctx.fillStyle="#2d984d";ctx.beginPath();ctx.ellipse(0,5,18,15,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#43bd5e";ctx.beginPath();ctx.ellipse(-9,-8,10,11,0,0,Math.PI*2);ctx.ellipse(9,-8,10,11,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(-9,-11,5,0,Math.PI*2);ctx.arc(9,-11,5,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#182c1d";ctx.beginPath();ctx.arc(-8,-10,2,0,Math.PI*2);ctx.arc(10,-10,2,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle="#15582b";ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,2,6,.2,Math.PI-.2);ctx.stroke();
+ if(blink){ctx.fillStyle="#e7b3a4";ctx.beginPath();ctx.arc(-15,0,3,0,Math.PI*2);ctx.arc(15,0,3,0,Math.PI*2);ctx.fill();}
+ ctx.restore();
+}
+function drawRoadSnake(ctx,x,y){
+ ctx.save();ctx.strokeStyle="#3ab65f";ctx.lineWidth=10;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(x-30,y+4);ctx.quadraticCurveTo(x-15,y-15,x,y+4);ctx.quadraticCurveTo(x+15,y+18,x+28,y-2);ctx.stroke();
+ ctx.fillStyle="#247d40";ctx.beginPath();ctx.arc(x+28,y-3,8,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(x+31,y-6,2,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#bd2534";ctx.beginPath();ctx.moveTo(x+34,y);ctx.lineTo(x+45,y+3);ctx.lineTo(x+34,y+4);ctx.fill();ctx.restore();
+}
+function drawRoadLog(ctx,x,y){
+ ctx.save();ctx.translate(x,y);ctx.rotate(-.05);
+ ctx.fillStyle="#8d5b34";ctx.beginPath();ctx.roundRect(-33,-9,66,18,8);ctx.fill();
+ ctx.strokeStyle="#ba8c57";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-10,-7);ctx.lineTo(-10,7);ctx.moveTo(13,-7);ctx.lineTo(13,7);ctx.stroke();
+ ctx.fillStyle="#d8ae72";ctx.beginPath();ctx.ellipse(31,0,4,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
+}
+function drawFrogFrame(now){
+ if(game!=="frog"||!frogArcade)return;
+ const canvas=$("frogCanvas");if(!canvas)return;
+ const rect=canvas.getBoundingClientRect(),ratio=Math.max(1,window.devicePixelRatio||1);
+ if(canvas.width!==Math.floor(rect.width*ratio)||canvas.height!==Math.floor(rect.height*ratio)){canvas.width=Math.floor(rect.width*ratio);canvas.height=Math.floor(rect.height*ratio);}
+ const ctx=canvas.getContext("2d");ctx.setTransform(canvas.width/900,0,0,canvas.height/520,0,0);
+ const s=frogArcade,dt=Math.min(.04,s.lastTime?(now-s.lastTime)/1000:1/60);s.lastTime=now;
+ s.invulnerable=Math.max(0,s.invulnerable-dt);
+ ctx.clearRect(0,0,900,520);
+ const grass=ctx.createLinearGradient(0,0,0,520);grass.addColorStop(0,"#a9d67a");grass.addColorStop(.18,"#73bd60");grass.addColorStop(.84,"#5da64e");grass.addColorStop(1,"#a7d879");ctx.fillStyle=grass;ctx.fillRect(0,0,900,520);
+ ctx.fillStyle="#d5ed9b";ctx.fillRect(0,0,900,67);ctx.fillStyle="#e5dca8";ctx.fillRect(0,440,900,80);
+ ctx.fillStyle="#346f45";ctx.fillRect(0,67,900,373);
+ for(let row=1;row<=4;row++){
+  const y=frogY(row);ctx.fillStyle=row%2?"#4c555b":"#555f63";ctx.fillRect(0,y-31,900,62);
+  ctx.fillStyle="#394349";ctx.fillRect(0,y-31,900,3);ctx.fillRect(0,y+28,900,3);
+  ctx.strokeStyle="#d9d6b9";ctx.lineWidth=3;ctx.setLineDash([26,24]);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(900,y);ctx.stroke();ctx.setLineDash([]);
+  for(let x=22;x<900;x+=116){ctx.fillStyle="#84bd62";ctx.beginPath();ctx.arc(x,y-36,4,0,Math.PI*2);ctx.fill();}
+ }
+ ctx.fillStyle="#2d683b";ctx.font="bold 22px system-ui";ctx.textAlign="center";ctx.fillText("FINISH",450,41);
+ for(let x=40;x<900;x+=110){ctx.fillStyle="#3d8a45";ctx.beginPath();ctx.arc(x,462,5,0,Math.PI*2);ctx.arc(x+18,471,4,0,Math.PI*2);ctx.fill();}
+ // Moving hazards advance independently of the player's key presses.
+ for(const h of s.hazards){
+  h.x+=h.dir*h.speed*dt;
+  if(h.x<-75)h.x=975;if(h.x>975)h.x=-75;
+  const y=frogY(h.row);
+  if(h.type==="car")drawRoadCar(ctx,h.x,y,h.color,h.dir);
+  else if(h.type==="snake")drawRoadSnake(ctx,h.x,y);
+  else drawRoadLog(ctx,h.x,y);
+ }
+ // The vocabulary tiles sit among the traffic and stay readable on narrow screens.
+ for(const t of s.level.choices){
+  if(t.used)continue;
+  const x=(t.col+.5)*100,y=frogY(t.row),w=Math.min(145,Math.max(74,Array.from(t.text).length*13+24));
+  ctx.fillStyle="#fff3bd";ctx.strokeStyle="#bb8d2a";ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(x-w/2,y-19,w,38,9);ctx.fill();ctx.stroke();
+  ctx.fillStyle="#32260b";ctx.font=(Array.from(t.text).length>7?"bold 13px":"bold 16px")+" system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(t.text,x,y,w-7);
+ }
+ const playerX=(s.x+.5)*100,playerY=frogY(s.y);
+ if(!(s.invulnerable>0&&Math.floor(now/80)%2))drawTinyFrog(ctx,playerX,playerY,s.invulnerable>0);
+ // Traffic collisions happen in real time, including while the player stands still.
+ if(s.invulnerable<=0&&s.y>0&&s.y<5){
+  const px=playerX;
+  for(const h of s.hazards){
+   if(h.row===s.y&&Math.abs(h.x-px)<(h.type==="log"?38:34)){
+    frogLoseLife("Oeps! Een bewegend obstakel raakte Froggie. Probeer een ander moment om over te steken.");
+    return;
+   }
+  }
+ }
+ frogFrameId=requestAnimationFrame(drawFrogFrame);
+}
+function startFrogFrame(){frogArcade.lastTime=0;frogHud();frogFrameId=requestAnimationFrame(drawFrogFrame);}
+
 function frogLoseLife(message){
- const s=frogArcade;s.lives--;s.x=4;s.y=5;s.feedback=message;
- if(s.lives<=0){frogLives=0;ended=true;renderGame();return;}
- renderGame();
+ const s=frogArcade;if(!s||s.invulnerable>0)return;
+ s.lives--;s.x=4;s.y=5;s.invulnerable=1.25;s.feedback=message;frogLives=s.lives;
+ if(s.lives<=0){ended=true;renderGame();return;}
+ frogHud();
 }
 function frogStepMove(dir){
  if(game!=="frog"||ended||!frogArcade)return;
@@ -295,15 +396,15 @@ function frogStepMove(dir){
  else if(dir==="right")s.x=Math.min(8,s.x+1);
  else if(dir==="up")s.y=Math.max(0,s.y-1);
  else if(dir==="down")s.y=Math.min(5,s.y+1);
- // Traffic advances whenever Froggie hops.
- s.hazards.forEach(h=>h.col=(h.col+h.dir+9)%9);
- const hit=s.hazards.some(h=>h.row===s.y&&h.col===s.x);
- if(hit){frogLoseLife("🚗 Oeps! Je raakte een obstakel. Probeer een andere route.");return;}
+ if(s.invulnerable<=0&&s.y>0&&s.y<5){
+  const px=(s.x+.5)*100;
+  if(s.hazards.some(h=>h.row===s.y&&Math.abs(h.x-px)<(h.type==="log"?38:34))){frogLoseLife("Oeps! Je stapte vlak voor een bewegend obstakel. Probeer opnieuw.");return;}
+ }
  for(const t of s.level.choices){
   if(t.used||t.row!==s.y||t.col!==s.x)continue;
   t.used=true;
-  if(t.correct){s.gotWord=true;s.level.choices.forEach(x=>{if(!x.correct)x.used=true;});s.feedback="✅ Goed gevonden! Bereik nu de finish bovenaan.";}
-  else{s.lives--;s.x=4;s.y=5;s.feedback="❌ Niet de juiste vertaling. Je verliest een leven.";if(s.lives<=0){frogLives=0;ended=true;renderGame();return;}}
+  if(t.correct){s.gotWord=true;s.level.choices.forEach(x=>{if(!x.correct)x.used=true;});s.feedback="Goed gevonden! 🟡 Bereik nu de finish bovenaan.";}
+  else{frogLoseLife("Dat was niet het juiste woord. Je verliest een leven.");return;}
   break;
  }
  if(s.y===0){
@@ -311,10 +412,10 @@ function frogStepMove(dir){
   else{
    s.score++;frogStep=s.score;
    if(s.score>=7){ended=true;renderGame();return;}
-   s.round++;s.x=4;s.y=5;s.gotWord=false;s.level=newFrogRound();s.feedback="🌼 Goed! Volgende woord klaar.";
+   s.round++;s.x=4;s.y=5;s.gotWord=false;s.level=newFrogRound();s.hazards.forEach((h,i)=>{h.x=[70,740,280,660][i];});s.feedback="Goed oversteken! Volgende woord klaar.";
   }
  }
- renderGame();
+ frogHud();
 }
 window.addEventListener("keydown",e=>{
  if(game!=="frog"||ended)return;
@@ -505,11 +606,13 @@ function renderGame(){
   $("gameBody").innerHTML=renderEnd(title,body);return;
  }
  $("gameBody").innerHTML=renderBoard();
+ if(game==="frog")startFrogFrame();
  if(game==="pablo"){startPabloFrame();}
 }
 function startGame(which){
  if(which==="draw"&&lang!=="zh")return;
  if(pabloFrameId)cancelAnimationFrame(pabloFrameId);pabloFrameId=0;pabloLastTime=0;pabloKeys={left:false,right:false};pabloArcade=null;
+ if(frogFrameId)cancelAnimationFrame(frogFrameId);frogFrameId=0;
  game=which;ended=false;feedback="";frogStep=0;frogLives=3;playerProgress=0;opponentProgress=0;waves=0;explorerLives=3;towerLevel=1;gems=0;towerShields=0;heroLevel=1;exploredThisWave=false;regionsFound=0;pabloLevel=1;pabloLives=3;pabloStars=0;frogStep=0;frogArcade=null;raceCoins=0;raceCarLevel=1;raceWordsDone=0;raceMistakes=0;racePuzzle=null;memoryFirst=null;memoryPending=null;memoryMatches=0;memoryMoves=0;flashRevealed=false;drawIndex=0;
  $("gameMenu").classList.add("hidden");$("playArea").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});
  if(game==="draw"){
@@ -578,26 +681,40 @@ function drawArrow(ctx,points){
  const angle=Math.atan2(b.y-a.y,b.x-a.x),size=11;
  ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-size*Math.cos(angle-.55),b.y-size*Math.sin(angle-.55));ctx.lineTo(b.x-size*Math.cos(angle+.55),b.y-size*Math.sin(angle+.55));ctx.closePath();ctx.fillStyle="#a9780b";ctx.fill();
 }
+function drawVectorGuide(ctx,path,color,width){
+ if(typeof Path2D==="undefined"||typeof path!=="string"||!drawingState||!drawingState.scale)return false;
+ try{
+  const ratio=Math.max(1,window.devicePixelRatio||1),scale=drawingState.scale;
+  const shape=new Path2D(path);
+  ctx.save();
+  ctx.setTransform(ratio*scale,0,0,ratio*scale,ratio*drawingState.offsetX,ratio*drawingState.offsetY);
+  ctx.strokeStyle=color;ctx.lineWidth=width/scale;ctx.lineCap="round";ctx.lineJoin="round";
+  ctx.stroke(shape);ctx.restore();return true;
+ }catch(_){try{ctx.restore();}catch(__){}return false;}
+}
 function redrawDrawingCanvas(){
  const canvas=$("drawingCanvas");if(!canvas||!drawingState)return;
  const ratio=Math.max(1,window.devicePixelRatio||1),w=drawingState.width,h=drawingState.height,ctx=canvas.getContext("2d");
  ctx.setTransform(ratio,0,0,ratio,0,0);ctx.clearRect(0,0,w,h);ctx.fillStyle="#fffefa";ctx.fillRect(0,0,w,h);
  if(drawingState.data){
+  const useVector=typeof Path2D!=="undefined"&&Array.isArray(drawingState.data.strokes)&&drawingState.data.strokes.length===drawingState.data.medians.length;
   drawingState.data.medians.forEach((stroke,i)=>{
-   if(i<drawnStrokes.length)drawGuide(ctx,stroke,"#dfd1ab",8);
-   else if(i===drawnStrokes.length){drawGuide(ctx,stroke,"#e3b63e",12);drawArrow(ctx,stroke);}
-   else drawGuide(ctx,stroke,"#eee7d8",7);
+   const color=i<drawnStrokes.length?"#d6c9a8":i===drawnStrokes.length?"#e5ad1e":"#d7cfba";
+   const width=i===drawnStrokes.length?16:(i<drawnStrokes.length?10:9);
+   if(!useVector||!drawVectorGuide(ctx,drawingState.data.strokes[i],color,width))drawGuide(ctx,stroke,color,width);
+   if(i===drawnStrokes.length)drawArrow(ctx,stroke);
   });
  }else{
   ctx.fillStyle="#e4dcc4";ctx.textAlign="center";ctx.textBaseline="middle";ctx.font=Math.min(h*.76,w*.48)+'px "KaiTi","STKaiti","Noto Serif CJK SC","PingFang SC","Microsoft YaHei",serif';
   ctx.fillText(DRAW_DATA[drawIndex][0],w/2,h/2);
  }
+ ctx.setTransform(ratio,0,0,ratio,0,0);
  ctx.strokeStyle="#30240f";ctx.lineWidth=6;ctx.lineCap="round";ctx.lineJoin="round";
  const paint=p=>{if(!p||!p.length)return;ctx.beginPath();ctx.moveTo(p[0].x,p[0].y);for(let i=1;i<p.length;i++)ctx.lineTo(p[i].x,p[i].y);ctx.stroke();};
  drawnStrokes.forEach(paint);paint(currentStroke);
  const progress=$("strokeProgress"),n=drawingState.data?drawingState.data.medians.length:0;
- if(progress)progress.textContent=n?(drawnStrokes.length<n?"Streken: "+drawnStrokes.length+" van "+n+" · teken de goudkleurige streek apart":"Alle "+n+" streken gezet · vraag nu je cijfers"):"Streken: "+drawnStrokes.length;
- const rate=$("rateDrawing");if(rate)rate.disabled=!drawingState.data||!drawnStrokes.length||!!currentStroke;
+ if(progress)progress.textContent=n?(drawnStrokes.length<n?"Streken: "+drawnStrokes.length+" van "+n+" · volg de goudkleurige streek":"Alle "+n+" streken gezet · vraag nu je cijfers"):"Streken: "+drawnStrokes.length;
+ const rate=$("rateDrawing");if(rate)rate.disabled=!drawingState.data||!!currentStroke;
 }
 async function setupDrawingCanvas(){
  const canvas=$("drawingCanvas");if(!canvas)return;
@@ -651,7 +768,10 @@ function shapeDistance(a,b){
  return (uv/u.length+vu/v.length)/2;
 }
 function gradeDrawing(){
- if(!drawingState||!drawingState.data||!drawnStrokes.length)return;
+ if(!drawingState||!drawingState.data)return;
+ if(!drawnStrokes.length){
+  const result=$("drawScoreResult");result.innerHTML='<p>Teken eerst de goudkleurige streek op het tekenvlak. Laat je vinger of muis los na iedere streek.</p>';result.classList.remove("hidden");return;
+ }
  const targets=drawingState.data.medians.map(targetReference),users=drawnStrokes.map(userReference),expected=targets.length,actual=users.length;
  const candidates=[];
  for(let i=0;i<actual;i++)for(let j=0;j<expected;j++){
@@ -713,7 +833,7 @@ $("directionToggle").addEventListener("click",()=>{
  if(game&&game!=="draw")startGame(game);
 });
 document.querySelectorAll(".game-card").forEach(b=>b.addEventListener("click",()=>startGame(b.dataset.game)));
-$("backToGames").addEventListener("click",()=>{$("playArea").classList.add("hidden");$("gameMenu").classList.remove("hidden");game="";window.scrollTo({top:0,behavior:"smooth"});});
+$("backToGames").addEventListener("click",()=>{if(frogFrameId)cancelAnimationFrame(frogFrameId);frogFrameId=0;if(pabloFrameId)cancelAnimationFrame(pabloFrameId);pabloFrameId=0;$("playArea").classList.add("hidden");$("gameMenu").classList.remove("hidden");game="";window.scrollTo({top:0,behavior:"smooth"});});
 $("gameBody").addEventListener("click",e=>{
  const frogButton=e.target.closest("[data-frog-move]");if(frogButton){frogStepMove(frogButton.dataset.frogMove);return;}
  const pabloButton=e.target.closest("[data-pablo-control]");if(pabloButton)return;
@@ -745,7 +865,9 @@ $("gameBody").addEventListener("click",e=>{
  if(e.target.closest("#backEnd")){$("backToGames").click();return;}
 });
 $("gameBody").addEventListener("pointerdown",e=>{const b=e.target.closest("[data-pablo-control]");if(!b)return;e.preventDefault();const key=b.dataset.pabloControl;if(key==="left"||key==="right")pabloKeys[key]=true;if(key==="jump"&&pabloArcade&&pabloArcade.player.onGround)pabloArcade.player.vy=-545;});
-$("gameBody").addEventListener("pointerup",e=>{const b=e.target.closest("[data-pablo-control]");if(b&&b.dataset.pabloControl in pabloKeys)pabloKeys[b.dataset.pabloControl]=false;});
+window.addEventListener("pointerup",e=>{const b=e.target&&e.target.closest?e.target.closest("[data-pablo-control]"):null;if(b&&b.dataset.pabloControl in pabloKeys)pabloKeys[b.dataset.pabloControl]=false;});
+window.addEventListener("pointercancel",()=>{pabloKeys.left=false;pabloKeys.right=false;});
+window.addEventListener("blur",()=>{pabloKeys.left=false;pabloKeys.right=false;});
 $("gameBody").addEventListener("pointercancel",()=>{pabloKeys.left=false;pabloKeys.right=false;});
 
 })();
