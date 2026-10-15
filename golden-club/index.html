@@ -161,12 +161,12 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
  </section>
  <div class="label">1 · Kies je taal</div>
  <div class="languages" role="group" aria-label="Kies een oefentaal">
-  <button class="lang" data-lang="es"><span>🇪🇸</span>Spaans</button>
+  <button class="lang active" data-lang="es"><span>🇪🇸</span>Spaans</button>
   <button class="lang" data-lang="fr"><span>🇫🇷</span>Frans</button>
-  <button class="lang active" data-lang="zh"><span>🀄</span>Chinees</button>
+  <button class="lang" data-lang="zh"><span>🀄</span>Chinees</button>
  </div>
  <div class="directionrow">
-  <p id="directionLabel">Oefenrichting: Chinees → Nederlands</p>
+  <p id="directionLabel">Oefenrichting: Nederlands → Spaans</p>
   <button id="directionToggle" class="btn light" type="button">🔄 Draai de richting om</button>
  </div>
  <div class="label">2 · Kies een game</div>
@@ -203,7 +203,7 @@ const LANGS={es:{name:"Spaans",flag:"🇪🇸"},fr:{name:"Frans",flag:"🇫🇷"
 const DRAW_DATA=[["我","ik"],["你","jij"],["他","hij"],["她","zij"],["叫","heten / noemen"],["好","goed"],["吗","vraagdeeltje voor een ja/nee-vraag"],["呢","vraagdeeltje (en jij? / hoe zit het?)"],["不","niet"]];
 const GAMES={draw:{title:"Karakters tekenen",desc:"Trek het Chinese karakter over op het tekenvlak."},frog:{title:"Tiny Froggie",desc:"Spring over de obstakels door de juiste vertaling te kiezen."},race:{title:"Garden Race",desc:"Geef je auto een boost met goede antwoorden en finish als eerste."},explorer:{title:"The Explorer",desc:"Bouw een verdediging, koop schildtorens en overleef acht golven."},pablo:{title:"Super Pablo",desc:"Ren door acht levels, verzamel sterren en ontwijk hindernissen."},memory:{title:"Memory Quest",desc:"Vind de zes woord-betekenisparen."},cards:{title:"Flashcard Quest",desc:"Draai de kaarten om en leer woorden op je eigen tempo."}};
 const $=id=>document.getElementById(id);
-let lang="zh",direction="toDutch",game="",item=null,options=[],feedback="",ended=false;
+let lang="es",direction="toForeign",game="",item=null,options=[],feedback="",ended=false;
 let frogStep=0,frogLives=3,playerProgress=0,opponentProgress=0,waves=0,explorerLives=3,towerLevel=1,gems=0,towerShields=0,heroLevel=1,exploredThisWave=false,regionsFound=0,pabloLevel=1,pabloLives=3,pabloStars=0;
 let memoryDeck=[],memoryFirst=null,memoryPending=null,memoryMatches=0,memoryMoves=0;
 let flashDeck=[],flashIndex=0,flashRevealed=false,drawIndex=0,drawingState=null,drawHasMarks=false,drawnStrokes=[],currentStroke=null,drawSetupToken=0;
@@ -324,7 +324,7 @@ window.addEventListener("keydown",e=>{
 
 
 function makePabloArcade(){
- const pair=randomPair(),target=Array.from(answerOf(pair)),tokens=[];
+ const pair=chooseGamePair(),target=Array.from(answerOf(pair)),tokens=[];
  const span=target.length>1?690/(target.length-1):0;
  const heights=[350,315,333,292,350,310,330,300];
  target.forEach((ch,i)=>tokens.push({x:105+i*span,y:heights[i%heights.length],ch,index:i,correct:true,used:false}));
@@ -338,7 +338,7 @@ function makePabloArcade(){
 }
 function renderPabloBoard(){
  const s=pabloArcade;
- return '<div class="question"><div class="q-label">Super Pablo · verzamel fruitletters</div><div class="prompt" id="pabloPrompt">'+(s?promptOf(s.pair):"…")+'</div><p class="mini-hint">Spring over kisten, pak de juiste letters/tekens in de goede volgorde en voltooi acht levels.</p><div class="pablo-slots" id="pabloSlots">'+(s?s.target.map((ch,i)=>i<s.collected?ch:"＿").join(" "):"")+'</div><p class="feedback" id="pabloFeedback">'+(s?s.feedback:"")+'</p></div><div class="arcade-canvas-wrap"><canvas class="arcade-canvas" id="pabloCanvas" aria-label="Super Pablo platformspel"></canvas></div><div class="arcade-controls"><button class="btn light" data-pablo-control="left">← Houd vast</button><button class="btn gold" data-pablo-control="jump">↑ Spring</button><button class="btn light" data-pablo-control="right">Houd vast →</button></div><p class="mini-hint" id="pabloStatus">Level '+pabloLevel+' / 8 · Sterren: '+pabloStars+' · Levens: '+'❤️'.repeat(pabloLives)+'</p>';
+ return '<div class="question"><div class="q-label">Super Pablo · verzamel de juiste fruitletters/tekens</div><div class="prompt" id="pabloPrompt">'+(s?promptOf(s.pair):"…")+'</div><p class="mini-hint">Spring over kisten en verzamel de juiste fruitletters/tekens in de goede volgorde. Voltooi acht levels.</p><div class="pablo-slots" id="pabloSlots">'+(s?s.target.map((ch,i)=>i<s.collected?ch:"＿").join(" "):"")+'</div><p class="feedback" id="pabloFeedback">'+(s?s.feedback:"")+'</p></div><div class="arcade-canvas-wrap"><canvas class="arcade-canvas" id="pabloCanvas" aria-label="Super Pablo platformspel"></canvas></div><div class="arcade-controls"><button class="btn light" data-pablo-control="left">← Houd vast</button><button class="btn gold" data-pablo-control="jump">↑ Spring</button><button class="btn light" data-pablo-control="right">Houd vast →</button></div><p class="mini-hint" id="pabloStatus">Level '+pabloLevel+' / 8 · Sterren: '+pabloStars+' · Levens: '+'❤️'.repeat(pabloLives)+'</p>';
 }
 function updatePabloHud(){
  if(!pabloArcade)return;
@@ -397,11 +397,16 @@ function drawPabloFrame(now){
  ctx.fillStyle="#8e603a";ctx.strokeStyle="#694226";ctx.lineWidth=3;
  s.platforms.slice(1).forEach(pl=>{ctx.fillRect(pl.x,pl.y,pl.w,15);ctx.strokeRect(pl.x,pl.y,pl.w,15);ctx.fillStyle="#64b04c";ctx.fillRect(pl.x,pl.y,pl.w,5);ctx.fillStyle="#8e603a";});
  ctx.fillStyle="#4f923b";for(let x=0;x<900;x+=38)ctx.fillRect(x,430,27,7);
- // Fruit tiles contain the character/letter the learner must collect.
- s.tokens.forEach(t=>{
+ // Fruit carrying the character/letter that Pablo must collect.
+ const fruitIcons=["🍎","🍊","🍓","🍐","🍇","🍒","🍋","🍑"];
+ s.tokens.forEach((t,i)=>{
   if(t.used)return;
-  ctx.beginPath();ctx.fillStyle=t.correct?"#ffcf50":"#d5ecff";ctx.strokeStyle=t.correct?"#b27a19":"#6f9ab7";ctx.lineWidth=3;ctx.arc(t.x,t.y,20,0,Math.PI*2);ctx.fill();ctx.stroke();
-  ctx.font="bold 22px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#2e220b";ctx.fillText(t.ch,t.x,t.y);
+  const fruit=fruitIcons[(t.index>=0?t.index:i)%fruitIcons.length];
+  ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.font="34px system-ui";ctx.fillText(fruit,t.x,t.y-5);
+  ctx.beginPath();ctx.fillStyle=t.correct?"#fff1ba":"#e3f2ff";ctx.strokeStyle=t.correct?"#b47b16":"#7198b8";ctx.lineWidth=2;
+  ctx.arc(t.x+14,t.y+14,12,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.font="bold 14px system-ui";ctx.fillStyle="#2e220b";ctx.fillText(t.ch,t.x+14,t.y+14);
  });
  // Hazards that are jumped over
  s.obstacles.forEach((o,i)=>{ctx.fillStyle="#9a6437";ctx.fillRect(o.x-o.w/2,398,o.w,32);ctx.strokeStyle="#ca9458";ctx.lineWidth=3;ctx.strokeRect(o.x-o.w/2,398,o.w,32);ctx.font="20px system-ui";ctx.fillText(i===1?"📦":"🪵",o.x,394);});
