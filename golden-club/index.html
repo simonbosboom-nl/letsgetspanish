@@ -916,9 +916,9 @@ function answerQuestion(index){
   if(chosen===correct){
    const target=explorerEnemies.filter(e=>e.hp>0).sort((a,b)=>explorerDistance(explorerHero,a)-explorerDistance(explorerHero,b))[0];
    if(target){target.hp--;if(target.hp<=0)gems+=5;}
-   gems+=4+heroLevel;exploredThisWave=false;
+   gems+=4+heroLevel;
    if(explorerEnemies.every(e=>e.hp<=0)){
-    waves++;gems+=8;if(waves>=8)ended=true;else spawnExplorerWave();
+    waves++;gems+=8;exploredThisWave=false;if(waves>=8)ended=true;else spawnExplorerWave();
    }
    feedback="🏹 Goed antwoord! Je held valt de dichtstbijzijnde blob aan en je vindt bouwmaterialen.";
   }else if(towerShields>0){towerShields--;feedback="🛡️ Een schild blokkeert de aanval! Het juiste antwoord was: "+correct;}
