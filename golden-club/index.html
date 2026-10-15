@@ -98,8 +98,9 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 .explore-board .castle{filter:drop-shadow(0 5px 0 #315b24)}.blobs{display:flex;flex-direction:column;gap:3px;font-size:25px}
 .explore-map{padding:13px;border:2px solid #86b654;border-radius:18px;margin:13px 0;background:radial-gradient(circle at 20% 20%,#a9d86f,#5e9d48 72%,#427b39);box-shadow:inset 0 0 0 4px #d4ebad}
 .map-banner{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:#244a1d;font-size:12px;font-weight:950;margin-bottom:10px}
+.explore-path:after{content:"";position:absolute;right:21%;top:49%;z-index:1;width:15px;height:5px;border-radius:99px;background:#ffe56b;box-shadow:0 0 7px #fff3a3;animation:towerShot 1.05s linear infinite}
 .explore-path{position:relative;display:flex;align-items:center;justify-content:space-between;gap:7px;min-height:82px;border:4px dashed #d9c79a;border-radius:40px;padding:12px 10px;background:linear-gradient(90deg,#68705d,#85826c,#66745d);box-shadow:inset 0 0 0 3px #ffffff24}
-.explore-path .enemy{font-size:25px;filter:drop-shadow(0 3px 0 #0003);animation:blobWiggle .7s ease-in-out infinite alternate}
+.explore-path .enemy{position:absolute;left:var(--enemy-start,80%);top:50%;z-index:2;font-size:25px;filter:drop-shadow(0 3px 0 #0003);animation:blobWiggle .7s ease-in-out infinite alternate,blobTravel 3.1s linear infinite;animation-delay:var(--enemy-delay,0s)}
 .explore-path .fortress{font-size:44px;filter:drop-shadow(0 4px 0 #29491b)}
 
 .explore-regions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:9px 0;color:#315624;font-size:12px;font-weight:900}
@@ -145,7 +146,7 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 .hidden{display:none!important}.footer-note{text-align:center;color:#806f45;font-size:12px;line-height:1.5;margin-top:22px}
 @media(max-width:740px){.games{grid-template-columns:repeat(2,minmax(0,1fr))}.art{height:115px}.game-copy p{min-height:0}.memory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:450px){.intro{align-items:flex-start}.crown{width:52px;height:52px;flex-basis:52px;font-size:28px;border-radius:14px}.games{grid-template-columns:1fr}.art{height:105px}.game-card{display:grid;grid-template-columns:108px 1fr}.game-card .art{height:100%;min-height:150px}.game-copy h3{font-size:17px}.language span{font-size:20px}.choices{grid-template-columns:1fr}.lane{height:36px}.memory-card{font-size:12px;min-height:72px}.play-head{align-items:flex-start}}
-@keyframes frogHop{0%{transform:translateY(10px) scale(.82)}65%{transform:translateY(-11px) scale(1.08)}100%{transform:translateY(0) scale(1)}}@keyframes obstacleDrift{from{transform:translateY(0)}to{transform:translateY(-5px)}}@keyframes roadRoll{from{background-position:0 0}to{background-position:-53px 0}}@keyframes carBounce{from{transform:translateY(0)}to{transform:translateY(-2px)}}@keyframes blobWiggle{from{transform:rotate(-8deg) translateY(0)}to{transform:rotate(8deg) translateY(-3px)}}@keyframes cloudFloat{from{transform:translateX(-5px)}to{transform:translateX(8px)}}@keyframes heroRun{from{transform:translateY(0)}to{transform:translateY(-4px)}}@keyframes starShine{from{transform:scale(.92) rotate(-7deg)}to{transform:scale(1.12) rotate(7deg)}}
+@keyframes frogHop{0%{transform:translateY(10px) scale(.82)}65%{transform:translateY(-11px) scale(1.08)}100%{transform:translateY(0) scale(1)}}@keyframes obstacleDrift{from{transform:translateY(0)}to{transform:translateY(-5px)}}@keyframes roadRoll{from{background-position:0 0}to{background-position:-53px 0}}@keyframes carBounce{from{transform:translateY(0)}to{transform:translateY(-2px)}}@keyframes blobWiggle{from{transform:translateY(-50%) rotate(-8deg)}to{transform:translateY(calc(-50% - 3px)) rotate(8deg)}}@keyframes blobTravel{from{margin-left:0}to{margin-left:-150px}}@keyframes towerShot{0%{right:20%;opacity:0}15%{opacity:1}100%{right:83%;opacity:0}}@keyframes cloudFloat{from{transform:translateX(-5px)}to{transform:translateX(8px)}}@keyframes heroRun{from{transform:translateY(0)}to{transform:translateY(-4px)}}@keyframes starShine{from{transform:scale(.92) rotate(-7deg)}to{transform:scale(1.12) rotate(7deg)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -480,6 +481,52 @@ function pabloCollisions(){
   }
  }
 }
+function drawPabloCloud(ctx,x,y,scale){
+ ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle="#fff";ctx.strokeStyle="#c1e8f4";ctx.lineWidth=2;
+ ctx.beginPath();ctx.arc(-21,5,17,Math.PI*.6,Math.PI*1.9);ctx.arc(-4,-7,22,Math.PI,Math.PI*1.95);ctx.arc(17,0,17,Math.PI*1.1,Math.PI*2);ctx.arc(22,8,15,0,Math.PI*.6);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+}
+function drawPabloHero(ctx,x,y,blink){
+ ctx.save();ctx.translate(x,y);
+ // Red scarf/cape and boots
+ ctx.fillStyle="#d94737";ctx.beginPath();ctx.moveTo(-7,6);ctx.lineTo(-20,21);ctx.lineTo(-6,17);ctx.lineTo(0,29);ctx.lineTo(7,8);ctx.fill();
+ ctx.fillStyle="#3d4054";ctx.beginPath();ctx.roundRect(-13,26,10,8,3);ctx.roundRect(4,26,10,8,3);ctx.fill();
+ // Legs and belt
+ ctx.fillStyle="#304e85";ctx.beginPath();ctx.roundRect(-10,15,8,14,3);ctx.roundRect(2,15,8,14,3);ctx.fill();
+ ctx.fillStyle="#f0c34b";ctx.fillRect(-10,20,20,4);
+ // Body, arm sleeves and hands
+ ctx.fillStyle="#347ec0";ctx.beginPath();ctx.roundRect(-14,-3,28,21,6);ctx.fill();
+ ctx.fillStyle="#f1c28e";ctx.beginPath();ctx.roundRect(-20,0,7,14,4);ctx.roundRect(13,0,7,14,4);ctx.fill();
+ // Face and hair
+ ctx.fillStyle="#f3c995";ctx.beginPath();ctx.ellipse(0,-13,14,16,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#593b2d";ctx.beginPath();ctx.moveTo(-14,-16);ctx.lineTo(-12,-27);ctx.lineTo(-3,-30);ctx.lineTo(5,-27);ctx.lineTo(14,-22);ctx.lineTo(13,-12);ctx.lineTo(7,-18);ctx.lineTo(1,-14);ctx.lineTo(-5,-18);ctx.lineTo(-11,-12);ctx.closePath();ctx.fill();
+ ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(-5,-12,3,4,0,0,Math.PI*2);ctx.ellipse(5,-12,3,4,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#24324c";ctx.beginPath();ctx.arc(-4,-11,1.5,0,Math.PI*2);ctx.arc(6,-11,1.5,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle="#894c37";ctx.lineWidth=1.8;ctx.beginPath();ctx.arc(1,-6,4,.25,Math.PI-.25);ctx.stroke();
+ if(blink){ctx.fillStyle="#f1a89b";ctx.beginPath();ctx.arc(-12,-6,2.5,0,Math.PI*2);ctx.arc(12,-6,2.5,0,Math.PI*2);ctx.fill();}
+ ctx.restore();
+}
+function drawFruitSprite(ctx,x,y,type){
+ ctx.save();ctx.translate(x,y);ctx.lineJoin="round";
+ const colors=["#e4473a","#f19b2e","#e84e6b","#8acb4f","#8f58bd","#cf3346","#f3d24a","#ed9c7e"];
+ const color=colors[type%colors.length];
+ ctx.fillStyle=color;ctx.strokeStyle="#824a25";ctx.lineWidth=2;
+ if(type%8===0||type%8===5){
+  ctx.beginPath();ctx.moveTo(0,-10);ctx.bezierCurveTo(-20,-28,-32,-8,-20,8);ctx.bezierCurveTo(-9,25,-2,22,0,15);ctx.bezierCurveTo(4,23,15,21,22,6);ctx.bezierCurveTo(31,-13,15,-27,0,-10);ctx.fill();ctx.stroke();
+ }else if(type%8===1||type%8===6){
+  ctx.beginPath();ctx.arc(0,0,17,0,Math.PI*2);ctx.fill();ctx.stroke();
+ }else if(type%8===2){
+  ctx.beginPath();ctx.moveTo(-18,-5);ctx.quadraticCurveTo(-16,12,0,22);ctx.quadraticCurveTo(16,12,18,-5);ctx.lineTo(0,-14);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.fillStyle="#ffecb1";for(let i=0;i<5;i++){ctx.beginPath();ctx.arc(-9+i*4.5,2+(i%2)*5,1.4,0,Math.PI*2);ctx.fill();}
+ }else if(type%8===3||type%8===7){
+  ctx.beginPath();ctx.moveTo(0,-20);ctx.bezierCurveTo(-3,-6,-20,-1,-16,13);ctx.bezierCurveTo(-13,28,13,27,16,12);ctx.bezierCurveTo(20,-1,3,-7,0,-20);ctx.fill();ctx.stroke();
+ }else{
+  for(const [dx,dy] of [[-9,-8],[2,-10],[12,-1],[-8,4],[3,6],[0,-1]]){ctx.beginPath();ctx.arc(dx,dy,7,0,Math.PI*2);ctx.fill();ctx.stroke();}
+ }
+ ctx.strokeStyle="#536e32";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-15);ctx.lineTo(3,-26);ctx.stroke();
+ ctx.fillStyle="#56a94a";ctx.beginPath();ctx.ellipse(9,-23,8,4,.4,0,Math.PI*2);ctx.fill();
+ ctx.restore();
+}
+
 function drawPabloFrame(now){
  if(game!=="pablo"||!pabloArcade)return;
  const canvas=$("pabloCanvas");if(!canvas)return;
@@ -491,7 +538,7 @@ function drawPabloFrame(now){
  ctx.clearRect(0,0,900,500);
  const sky=ctx.createLinearGradient(0,0,0,500);sky.addColorStop(0,"#88d9ff");sky.addColorStop(.65,"#e0f6ff");sky.addColorStop(.66,"#abd879");sky.addColorStop(1,"#579c44");
  ctx.fillStyle=sky;ctx.fillRect(0,0,900,500);
- ctx.font="34px system-ui";ctx.fillText("☁️",75+(now/100%60),68);ctx.fillText("☁️",675-(now/120%65),105);
+ drawPabloCloud(ctx,75+(now/100%60),68,.8);drawPabloCloud(ctx,675-(now/120%65),105,.65);
  // Rolling hills and platforms
  ctx.fillStyle="#9ad18a";ctx.beginPath();ctx.moveTo(0,310);ctx.quadraticCurveTo(200,240,360,320);ctx.quadraticCurveTo(580,225,900,310);ctx.lineTo(900,500);ctx.lineTo(0,500);ctx.closePath();ctx.fill();
  ctx.fillStyle="#4f923b";ctx.fillRect(0,430,900,70);
@@ -499,18 +546,15 @@ function drawPabloFrame(now){
  s.platforms.slice(1).forEach(pl=>{ctx.fillRect(pl.x,pl.y,pl.w,15);ctx.strokeRect(pl.x,pl.y,pl.w,15);ctx.fillStyle="#64b04c";ctx.fillRect(pl.x,pl.y,pl.w,5);ctx.fillStyle="#8e603a";});
  ctx.fillStyle="#4f923b";for(let x=0;x<900;x+=38)ctx.fillRect(x,430,27,7);
  // Fruit carrying the character/letter that Pablo must collect.
- const fruitIcons=["🍎","🍊","🍓","🍐","🍇","🍒","🍋","🍑"];
  s.tokens.forEach((t,i)=>{
   if(t.used)return;
-  const fruit=fruitIcons[(t.index>=0?t.index:i)%fruitIcons.length];
-  ctx.textAlign="center";ctx.textBaseline="middle";
-  ctx.font="34px system-ui";ctx.fillText(fruit,t.x,t.y-5);
-  ctx.beginPath();ctx.fillStyle=t.correct?"#fff1ba":"#e3f2ff";ctx.strokeStyle=t.correct?"#b47b16":"#7198b8";ctx.lineWidth=2;
-  ctx.arc(t.x+14,t.y+14,12,0,Math.PI*2);ctx.fill();ctx.stroke();
-  ctx.font="bold 14px system-ui";ctx.fillStyle="#2e220b";ctx.fillText(t.ch,t.x+14,t.y+14);
+  drawFruitSprite(ctx,t.x,t.y-2,(t.index>=0?t.index:i));
+  ctx.beginPath();ctx.fillStyle="#fff7d5";ctx.strokeStyle="#8c6620";ctx.lineWidth=2;
+  ctx.arc(t.x+15,t.y+13,13,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.font="bold 14px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#35240a";ctx.fillText(t.ch,t.x+15,t.y+13);
  });
  // Hazards that are jumped over
- s.obstacles.forEach((o,i)=>{ctx.fillStyle="#9a6437";ctx.fillRect(o.x-o.w/2,398,o.w,32);ctx.strokeStyle="#ca9458";ctx.lineWidth=3;ctx.strokeRect(o.x-o.w/2,398,o.w,32);ctx.font="20px system-ui";ctx.fillText(i===1?"📦":"🪵",o.x,394);});
+ s.obstacles.forEach((o,i)=>{ctx.fillStyle="#9a6437";ctx.fillRect(o.x-o.w/2,398,o.w,32);ctx.strokeStyle="#ca9458";ctx.lineWidth=3;ctx.strokeRect(o.x-o.w/2,398,o.w,32);ctx.fillStyle="#d9af71";ctx.fillRect(o.x-o.w/2+5,402,Math.max(8,o.w-10),4);ctx.strokeStyle="#704725";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(o.x-o.w/2+6,401);ctx.lineTo(o.x+o.w/2-6,427);ctx.moveTo(o.x+o.w/2-6,401);ctx.lineTo(o.x-o.w/2+6,427);ctx.stroke();});
  // Physics and platform landing
  if(pabloKeys.left)p.x-=245*dt;if(pabloKeys.right)p.x+=245*dt;p.x=Math.max(16,Math.min(884,p.x));
  const previousBottom=p.y+p.h;p.vy+=1180*dt;p.y+=p.vy*dt;p.onGround=false;
@@ -521,7 +565,7 @@ function drawPabloFrame(now){
  }
  if(p.y>480){losePabloLife("Je viel van het platform. Probeer opnieuw!");}
  ctx.save();if(s.invulnerable>0&&Math.floor(now/90)%2)ctx.globalAlpha=.45;
- ctx.font="38px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("🦸",p.x,p.y+p.h/2);ctx.restore();
+ drawPabloHero(ctx,p.x,p.y+1,s.invulnerable>0);ctx.restore();
  pabloCollisions();
  pabloFrameId=requestAnimationFrame(drawPabloFrame);
 }
@@ -570,7 +614,7 @@ function renderBoard(){
  if(game==="explorer"){
   const towerHtml=Array.from({length:Math.min(6,towerLevel)},(_,i)=>'<div class="tower-token"><span>🏹</span><small>TOREN '+(i+1)+'</small></div>').join("");
   const slotsHtml=Array.from({length:Math.max(0,6-Math.min(6,towerLevel))},()=>'<div class="tower-slot">＋<small>VRIJE PLEK</small></div>').join("");
-  const enemies=Array.from({length:Math.min(5,1+Math.floor(waves/2))},(_,i)=>'<span class="enemy" style="animation-delay:'+(i*.14)+'s">👾</span>').join("");
+  const enemies=Array.from({length:Math.min(5,1+Math.floor(waves/2))},(_,i)=>'<span class="enemy" style="--enemy-start:'+(86-i*11)+'%;--enemy-delay:-'+(i*.63)+'s">👾</span>').join("");
   const areas=Array.from({length:6},(_,i)=>'<span class="explore-tile '+(i<regionsFound?"visited":i===regionsFound?"current":"")+'">'+(i<regionsFound?"✓":i===regionsFound?"?":"·")+'</span>').join("");
   return stats(["Golf: "+waves+" / 8","Torenlevel: "+towerLevel,"Held level: "+heroLevel,"Edelstenen: "+gems,"Schilden: "+towerShields,"❤️".repeat(explorerLives||0)])+
    '<div class="explore-map"><div class="map-banner"><span>🗺️ BOSPAD · GOLF '+Math.min(8,waves+1)+'</span><span>Bescherm het kasteel!</span></div>'+
