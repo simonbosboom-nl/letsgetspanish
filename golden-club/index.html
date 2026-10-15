@@ -87,6 +87,11 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 .frogger-word.target{background:#fff4c4}
 .arcade-controls{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;margin:10px 0}
 .arcade-controls .btn{min-width:54px;touch-action:none;user-select:none;-webkit-user-select:none}
+
+.race-canvas-wrap{width:100%;aspect-ratio:900/490;max-height:540px;border:3px solid #c6ab57;border-radius:19px;overflow:hidden;margin:12px 0;background:#5d9a4c;box-shadow:0 7px 18px #4a370f22}
+.race-canvas{display:block;width:100%;height:100%;touch-action:manipulation}
+.race-slot.filled{background:#e6f5d9;border-color:#62a54a;color:#2d6935}
+
 .race-slots{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin:12px 0}
 .race-slot{display:grid;place-items:center;min-width:38px;min-height:44px;border:2px solid #e0c46d;border-radius:10px;background:#fffdf6;color:#47330d;font-size:22px;font-weight:900}
 .race-letters{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px 0}
@@ -227,43 +232,120 @@ function answerOf(p){return direction==="toDutch"?p[1]:p[0]}
 function makeQuestion(){const data=DATA[lang];item=data[Math.floor(Math.random()*data.length)];const correct=answerOf(item);const others=shuffle(data.filter(p=>answerOf(p)!==correct).map(answerOf).filter((v,i,a)=>a.indexOf(v)===i)).slice(0,3);options=shuffle([correct].concat(others));}
 
 let racePuzzle=null,raceCoins=0,raceCarLevel=1,raceWordsDone=0,raceMistakes=0;
+let raceFrameId=0,raceLastTime=0,raceAngle=0,raceOpponentProgress=0,raceLane=0,raceBoost=0,raceWonWords=0;
 function wordOnly(s){return /^[A-Za-zÀ-ÖØ-öø-ÿ\u4e00-\u9fff]+$/.test(String(s||""));}
 function gameWordPool(){
  return DATA[lang].filter(p=>{const t=answerOf(p),n=Array.from(t).length;return wordOnly(t)&&n>=2&&n<=8&&p[0]&&p[1];});
 }
 function chooseGamePair(){const pool=gameWordPool();const source=pool.length?pool:DATA[lang].filter(p=>p[0]&&p[1]);return source[Math.floor(Math.random()*source.length)];}
 function makeRacePuzzle(){
- const pair=chooseGamePair(),target=Array.from(answerOf(pair)),source=gameWordPool().map(p=>Array.from(answerOf(p))).flat(),decoys=[];
- for(let i=0;i<Math.max(3,Math.min(5,target.length));i++){
-  const other=source.filter(ch=>!target.includes(ch));
-  decoys.push(other.length?other[Math.floor(Math.random()*other.length)]:target[Math.floor(Math.random()*target.length)]);
+ const pair=chooseGamePair(),target=Array.from(answerOf(pair));
+ const tiles=[],spacing=2*Math.PI*.72/Math.max(1,target.length);
+ target.forEach((ch,i)=>tiles.push({id:"target-"+i,ch,order:i,correct:true,used:false,lane:(i+raceCarLevel)%2,angle:.12+i*spacing,lapTarget:.12+i*spacing}));
+ const decoySource=gameWordPool().map(p=>Array.from(answerOf(p))).flat().filter(ch=>!target.includes(ch));
+ for(let i=0;i<Math.max(4,Math.min(7,target.length+2));i++){
+  const ch=decoySource.length?decoySource[Math.floor(Math.random()*decoySource.length)]:target[(i+1)%target.length];
+  const angle=.08+i*(2*Math.PI*.78/Math.max(4,Math.min(7,target.length+2)));
+  tiles.push({id:"decoy-"+i,ch,order:-1,correct:false,used:false,lane:(i+raceCarLevel+1)%2,angle,lapTarget:angle});
  }
- const tiles=shuffle(target.map((ch,i)=>({id:"t"+i+"_"+Math.random().toString(36).slice(2),ch,used:false})).concat(decoys.map((ch,i)=>({id:"d"+i+"_"+Math.random().toString(36).slice(2),ch,used:false}))));
  racePuzzle={pair,target,tiles,filled:[],clue:promptOf(pair),answer:answerOf(pair)};
 }
 function renderRaceBoard(){
  if(!racePuzzle)makeRacePuzzle();
- const slots=racePuzzle.target.map((ch,i)=>'<span class="race-slot">'+(racePuzzle.filled[i]||"＿")+'</span>').join("");
- const tiles=racePuzzle.tiles.map((t,i)=>'<button type="button" class="race-letter '+(t.used?"used":"")+'" data-race-tile="'+i+'" '+(t.used?"disabled":"")+'>'+t.ch+'</button>').join("");
- return stats(["Jij: "+Math.min(100,playerProgress)+"%","Rivaal: "+Math.min(100,opponentProgress)+"%","Munten: "+raceCoins+" 🪙","Auto-upgrade: "+raceCarLevel])+
-  '<div class="race-track"><div class="race-label">🏁 JOUW AUTO</div><div class="race-line"><span class="race-car" style="left:'+(2+Math.min(100,playerProgress)*.85)+'%">🏎️</span></div><div class="race-label">🤖 TEGENSTANDER</div><div class="race-line"><span class="race-car" style="left:'+(2+Math.min(100,opponentProgress)*.85)+'%">🚙</span></div><div class="race-label">FINISH → · '+raceWordsDone+' woorden goed</div></div>'+
-  '<div class="question"><div class="q-label">Maak het woord · '+LANGS[lang].name+'</div><div class="prompt">'+racePuzzle.clue+'</div><p class="mini-hint">Tik op de letters/tekens in de juiste volgorde. Elk goed teken geeft snelheid.</p><div class="race-slots">'+slots+'</div><div class="race-letters">'+tiles+'</div><p class="feedback" aria-live="polite">'+feedback+'</p><div class="race-shop"><span>🏎️ Betere motor: '+(raceCarLevel>=4?"MAX":"25 🪙")+'</span><button id="upgradeRaceCar" class="btn light" type="button" '+(raceCoins<25||raceCarLevel>=4?"disabled":"")+'>Motor upgraden</button><button id="resetRaceWord" class="btn light" type="button">↶ Opnieuw</button></div></div>';
+ const slots=racePuzzle.target.map((ch,i)=>'<span class="race-slot '+(i<racePuzzle.filled.length?"filled":"")+'">'+(racePuzzle.filled[i]||"＿")+'</span>').join("");
+ return stats(["Woorden: "+raceWordsDone+" / 3","Progress: "+Math.round(playerProgress)+"%","Rivaal: "+Math.round(opponentProgress)+"%","Munten: "+raceCoins+" 🪙","Motor: "+raceCarLevel])+
+  '<div class="question"><div class="q-label">Race het woord · '+LANGS[lang].name+'</div><div class="prompt">'+racePuzzle.clue+'</div><div class="race-slots">'+slots+'</div><p class="mini-hint">Rijd over de gouden letters/tekens in de juiste volgorde. Gebruik ↑/↓ of de knoppen om van baan te wisselen. Blauwe tekens zijn afleiders.</p><p id="raceFeedback" class="feedback" aria-live="polite">'+feedback+'</p></div>'+
+  '<div class="race-canvas-wrap"><canvas id="raceCanvas" class="race-canvas" aria-label="Top-down racebaan met twee rijstroken en letters"></canvas></div>'+
+  '<div class="arcade-controls"><button class="btn light" data-race-lane="0">↖ Binnenbaan</button><button class="btn gold" data-race-lane="1">↗ Buitenbaan</button><button class="btn light" id="upgradeRaceCar" type="button" '+(raceCoins<25||raceCarLevel>=4?"disabled":"")+'>🏎️ Motorupgrade · 25 🪙</button></div>'+
+  '<p class="mini-hint">Vermijd de blauwe afleiders. Verzamel drie woorden vóór de tegenstander en verdien munten voor motorupgrades.</p>';
 }
-function chooseRaceTile(index){
- if(!racePuzzle||ended)return;const tile=racePuzzle.tiles[index];if(!tile||tile.used)return;
- const expected=racePuzzle.target[racePuzzle.filled.length];
- if(tile.ch===expected){
-  tile.used=true;racePuzzle.filled.push(tile.ch);playerProgress=Math.min(100,playerProgress+(2+raceCarLevel*.3));feedback="✅ Goed teken! Je auto versnelt.";
-  if(racePuzzle.filled.length>=racePuzzle.target.length){
-   raceWordsDone++;raceCoins+=10+raceCarLevel*2;playerProgress=Math.min(100,playerProgress+15+raceCarLevel*2);opponentProgress=Math.min(100,opponentProgress+10+Math.floor(Math.random()*7));
-   feedback="🏁 Woord compleet! Je krijgt "+(10+raceCarLevel*2)+" munten.";
-   if(playerProgress>=100||opponentProgress>=100){ended=true;renderGame();return;}
-   makeRacePuzzle();
+function positionOnRace(angle,lane){
+ const radiusX=lane===0?260:333,radiusY=lane===0?108:170;
+ const theta=-Math.PI/2+(angle%(2*Math.PI));
+ return {x:450+Math.cos(theta)*radiusX,y:245+Math.sin(theta)*radiusY,theta};
+}
+function drawRaceCar(ctx,pos,color,label){
+ ctx.save();ctx.translate(pos.x,pos.y);ctx.rotate(pos.theta+Math.PI/2);
+ ctx.fillStyle="#202b31";ctx.beginPath();ctx.roundRect(-20,-13,40,26,7);ctx.fill();
+ ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(-17,-12,34,23,7);ctx.fill();
+ ctx.fillStyle="#d9eef1";ctx.beginPath();ctx.roundRect(-10,-9,20,10,4);ctx.fill();
+ ctx.fillStyle="#344c56";ctx.fillRect(-10,4,20,4);
+ ctx.fillStyle="#fff2ac";ctx.fillRect(-14,-14,7,3);ctx.fillRect(7,-14,7,3);
+ ctx.fillStyle="#222";ctx.fillRect(-16,8,7,7);ctx.fillRect(9,8,7,7);
+ ctx.restore();
+ ctx.font="bold 12px system-ui";ctx.fillStyle="#fff";ctx.textAlign="center";ctx.shadowColor="#18212a";ctx.shadowBlur=3;ctx.fillText(label,pos.x,pos.y-25);ctx.shadowBlur=0;
+}
+function startRaceFrame(){
+ raceLastTime=0;raceLane=0;raceBoost=0;raceWonWords=raceWordsDone;
+ raceFrameId=requestAnimationFrame(drawRaceFrame);
+}
+function drawRaceFrame(now){
+ if(game!=="race")return;
+ const canvas=$("raceCanvas");if(!canvas)return;
+ const rect=canvas.getBoundingClientRect(),ratio=Math.max(1,window.devicePixelRatio||1);
+ if(canvas.width!==Math.floor(rect.width*ratio)||canvas.height!==Math.floor(rect.height*ratio)){canvas.width=Math.floor(rect.width*ratio);canvas.height=Math.floor(rect.height*ratio);}
+ const ctx=canvas.getContext("2d");ctx.setTransform(canvas.width/900,0,0,canvas.height/490,0,0);
+ const dt=Math.min(.04,raceLastTime?(now-raceLastTime)/1000:1/60);raceLastTime=now;
+ raceAngle+=(.47+(raceCarLevel-1)*.055+raceBoost)*dt;
+ raceBoost=Math.max(0,raceBoost-dt*.33);
+ opponentProgress=Math.min(100,opponentProgress+dt*3.05);
+ playerProgress=Math.min(100,((raceWordsDone+(racePuzzle?racePuzzle.filled.length/Math.max(1,racePuzzle.target.length):0))/3)*100);
+ if(opponentProgress>=100&&!ended){ended=true;renderGame();return;}
+ ctx.clearRect(0,0,900,490);
+ const grass=ctx.createLinearGradient(0,0,900,490);grass.addColorStop(0,"#8ac66a");grass.addColorStop(1,"#3e7f3d");ctx.fillStyle=grass;ctx.fillRect(0,0,900,490);
+ // Decorative garden plants around a wide oval asphalt race circuit.
+ for(let i=0;i<48;i++){const x=(i*197)%900,y=(i*113)%490;ctx.fillStyle=i%2?"#2f7b3d":"#d0e49d";ctx.beginPath();ctx.arc(x,y,4+(i%4),0,Math.PI*2);ctx.fill();}
+ ctx.strokeStyle="#ece4c6";ctx.lineWidth=126;ctx.beginPath();ctx.ellipse(450,245,324,158,0,0,Math.PI*2);ctx.stroke();
+ ctx.strokeStyle="#4d565d";ctx.lineWidth=116;ctx.beginPath();ctx.ellipse(450,245,324,158,0,0,Math.PI*2);ctx.stroke();
+ ctx.strokeStyle="#f7e6a8";ctx.lineWidth=3;ctx.setLineDash([20,18]);ctx.beginPath();ctx.ellipse(450,245,295,130,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+ // Inner garden island
+ ctx.fillStyle="#76b557";ctx.beginPath();ctx.ellipse(450,245,238,80,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#4d913f";for(let i=0;i<20;i++){const a=i*Math.PI*2/20;ctx.beginPath();ctx.ellipse(450+Math.cos(a)*210,245+Math.sin(a)*58,12,5,a,0,Math.PI*2);ctx.fill();}
+ // Finish stripe across the top of the road.
+ ctx.save();ctx.translate(450,80);for(let x=-44;x<44;x+=11)for(let y=0;y<19;y+=9){ctx.fillStyle=((x+44)/11+y/9)%2?"#fff":"#242a2e";ctx.fillRect(x,y,11,9);}ctx.restore();
+ // Spawned glyphs sit directly on the circuit; collect the current golden glyph only.
+ if(racePuzzle){
+  for(const t of racePuzzle.tiles){
+   if(t.used)continue;
+   while(t.lapTarget<raceAngle-.08)t.lapTarget+=2*Math.PI;
+   const pos=positionOnRace(t.lapTarget,t.lane),isNext=t.correct&&t.order===racePuzzle.filled.length;
+   ctx.save();ctx.translate(pos.x,pos.y);
+   ctx.fillStyle=isNext?"#f5c742":"#deedf2";ctx.strokeStyle=isNext?"#77520a":"#5b8eaa";ctx.lineWidth=isNext?4:2;
+   ctx.beginPath();ctx.arc(0,0,isNext?19:16,0,Math.PI*2);ctx.fill();ctx.stroke();
+   if(isNext){ctx.shadowBlur=13;ctx.shadowColor="#ffd95a";}
+   ctx.font="bold 17px system-ui";ctx.fillStyle="#2a270f";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(t.ch,0,1);ctx.restore();
+   if(Math.abs(raceAngle-t.lapTarget)<.035){
+    if(Math.abs(raceLane-t.lane)===0){
+     if(t.correct&&t.order===racePuzzle.filled.length){
+      t.used=true;racePuzzle.filled.push(t.ch);raceCoins+=3;raceBoost=.65;
+      feedback="⚡ Goed teken! Turbo-boost en 3 munten.";
+      if(racePuzzle.filled.length>=racePuzzle.target.length){
+       raceWordsDone++;raceCoins+=10;feedback="🏁 Woord compleet! Je krijgt bonusmunten.";
+       if(raceWordsDone>=3){playerProgress=100;ended=true;renderGame();return;}
+       makeRacePuzzle();
+      }
+     }else{
+      if(!t.correct){raceMistakes++;raceCoins=Math.max(0,raceCoins-2);opponentProgress=Math.min(100,opponentProgress+3);feedback="Oeps, afleider! Je verliest snelheid en 2 munten.";}
+      else feedback="Je reed langs een letter die nog niet aan de beurt was. Probeer het volgende rondje.";
+      t.lapTarget+=2*Math.PI;
+     }
+    }else{
+     // If the player passes in the wrong lane, the glyph stays available next lap.
+     t.lapTarget+=2*Math.PI;
+    }
+    const fb=$("raceFeedback");if(fb)fb.textContent=feedback;
+    const slots=$("gameBody").querySelectorAll?$("gameBody").querySelectorAll(".race-slot"):[];
+    if(slots&&slots.length)slots.forEach((el,i)=>{el.textContent=racePuzzle.filled[i]||"＿";el.classList.toggle("filled",i<racePuzzle.filled.length);});
+   }
   }
- }else{
-  tile.used=true;raceMistakes++;opponentProgress=Math.min(100,opponentProgress+4);feedback="❌ Dat is niet het volgende teken. De tegenstander haalt je in.";
  }
- renderGame();
+ const player=positionOnRace(raceAngle,raceLane);
+ const opponent=positionOnRace((raceAngle*.74+1.25)%(2*Math.PI),0);
+ drawRaceCar(ctx,opponent,"#e47734","RIVAAL");
+ drawRaceCar(ctx,player,"#3bd58b","JIJ");
+ ctx.fillStyle="#f8f2d0";ctx.textAlign="center";ctx.font="bold 15px system-ui";ctx.fillText("GARDEN RACE",450,239);
+ ctx.font="12px system-ui";ctx.fillText("Woord "+Math.min(3,raceWordsDone+1)+" van 3",450,259);
+ raceFrameId=requestAnimationFrame(drawRaceFrame);
 }
 
 function stats(arr){return '<div class="stats">'+arr.map(x=>'<span class="stat">'+x+'</span>').join("")+'</div>';}
@@ -577,6 +659,11 @@ function startPabloFrame(){
  pabloLastTime=0;updatePabloHud();pabloFrameId=requestAnimationFrame(drawPabloFrame);
 }
 window.addEventListener("keydown",e=>{
+ if(game==="race"&&!ended){
+  if(e.key==="ArrowUp"||e.key==="ArrowLeft"){raceLane=0;e.preventDefault();}
+  else if(e.key==="ArrowDown"||e.key==="ArrowRight"){raceLane=1;e.preventDefault();}
+  return;
+ }
  if(game!=="pablo"||ended)return;
  if(e.key==="ArrowLeft"){pabloKeys.left=true;e.preventDefault();}
  if(e.key==="ArrowRight"){pabloKeys.right=true;e.preventDefault();}
@@ -594,7 +681,7 @@ function spawnExplorerWave(){
  const count=Math.min(10,3+waves);
  explorerEnemies=[];
  for(let i=0;i<count;i++){
-  explorerEnemies.push({x:890+i*44,y:[95,170,245,320,395][i%5],hp:1+Math.floor(waves/3),maxHp:1+Math.floor(waves/3),speed:25+waves*2+(i%3)*5,r:15+(i%2)*2,phase:i*.7});
+  explorerEnemies.push({x:890+i*44,y:[95,170,245,320,395][i%5],hp:1+Math.floor(waves/3),maxHp:1+Math.floor(waves/3),speed:25+waves*2+(i%3)*5,r:15+(i%2)*2,phase:i*.7,attackCooldown:0});
  }
  explorerShots=[];
 }
@@ -760,6 +847,8 @@ function renderBoard(){
 }
 function renderEnd(title,body){return '<div class="endbox"><h3>'+title+'</h3><p>'+body+'</p><button class="btn gold" id="playAgain" type="button">🔄 Opnieuw spelen</button> <button class="btn light" id="backEnd" type="button">Alle games</button></div>';}
 function renderGame(){
+ if(explorerFrameId)cancelAnimationFrame(explorerFrameId);explorerFrameId=0;
+ if(raceFrameId)cancelAnimationFrame(raceFrameId);raceFrameId=0;
  $("gameTitle").textContent=GAMES[game].title;$("gameDesc").textContent=GAMES[game].desc+" · "+LANGS[lang].flag+" "+LANGS[lang].name;
  if(ended){
   let title="",body="";
@@ -773,12 +862,14 @@ function renderGame(){
  $("gameBody").innerHTML=renderBoard();
  if(game==="frog")startFrogFrame();
  if(game==="explorer")startExplorerFrame();
+ if(game==="race")startRaceFrame();
  if(game==="pablo"){startPabloFrame();}
 }
 function startGame(which){
  if(which==="draw"&&lang!=="zh")return;
  if(pabloFrameId)cancelAnimationFrame(pabloFrameId);pabloFrameId=0;pabloLastTime=0;pabloKeys={left:false,right:false};pabloArcade=null;
  if(explorerFrameId)cancelAnimationFrame(explorerFrameId);explorerFrameId=0;
+ if(raceFrameId)cancelAnimationFrame(raceFrameId);raceFrameId=0;
  if(frogFrameId)cancelAnimationFrame(frogFrameId);frogFrameId=0;
  game=which;ended=false;feedback="";frogStep=0;frogLives=3;playerProgress=0;opponentProgress=0;waves=0;explorerLives=3;towerLevel=1;gems=0;towerShields=0;heroLevel=1;exploredThisWave=false;regionsFound=0;pabloLevel=1;pabloLives=3;pabloStars=0;frogStep=0;frogArcade=null;raceCoins=0;raceCarLevel=1;raceWordsDone=0;raceMistakes=0;racePuzzle=null;memoryFirst=null;memoryPending=null;memoryMatches=0;memoryMoves=0;flashRevealed=false;drawIndex=0;
  $("gameMenu").classList.add("hidden");$("playArea").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});
@@ -787,7 +878,7 @@ function startGame(which){
  }else if(game==="memory"){
   memoryDeck=shuffle(shuffle(DATA[lang]).slice(0,6).flatMap((p,i)=>[{id:i,text:p[0],type:"foreign",open:false,matched:false},{id:i,text:p[1],type:"dutch",open:false,matched:false}]));
  }else if(game==="cards"){flashDeck=shuffle(DATA[lang]);flashIndex=0;}
- else if(game==="race"){makeRacePuzzle();}
+ else if(game==="race"){raceAngle=0;raceLane=0;raceBoost=0;raceOpponentProgress=0;makeRacePuzzle();}
  else if(game==="frog"){frogArcade=makeFrogArcade();}
  else if(game==="explorer"){explorerHero={x:130,y:265};explorerTarget={x:130,y:265};explorerPlaceMode=false;explorerTowers=[];explorerShots=[];spawnExplorerWave();}
  else if(game==="pablo"){pabloArcade=makePabloArcade();pabloKeys={left:false,right:false};}
@@ -1007,7 +1098,7 @@ $("directionToggle").addEventListener("click",()=>{
  if(game&&game!=="draw")startGame(game);
 });
 document.querySelectorAll(".game-card").forEach(b=>b.addEventListener("click",()=>startGame(b.dataset.game)));
-$("backToGames").addEventListener("click",()=>{if(frogFrameId)cancelAnimationFrame(frogFrameId);frogFrameId=0;if(explorerFrameId)cancelAnimationFrame(explorerFrameId);explorerFrameId=0;if(pabloFrameId)cancelAnimationFrame(pabloFrameId);pabloFrameId=0;$("playArea").classList.add("hidden");$("gameMenu").classList.remove("hidden");game="";window.scrollTo({top:0,behavior:"smooth"});});
+$("backToGames").addEventListener("click",()=>{if(frogFrameId)cancelAnimationFrame(frogFrameId);frogFrameId=0;if(explorerFrameId)cancelAnimationFrame(explorerFrameId);explorerFrameId=0;if(raceFrameId)cancelAnimationFrame(raceFrameId);raceFrameId=0;if(pabloFrameId)cancelAnimationFrame(pabloFrameId);pabloFrameId=0;$("playArea").classList.add("hidden");$("gameMenu").classList.remove("hidden");game="";window.scrollTo({top:0,behavior:"smooth"});});
 $("gameBody").addEventListener("click",e=>{
  const explorerCanvas=e.target.closest("#explorerCanvas");
  if(explorerCanvas&&game==="explorer"){
@@ -1032,6 +1123,7 @@ $("gameBody").addEventListener("click",e=>{
   if(gems>=30&&heroLevel<5){gems-=30;heroLevel++;feedback="🛡️ Je held is sterker geworden! Goede antwoorden leveren meer materialen op.";}
   renderGame();return;
  }
+ const raceLaneButton=e.target.closest("[data-race-lane]");if(raceLaneButton){raceLane=Number(raceLaneButton.dataset.raceLane);return;}
  const raceTile=e.target.closest("[data-race-tile]");if(raceTile){chooseRaceTile(Number(raceTile.dataset.raceTile));return;}
  if(e.target.closest("#upgradeRaceCar")){if(raceCoins>=25&&raceCarLevel<4){raceCoins-=25;raceCarLevel++;feedback="🏎️ Motor geüpgraded! Elk goed teken geeft nu meer snelheid.";}renderGame();return;}
  if(e.target.closest("#resetRaceWord")){makeRacePuzzle();feedback="Nieuw woord klaar!";renderGame();return;}
