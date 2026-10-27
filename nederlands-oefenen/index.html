@@ -86,7 +86,7 @@ h3{margin:0;font-size:1.1rem}
  <a class="linkbtn" href="../frans-oefenen/">🇫🇷 Frans oefenen</a>
  <a class="linkbtn" href="../golden-club/">👑 Golden Language Club</a>
 </div>
-<nav class="nav" aria-label="Oefenonderdelen">
+<nav id="main-nav" class="nav" aria-label="Oefenonderdelen">
  <button class="navbtn active" data-mode="home">Start</button>
  <button class="navbtn" data-mode="cards">🃏 Flashcards</button>
  <button class="navbtn" data-mode="quiz">🎯 Quiz</button>
@@ -213,7 +213,7 @@ function renderMemory(){
 }
 function renderWords(){
  const sectionOptions=[...new Set(WORDS.map(w=>w.section))];
- const matches=WORDS.map((w,i)=>({w,i})).filter(x=>(filterChapter==="all"||x.w.chapter===filterChapter)&&norm(x.w.term+" "+x.w.meaning+" "+x.w.section+" "+x.w.chapter).includes(norm(searchText)));
+ const matches=WORDS.map((w,i)=>({w,i})).filter(x=>(filterChapter==="all"||x.w.chapter===filterChapter||x.w.section===filterChapter)&&norm(x.w.term+" "+x.w.meaning+" "+x.w.section+" "+x.w.chapter).includes(norm(searchText)));
  const options='<option value="all">Alle hoofdstukken en onderdelen</option>'+[...new Set(WORDS.map(w=>w.chapter))].map(ch=>'<option value="'+esc(ch)+'" '+(filterChapter===ch?"selected":"")+'>'+esc(ch)+'</option>').join("")+sectionOptions.map(ch=>'<option value="'+esc(ch)+'" '+(filterChapter===ch?"selected":"")+'>'+esc(ch)+'</option>').join("");
  const rows=matches.map(({w,i})=>'<div class="wordrow"><strong>'+esc(w.term)+'</strong><span>'+esc(w.meaning)+'</span><div class="word-meta"><span>'+esc(w.chapter)+' · '+esc(w.section.split(" · ").slice(1).join(" · "))+'</span><span class="knownmark">'+(mastered.has(i)?"✓ Geoefend":"")+'</span></div></div>').join("");
  view.innerHTML='<div class="section-head"><div><h2>📚 Woordenlijst</h2><p class="small-note">'+matches.length+' van de '+WORDS.length+' woorden</p></div></div>'+
