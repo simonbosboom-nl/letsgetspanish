@@ -159,6 +159,7 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 @media(max-width:450px){.intro{align-items:flex-start}.crown{width:52px;height:52px;flex-basis:52px;font-size:28px;border-radius:14px}.games{grid-template-columns:1fr}.art{height:105px}.game-card{display:grid;grid-template-columns:108px 1fr}.game-card .art{height:100%;min-height:150px}.game-copy h3{font-size:17px}.language span{font-size:20px}.choices{grid-template-columns:1fr}.lane{height:36px}.memory-card{font-size:12px;min-height:72px}.play-head{align-items:flex-start}}
 @keyframes frogHop{0%{transform:translateY(10px) scale(.82)}65%{transform:translateY(-11px) scale(1.08)}100%{transform:translateY(0) scale(1)}}@keyframes obstacleDrift{from{transform:translateY(0)}to{transform:translateY(-5px)}}@keyframes roadRoll{from{background-position:0 0}to{background-position:-53px 0}}@keyframes carBounce{from{transform:translateY(0)}to{transform:translateY(-2px)}}@keyframes blobWiggle{from{transform:translateY(-50%) rotate(-8deg)}to{transform:translateY(calc(-50% - 3px)) rotate(8deg)}}@keyframes blobTravel{from{margin-left:0}to{margin-left:-150px}}@keyframes towerShot{0%{right:20%;opacity:0}15%{opacity:1}100%{right:83%;opacity:0}}@keyframes cloudFloat{from{transform:translateX(-5px)}to{transform:translateX(8px)}}@keyframes heroRun{from{transform:translateY(0)}to{transform:translateY(-4px)}}@keyframes starShine{from{transform:scale(.92) rotate(-7deg)}to{transform:scale(1.12) rotate(7deg)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.languages{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
 </style>
 </head>
 <body>
@@ -169,18 +170,20 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
  <nav class="toplinks" aria-label="Terug naar gewone taaloefeningen">
   <a class="linkbtn" href="../">🇪🇸 Gewoon Spaans oefenen</a>
   <a class="linkbtn" href="../frans-oefenen/">🇫🇷 Gewoon Frans oefenen</a>
+  <a class="linkbtn" href="../nederlands-oefenen/">🇳🇱 Nederlands oefenen</a>
  </nav>
 </header>
 <main class="wrap">
  <section class="intro">
   <div class="crown">👑</div>
-  <div><h2>Gouden speelhal</h2><p>Speel alle minigames in het Spaans, Frans of Chinees. Bij Chinees kun je ook oefenen met karakters tekenen, met sierlijke versieringen en aparte cijfers voor netheid en schrijfvolgorde.</p></div>
+  <div><h2>Gouden speelhal</h2><p>Speel alle minigames in het Spaans, Frans, Chinees of Nederlands. Bij Nederlands oefen je de woorden uit Geletterdheid en Kracht van verhalen. Bij Chinees kun je ook karakters tekenen, met sierlijke versieringen en aparte cijfers voor netheid en schrijfvolgorde.</p></div>
  </section>
  <div class="label">1 · Kies je taal</div>
  <div class="languages" role="group" aria-label="Kies een oefentaal">
   <button class="lang active" data-lang="es"><span>🇪🇸</span>Spaans</button>
   <button class="lang" data-lang="fr"><span>🇫🇷</span>Frans</button>
   <button class="lang" data-lang="zh"><span>🀄</span>Chinees</button>
+  <button class="lang" data-lang="nl"><span>🇳🇱</span>Nederlands</button>
  </div>
  <div class="directionrow">
   <p id="directionLabel">Oefenrichting: Nederlands → Spaans</p>
@@ -215,8 +218,10 @@ fr:[
 ],
 zh:[
 ["一","één"],["二","twee"],["三","drie"],["十","tien"],["人","mens"],["口","mond"],["日","zon / dag"],["月","maan / maand"],["山","berg"],["水","water"],["火","vuur"],["木","boom / hout"],["田","veld"],["大","groot"],["小","klein"],["中","midden"],["上","boven"],["下","onder"],["天","hemel"],["女","vrouw"],["子","kind"],["好","goed"],["学","leren"],["生","leven"],["我","ik"],["你","jij"],["他","hij"],["她","zij"],["是","zijn / is"],["不","niet"],["有","hebben"],["家","huis / gezin"],["手","hand"],["目","oog"],["耳","oor"],["心","hart"],["门","deur"],["书","boek"],["鱼","vis"],["马","paard"],["鸟","vogel"],["牛","koe"],["羊","schaap"],["米","rijst"],["雨","regen"],["电","elektriciteit"],["石","steen"],["金","goud / metaal"],["开","open"],["关","dicht"],["来","komen"],["去","gaan"],["见","zien"],["叫","heten / noemen"],["吗","vraagdeeltje voor een ja/nee-vraag"],["呢","vraagdeeltje (en jij? / hoe zit het?)"],["你好","hallo"],["你好吗","hoe gaat het met je"],["我叫","ik heet"],["他是","hij is"],["她是","zij is"],["不是","is niet"],["不好","niet goed"],["再见","tot ziens"],["谢谢","bedankt"],["朋友","vriend"],["学生","leerling"],["老师","docent"],["中国","China"],["大家","iedereen"]
-]};
-const LANGS={es:{name:"Spaans",flag:"🇪🇸"},fr:{name:"Frans",flag:"🇫🇷"},zh:{name:"Chinees",flag:"🀄"}};
+],
+nl:[["de alfabeet","iemand die kan lezen en schrijven"],["de algemene ontwikkeling","bepaalde hoeveelheid kennis op verschillende gebieden"],["de analfabeet","iemand die niet kan lezen en schrijven"],["buitengesloten worden","er niet bij mogen horen"],["de digibeet","iemand die niet digitaal vaardig is"],["de digitale geletterdheid","digitaal vaardig zijn"],["gecijferd","wie met getallen en wiskundige begrippen om kan gaan"],["geletterd","wie kan lezen en schrijven, wie veel algemene kennis heeft"],["toelichten","uitleggen wat iets betekent of hoe iets werkt"],["de woordenschat","alle woorden en uitdrukkingen die iemand kent"],["aangeven","iets laten weten"],["afleiden","iets begrijpen door wat je ziet of hoort"],["confronteren","iemand op zijn gedrag aanspreken"],["de context","tekst rondom een woord of woordgroep"],["de drang","sterke behoefte"],["effectief","waardoor het beoogde doel bereikt wordt, succesvol"],["in aanraking komen met","te maken hebben met, contact maken"],["de strategie","manier waarop je iets doet"],["het synoniem","ander woord met dezelfde of een soortgelijke betekenis"],["het voorwerp","iets wat je kunt aanraken, een ding"],["bijdragen aan","geven, helpen"],["de drempel","iets wat je tegenhoudt of hindert"],["de dyslexie","leerstoornis waardoor je moeite hebt met het lezen en spellen van woorden"],["globaal","in grote lijnen"],["de laaggeletterdheid","moeite hebben met lezen en schrijven"],["onder de knie hebben","beheersen, iets goed kunnen"],["de oorzaak","waardoor iets komt of gebeurt"],["het proces","hoe iets verloopt"],["sjoemelen","valsspelen, oneerlijke trucjes toepassen"],["het taboe","wat je niet mag doen of waar je niet over mag praten"],["benadrukken","iets extra belangrijk maken"],["fiks","flink, krachtig"],["de functie","waarvoor iets bedoeld is"],["de heldendaad","dappere actie"],["inspelen op","ergens rekening mee houden"],["kennelijk","blijkbaar"],["magisch","iets wat met toverkracht te maken heeft"],["het medium / de media","iets wat informatie overbrengt"],["sensationeel","bijzonder, met veel spektakel"],["vermeend","vermoedelijk"],["divers","verschillend, anders"],["doneren","schenken, geven"],["de emotie","gevoel"],["grofweg","ongeveer"],["het oordeel","mening of opvatting waarmee je iets goed- of afkeurt"],["op de hoogte stellen","vertellen wat er is gebeurd"],["de roman","lang verhaal in een boek"],["de strubbeling","kleine ruzie, worsteling"],["tussen de bedrijven door","iets tussen andere bezigheden in doen"],["de verschijningsvorm","hoe iets eruitziet"],["activeren","ervoor zorgen dat iemand iets gaat doen"],["actueel","op dit moment, in het nieuws"],["evalueren","achteraf bespreken"],["het gezichtspunt","hoe je ergens naar kijkt"],["historisch","iets uit de geschiedenis"],["instrueren","instructies geven"],["motiveren","enthousiast maken om iets te doen"],["primitief","basis, met weinig kennis en kunde"],["de service","diensten van een organisatie"],["verklaren","uitleggen, duidelijk maken"]]
+};
+const LANGS={es:{name:"Spaans",flag:"🇪🇸"},fr:{name:"Frans",flag:"🇫🇷"},zh:{name:"Chinees",flag:"🀄"},nl:{name:"Nederlands",flag:"🇳🇱"}};
 const DRAW_DATA=[["我","ik"],["你","jij"],["他","hij"],["她","zij"],["叫","heten / noemen"],["好","goed"],["吗","vraagdeeltje voor een ja/nee-vraag"],["呢","vraagdeeltje (en jij? / hoe zit het?)"],["不","niet"]];
 const GAMES={draw:{title:"Karakters tekenen",desc:"Trek het Chinese karakter over op het tekenvlak."},frog:{title:"Tiny Froggie",desc:"Spring over de obstakels door de juiste vertaling te kiezen."},race:{title:"Garden Race",desc:"Geef je auto een boost met goede antwoorden en finish als eerste."},explorer:{title:"The Explorer",desc:"Bouw een verdediging, koop schildtorens en overleef acht golven."},pablo:{title:"Super Pablo",desc:"Ren door acht levels, verzamel sterren en ontwijk hindernissen."},memory:{title:"Memory Quest",desc:"Vind de zes woord-betekenisparen."},cards:{title:"Flashcard Quest",desc:"Draai de kaarten om en leer woorden op je eigen tempo."}};
 const $=id=>document.getElementById(id);
@@ -231,6 +236,7 @@ const shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floo
 const norm=s=>String(s||"").trim().toLocaleLowerCase();
 function promptOf(p){return direction==="toDutch"?p[0]:p[1]}
 function answerOf(p){return direction==="toDutch"?p[1]:p[0]}
+function directionText(){if(lang==="nl")return direction==="toDutch"?"Woord → betekenis":"Betekenis → woord";return direction==="toDutch"?LANGS[lang].name+" → Nederlands":"Nederlands → "+LANGS[lang].name;}
 
 function makeQuestion(){const data=DATA[lang];item=data[Math.floor(Math.random()*data.length)];const correct=answerOf(item);const others=shuffle(data.filter(p=>answerOf(p)!==correct).map(answerOf).filter((v,i,a)=>a.indexOf(v)===i)).slice(0,3);options=shuffle([correct].concat(others));}
 
@@ -1153,7 +1159,7 @@ function onMemoryClick(index){
 function setLanguage(next){
  lang=next;
  document.querySelectorAll(".lang").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));
- $("directionLabel").textContent="Oefenrichting: "+(direction==="toDutch"?LANGS[lang].name+" → Nederlands":"Nederlands → "+LANGS[lang].name);
+ $("directionLabel").textContent="Oefenrichting: "+directionText();
  $("drawGameCard").classList.toggle("hidden",lang!=="zh");
  if(game==="draw"&&lang!=="zh"){$("backToGames").click();return;}
  if(game)startGame(game);
@@ -1161,7 +1167,7 @@ function setLanguage(next){
 document.querySelectorAll(".lang").forEach(b=>b.addEventListener("click",()=>setLanguage(b.dataset.lang)));
 $("directionToggle").addEventListener("click",()=>{
  direction=direction==="toDutch"?"toForeign":"toDutch";
- $("directionLabel").textContent="Oefenrichting: "+(direction==="toDutch"?LANGS[lang].name+" → Nederlands":"Nederlands → "+LANGS[lang].name);
+ $("directionLabel").textContent="Oefenrichting: "+directionText();
  if(game&&game!=="draw")startGame(game);
 });
 document.querySelectorAll(".game-card").forEach(b=>b.addEventListener("click",()=>startGame(b.dataset.game)));
@@ -1229,5 +1235,6 @@ $("gameBody").addEventListener("pointercancel",()=>{pabloKeys.left=false;pabloKe
 
 })();
 </script>
+<footer class="club-bottom-link" style="text-align:center;padding:28px 16px 36px;color:#8b7b96;font-size:.92rem"><p>Ook de woorden uit je Nederlandse leerstof oefenen?</p><a class="linkbtn" href="../nederlands-oefenen/">🇳🇱 Nederlands oefenen →</a></footer>
 </body>
 </html>
