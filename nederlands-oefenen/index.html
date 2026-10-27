@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#155e58">
+<meta name="description" content="Oefen de woorden uit Geletterdheid en Kracht van verhalen met flashcards, quizzen, schrijfopdrachten, toetsen, memory en een woordenlijst.">
+<title>Nederlands oefenen — Woorden & betekenissen</title>
+<style>
+:root{--ink:#172a29;--muted:#647775;--deep:#155e58;--deep2:#0d4945;--mint:#e1f2eb;--cream:#fff8e8;--gold:#f4c65e;--line:#d8e6df;--white:#fff;--green:#16845a;--red:#bd354d}
+*{box-sizing:border-box}
+body{margin:0;background:#f3f8f5;color:var(--ink);font-family:ui-rounded,"Avenir Next",Avenir,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #e4ad25;outline-offset:3px}
+.shell{max-width:1120px;margin:0 auto;padding:22px 18px 26px}
+.hero{background:linear-gradient(130deg,#124d49,#1b766b 74%,#2f8774);border-radius:28px;padding:clamp(24px,5vw,44px);color:white;position:relative;overflow:hidden;box-shadow:0 12px 30px #1b51451c}
+.hero:after{content:"Aa";position:absolute;right:24px;bottom:-55px;font-size:clamp(110px,20vw,220px);font-weight:950;letter-spacing:-.1em;color:#ffffff0d;pointer-events:none}
+.eyebrow{font-size:.76rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#c9eee1}
+h1{font-size:clamp(2.1rem,5.8vw,3.8rem);line-height:1.03;margin:10px 0 12px;letter-spacing:-.045em}
+.hero p{max-width:690px;color:#e6f4ef;line-height:1.6;margin:0;font-size:1.04rem}
+.hero-foot{margin-top:23px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;position:relative;z-index:1}
+.count-pill{background:#ffffff16;border:1px solid #ffffff36;padding:8px 12px;border-radius:999px;font-weight:850;font-size:.88rem}
+.progress-track{height:9px;background:#dce9e3;border-radius:99px;overflow:hidden;flex:1;min-width:100px}
+.progress-fill{height:100%;width:0;background:var(--gold);border-radius:99px;transition:width .25s}
+.toplinks{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px}
+.linkbtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#fff;border:1px solid var(--line);padding:9px 13px;border-radius:12px;color:#275c55;text-decoration:none;font-weight:800;font-size:.9rem}
+.linkbtn:hover{background:var(--mint)}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.navbtn{border:1px solid #d6e5dd;background:white;color:#305a55;border-radius:12px;padding:10px 14px;font-weight:800}
+.navbtn.active,.navbtn:hover{background:var(--deep);color:white;border-color:var(--deep)}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:24px 0 12px;flex-wrap:wrap}
+h2{font-size:1.45rem;letter-spacing:-.025em;margin:0}
+h3{margin:0;font-size:1.1rem}
+.small-note{color:var(--muted);font-size:.91rem;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tile{background:white;border:1px solid #dce9e2;border-radius:20px;padding:19px;text-align:left;color:var(--ink);min-height:138px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;box-shadow:0 6px 18px #214c3608;transition:transform .16s,border-color .16s}
+.tile:hover{transform:translateY(-2px);border-color:#85b8a7}
+.tile .emoji{font-size:1.65rem}.tile strong{font-size:1.13rem}.tile span:last-child{color:var(--muted);line-height:1.43}
+.panel{background:white;border:1px solid #dce9e2;border-radius:23px;padding:clamp(18px,4vw,32px);box-shadow:0 8px 25px #214c3608}
+.panel-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:.9rem}
+.pill{display:inline-flex;border-radius:99px;padding:6px 11px;background:var(--mint);color:#1e655b;font-weight:850;font-size:.8rem}
+.big-word{font-size:clamp(1.9rem,5.6vw,3.5rem);line-height:1.2;letter-spacing:-.03em;text-align:center;padding:38px 8px 22px;overflow-wrap:anywhere}
+.meaning{font-size:clamp(1.2rem,3vw,1.7rem);text-align:center;color:var(--deep);font-weight:750;padding:9px 0 25px;min-height:64px;overflow-wrap:anywhere}
+.action-row{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-top:17px}
+.primary,.secondary,.choice{border-radius:13px;padding:12px 17px;border:1px solid transparent;font-weight:850}
+.primary{background:var(--deep);color:white}.primary:hover{background:var(--deep2)}
+.secondary{background:white;color:var(--deep);border-color:#d0e3da}.secondary:hover{background:#edf7f1}
+.primary:disabled,.secondary:disabled{opacity:.45;cursor:not-allowed}
+.direction{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.direction button{border:1px solid #d5e5dd;background:#fff;color:#315f56;border-radius:11px;padding:8px 11px;font-size:.85rem;font-weight:800}.direction button.selected{background:#e4f3ea;border-color:#82b7a3;color:#16554c}
+.quiz-prompt{font-size:clamp(1.65rem,4.8vw,2.65rem);font-weight:850;text-align:center;padding:27px 0;overflow-wrap:anywhere;line-height:1.25}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.choice{background:#f9fcfa;border-color:#dce9e2;color:#233b37;text-align:left;min-height:62px;line-height:1.38;overflow-wrap:anywhere}
+.choice:hover:not(:disabled){border-color:#70ad98;background:#eef7f2}.choice.correct{background:#e1f6e9;border-color:#87d0a3;color:#135c35}.choice.wrong{background:#ffeaed;border-color:#f2a7b4;color:#8b2134}
+.feedback{text-align:center;font-weight:850;margin:18px 0 0;min-height:25px;line-height:1.45}.feedback.good{color:var(--green)}.feedback.bad{color:var(--red)}
+.write-form{max-width:680px;margin:0 auto}.write-input{display:block;width:100%;border:2px solid #d7e6de;background:#fcfefc;border-radius:15px;padding:15px 16px;font-size:1.04rem;margin:14px 0}
+.wordlist-tools{display:flex;gap:10px;flex-wrap:wrap;margin:17px 0}.wordlist-tools input{flex:1;min-width:200px}.wordlist-tools select{min-width:205px}
+.wordlist{border:1px solid #e0ebe4;border-radius:16px;overflow:hidden}
+.wordrow{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:10px;align-items:start;padding:13px 15px;border-bottom:1px solid #edf2ee;background:white}
+.wordrow:last-child{border-bottom:0}.wordrow strong{font-size:1rem;overflow-wrap:anywhere}.wordrow span{color:#5c706b;overflow-wrap:anywhere;line-height:1.45}.word-meta{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#71847f;font-size:.77rem}
+.knownmark{font-size:.78rem;color:var(--green);font-weight:850;text-align:right}
+.result-number{font-size:clamp(2.8rem,9vw,5.4rem);line-height:1;color:var(--deep);font-weight:950;text-align:center;margin:22px 0 12px}
+.chapter-card{border-radius:20px;border:1px solid #dce9e2;overflow:hidden;background:#fff}
+.chapter-head{background:#ffedbd;padding:16px 18px;color:#4e401a}.chapter-head strong{font-size:1.1rem}.chapter-body{padding:16px 18px}.section-chip{display:inline-block;background:#e6f3ed;color:#28665c;padding:5px 8px;margin:3px;border-radius:8px;font-size:.78rem;font-weight:800}
+.memory-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.memory-card{min-height:105px;border:1px solid #d5e4dc;border-radius:14px;background:linear-gradient(145deg,#fff,#f3faf6);color:#1d554c;padding:9px;display:grid;place-items:center;text-align:center;font-weight:800;overflow-wrap:anywhere}
+.memory-card.closed{background:linear-gradient(145deg,#155e58,#1b786d);color:#fff;border-color:#155e58;font-size:1.7rem}
+.memory-card.matched{background:#e1f6e9;border-color:#87d0a3;color:#135c35}
+.footer{text-align:center;color:#7a8c86;font-size:.88rem;margin:26px 0 0;line-height:1.7}
+@media(max-width:720px){.grid.three{grid-template-columns:repeat(2,minmax(0,1fr))}.memory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{border-radius:22px}}
+@media(max-width:540px){.shell{padding:12px 11px 25px}.hero{padding:23px 20px}.grid,.grid.three{grid-template-columns:1fr}.choices{grid-template-columns:1fr}.wordrow{grid-template-columns:1fr;gap:5px}.word-meta{grid-column:1}.memory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.navbtn{padding:9px 11px;font-size:.87rem}.panel{border-radius:19px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="hero">
+ <div class="eyebrow">Hoofdstuk 1 & 2 · Woorden leren</div>
+ <h1>🇳🇱 Nederlands oefenen</h1>
+ <p>Oefen de woorden uit <strong>Geletterdheid</strong> en <strong>Kracht van verhalen</strong>. Leer de betekenissen met kaartjes, quizzen, schrijfopdrachten, toetsen en memory.</p>
+ <div class="hero-foot">
+  <span id="progress-label" class="count-pill">0 van 60 geoefend</span>
+  <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+ </div>
+</header>
+<div class="toplinks">
+ <a class="linkbtn" href="../">🇪🇸 Spaans oefenen</a>
+ <a class="linkbtn" href="../frans-oefenen/">🇫🇷 Frans oefenen</a>
+ <a class="linkbtn" href="../golden-club/">👑 Golden Language Club</a>
+</div>
+<nav class="nav" aria-label="Oefenonderdelen">
+ <button class="navbtn active" data-mode="home">Start</button>
+ <button class="navbtn" data-mode="cards">🃏 Flashcards</button>
+ <button class="navbtn" data-mode="quiz">🎯 Quiz</button>
+ <button class="navbtn" data-mode="write">✍️ Schrijven</button>
+ <button class="navbtn" data-mode="test">📝 Toets</button>
+ <button class="navbtn" data-mode="memory">🧠 Memory</button>
+ <button class="navbtn" data-mode="words">📚 Woordenlijst</button>
+</nav>
+<main id="view" aria-live="polite"></main>
+<footer class="footer">
+ <p>De woordlijst volgt de woorden en betekenissen die op de meegestuurde afbeeldingen zichtbaar zijn.</p>
+ <a class="linkbtn" href="../golden-club/">Terug naar de Golden Language Club →</a>
+</footer>
+</div>
+<script>
+"use strict";
+const WORDS=[{"id":0,"term":"de alfabeet","meaning":"iemand die kan lezen en schrijven","chapter":"1 · Geletterdheid","section":"A · Van letters tot kennis"},{"id":1,"term":"de algemene ontwikkeling","meaning":"bepaalde hoeveelheid kennis op verschillende gebieden","chapter":"1 · Geletterdheid","section":"A · Van letters tot kennis"},{"id":2,"term":"de analfabeet","meaning":"iemand die niet kan lezen en schrijven","chapter":"1 · Geletterdheid","section":"A · Van letters tot kennis"},{"id":3,"term":"buitengesloten worden","meaning":"er niet bij mogen horen","chapter":"1 · Geletterdheid","section":"A · Van letters tot kennis"},{"id":4,"term":"de digibeet","meaning":"iemand die niet digitaal vaardig is","chapter":"1 · Geletterdheid","section":"A · Van letters tot kennis"},{"id":5,"term":"de digitale geletterdheid","meaning":"digitaal vaardig zijn","chapter":"1 · Geletterdheid","section":"A · Van letters tot kennis"},{"id":6,"term":"gecijferd","meaning":"wie met getallen en wiskundige begrippen om kan gaan","chapter":"1 · Geletterdheid","section":"A · Van letters tot kennis"},{"id":7,"term":"geletterd","meaning":"wie kan lezen en schrijven, wie veel algemene kennis heeft","chapter":"1 · Geletterdheid","section":"A · Van letters tot kennis"},{"id":8,"term":"toelichten","meaning":"uitleggen wat iets betekent of hoe iets werkt","chapter":"1 · Geletterdheid","section":"A · Van letters tot kennis"},{"id":9,"term":"de woordenschat","meaning":"alle woorden en uitdrukkingen die iemand kent","chapter":"1 · Geletterdheid","section":"A · Van letters tot kennis"},{"id":10,"term":"aangeven","meaning":"iets laten weten","chapter":"1 · Geletterdheid","section":"B · Woorden en hun betekenissen"},{"id":11,"term":"afleiden","meaning":"iets begrijpen door wat je ziet of hoort","chapter":"1 · Geletterdheid","section":"B · Woorden en hun betekenissen"},{"id":12,"term":"confronteren","meaning":"iemand op zijn gedrag aanspreken","chapter":"1 · Geletterdheid","section":"B · Woorden en hun betekenissen"},{"id":13,"term":"de context","meaning":"tekst rondom een woord of woordgroep","chapter":"1 · Geletterdheid","section":"B · Woorden en hun betekenissen"},{"id":14,"term":"de drang","meaning":"sterke behoefte","chapter":"1 · Geletterdheid","section":"B · Woorden en hun betekenissen"},{"id":15,"term":"effectief","meaning":"waardoor het beoogde doel bereikt wordt, succesvol","chapter":"1 · Geletterdheid","section":"B · Woorden en hun betekenissen"},{"id":16,"term":"in aanraking komen met","meaning":"te maken hebben met, contact maken","chapter":"1 · Geletterdheid","section":"B · Woorden en hun betekenissen"},{"id":17,"term":"de strategie","meaning":"manier waarop je iets doet","chapter":"1 · Geletterdheid","section":"B · Woorden en hun betekenissen"},{"id":18,"term":"het synoniem","meaning":"ander woord met dezelfde of een soortgelijke betekenis","chapter":"1 · Geletterdheid","section":"B · Woorden en hun betekenissen"},{"id":19,"term":"het voorwerp","meaning":"iets wat je kunt aanraken, een ding","chapter":"1 · Geletterdheid","section":"B · Woorden en hun betekenissen"},{"id":20,"term":"bijdragen aan","meaning":"geven, helpen","chapter":"1 · Geletterdheid","section":"C · Leesdoelen en leesmanieren"},{"id":21,"term":"de drempel","meaning":"iets wat je tegenhoudt of hindert","chapter":"1 · Geletterdheid","section":"C · Leesdoelen en leesmanieren"},{"id":22,"term":"de dyslexie","meaning":"leerstoornis waardoor je moeite hebt met het lezen en spellen van woorden","chapter":"1 · Geletterdheid","section":"C · Leesdoelen en leesmanieren"},{"id":23,"term":"globaal","meaning":"in grote lijnen","chapter":"1 · Geletterdheid","section":"D · Aanvullende woorden uit de afbeeldingen"},{"id":24,"term":"de laaggeletterdheid","meaning":"moeite hebben met lezen en schrijven","chapter":"1 · Geletterdheid","section":"D · Aanvullende woorden uit de afbeeldingen"},{"id":25,"term":"onder de knie hebben","meaning":"beheersen, iets goed kunnen","chapter":"1 · Geletterdheid","section":"D · Aanvullende woorden uit de afbeeldingen"},{"id":26,"term":"de oorzaak","meaning":"waardoor iets komt of gebeurt","chapter":"1 · Geletterdheid","section":"D · Aanvullende woorden uit de afbeeldingen"},{"id":27,"term":"het proces","meaning":"hoe iets verloopt","chapter":"1 · Geletterdheid","section":"D · Aanvullende woorden uit de afbeeldingen"},{"id":28,"term":"sjoemelen","meaning":"valsspelen, oneerlijke trucjes toepassen","chapter":"1 · Geletterdheid","section":"D · Aanvullende woorden uit de afbeeldingen"},{"id":29,"term":"het taboe","meaning":"wat je niet mag doen of waar je niet over mag praten","chapter":"1 · Geletterdheid","section":"D · Aanvullende woorden uit de afbeeldingen"},{"id":30,"term":"benadrukken","meaning":"iets extra belangrijk maken","chapter":"2 · Kracht van verhalen","section":"A · Mensen kunnen niet zonder verhalen"},{"id":31,"term":"fiks","meaning":"flink, krachtig","chapter":"2 · Kracht van verhalen","section":"A · Mensen kunnen niet zonder verhalen"},{"id":32,"term":"de functie","meaning":"waarvoor iets bedoeld is","chapter":"2 · Kracht van verhalen","section":"A · Mensen kunnen niet zonder verhalen"},{"id":33,"term":"de heldendaad","meaning":"dappere actie","chapter":"2 · Kracht van verhalen","section":"A · Mensen kunnen niet zonder verhalen"},{"id":34,"term":"inspelen op","meaning":"ergens rekening mee houden","chapter":"2 · Kracht van verhalen","section":"A · Mensen kunnen niet zonder verhalen"},{"id":35,"term":"kennelijk","meaning":"blijkbaar","chapter":"2 · Kracht van verhalen","section":"A · Mensen kunnen niet zonder verhalen"},{"id":36,"term":"magisch","meaning":"iets wat met toverkracht te maken heeft","chapter":"2 · Kracht van verhalen","section":"A · Mensen kunnen niet zonder verhalen"},{"id":37,"term":"het medium / de media","meaning":"iets wat informatie overbrengt","chapter":"2 · Kracht van verhalen","section":"A · Mensen kunnen niet zonder verhalen"},{"id":38,"term":"sensationeel","meaning":"bijzonder, met veel spektakel","chapter":"2 · Kracht van verhalen","section":"A · Mensen kunnen niet zonder verhalen"},{"id":39,"term":"vermeend","meaning":"vermoedelijk","chapter":"2 · Kracht van verhalen","section":"A · Mensen kunnen niet zonder verhalen"},{"id":40,"term":"divers","meaning":"verschillend, anders","chapter":"2 · Kracht van verhalen","section":"B · Tekstsoorten"},{"id":41,"term":"doneren","meaning":"schenken, geven","chapter":"2 · Kracht van verhalen","section":"B · Tekstsoorten"},{"id":42,"term":"de emotie","meaning":"gevoel","chapter":"2 · Kracht van verhalen","section":"B · Tekstsoorten"},{"id":43,"term":"grofweg","meaning":"ongeveer","chapter":"2 · Kracht van verhalen","section":"B · Tekstsoorten"},{"id":44,"term":"het oordeel","meaning":"mening of opvatting waarmee je iets goed- of afkeurt","chapter":"2 · Kracht van verhalen","section":"B · Tekstsoorten"},{"id":45,"term":"op de hoogte stellen","meaning":"vertellen wat er is gebeurd","chapter":"2 · Kracht van verhalen","section":"B · Tekstsoorten"},{"id":46,"term":"de roman","meaning":"lang verhaal in een boek","chapter":"2 · Kracht van verhalen","section":"B · Tekstsoorten"},{"id":47,"term":"de strubbeling","meaning":"kleine ruzie, worsteling","chapter":"2 · Kracht van verhalen","section":"B · Tekstsoorten"},{"id":48,"term":"tussen de bedrijven door","meaning":"iets tussen andere bezigheden in doen","chapter":"2 · Kracht van verhalen","section":"B · Tekstsoorten"},{"id":49,"term":"de verschijningsvorm","meaning":"hoe iets eruitziet","chapter":"2 · Kracht van verhalen","section":"B · Tekstsoorten"},{"id":50,"term":"activeren","meaning":"ervoor zorgen dat iemand iets gaat doen","chapter":"2 · Kracht van verhalen","section":"C · Tekstdoelen"},{"id":51,"term":"actueel","meaning":"op dit moment, in het nieuws","chapter":"2 · Kracht van verhalen","section":"C · Tekstdoelen"},{"id":52,"term":"evalueren","meaning":"achteraf bespreken","chapter":"2 · Kracht van verhalen","section":"C · Tekstdoelen"},{"id":53,"term":"het gezichtspunt","meaning":"hoe je ergens naar kijkt","chapter":"2 · Kracht van verhalen","section":"C · Tekstdoelen"},{"id":54,"term":"historisch","meaning":"iets uit de geschiedenis","chapter":"2 · Kracht van verhalen","section":"C · Tekstdoelen"},{"id":55,"term":"instrueren","meaning":"instructies geven","chapter":"2 · Kracht van verhalen","section":"C · Tekstdoelen"},{"id":56,"term":"motiveren","meaning":"enthousiast maken om iets te doen","chapter":"2 · Kracht van verhalen","section":"C · Tekstdoelen"},{"id":57,"term":"primitief","meaning":"basis, met weinig kennis en kunde","chapter":"2 · Kracht van verhalen","section":"C · Tekstdoelen"},{"id":58,"term":"de service","meaning":"diensten van een organisatie","chapter":"2 · Kracht van verhalen","section":"C · Tekstdoelen"},{"id":59,"term":"verklaren","meaning":"uitleggen, duidelijk maken","chapter":"2 · Kracht van verhalen","section":"C · Tekstdoelen"}];
+const STORE="nederlandsOefenenProgressV1";
+const $=id=>document.getElementById(id);
+const view=$("view"), nav=$("main-nav");
+let mode="home",direction="meaning-to-term",filterChapter="all",searchText="";
+let mastered=new Set();
+try{mastered=new Set(JSON.parse(localStorage.getItem(STORE)||"[]").filter(n=>Number.isInteger(n)&&n>=0&&n<WORDS.length));}catch(e){}
+let cardOrder=[],cardAt=0,flipped=false;
+let quizOrder=[],quizAt=0,quizScore=0,quizAnswered=false,quizChosen=-1,quizOptions=[];
+let writeOrder=[],writeAt=0,writeTries=0,writeChecked=false,writeCorrect=false;
+let testOrder=[],testAt=0,testScore=0,testAnswers=[],testActive=false,testLength=10;
+let memoryDeck=[],memoryFirst=-1,memoryLocked=false,memoryMoves=0,memoryMatches=0;
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
+function norm(s){return String(s||"").toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[’‘]/g,"'").replace(/[.!?;,]/g,"").replace(/\s+/g," ");}
+function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function allIndices(){return WORDS.map((w,i)=>i);}
+function currentPool(){if(filterChapter==="all")return allIndices();return WORDS.map((w,i)=>({w,i})).filter(x=>x.w.chapter===filterChapter).map(x=>x.i);}
+function promptFor(w){return direction==="term-to-meaning"?w.term:w.meaning;}
+function answerFor(w){return direction==="term-to-meaning"?w.meaning:w.term;}
+function directionMarkup(){return '<div class="direction"><span class="small-note">Richting:</span><button data-action="direction" data-dir="term-to-meaning" class="'+(direction==="term-to-meaning"?"selected":"")+'">Woord → betekenis</button><button data-action="direction" data-dir="meaning-to-term" class="'+(direction==="meaning-to-term"?"selected":"")+'">Betekenis → woord</button></div>';}
+function updateProgress(){const label=$("progress-label"),fill=$("progress-fill");if(label)label.textContent=mastered.size+" van "+WORDS.length+" geoefend";if(fill)fill.style.width=(mastered.size/WORDS.length*100)+"%";}
+function saveProgress(){try{localStorage.setItem(STORE,JSON.stringify(Array.from(mastered)));}catch(e){}updateProgress();}
+function setMode(next){mode=next;nav.querySelectorAll("[data-mode]").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));render();}
+function render(){
+ updateProgress();
+ if(mode==="home")renderHome();
+ else if(mode==="cards")renderCards();
+ else if(mode==="quiz")renderQuiz();
+ else if(mode==="write")renderWrite();
+ else if(mode==="test")renderTest();
+ else if(mode==="memory")renderMemory();
+ else if(mode==="words")renderWords();
+}
+function start(modeName){if(modeName==="cards"){cardOrder=shuffle(allIndices());cardAt=0;flipped=false;}if(modeName==="quiz"){quizOrder=shuffle(allIndices()).slice(0,10);quizAt=0;quizScore=0;quizAnswered=false;makeQuizOptions();}if(modeName==="write"){writeOrder=shuffle(allIndices());writeAt=0;writeTries=0;writeChecked=false;writeCorrect=false;}if(modeName==="test"){testActive=false;testOrder=[];testAt=0;testAnswers=[];testScore=0;}if(modeName==="memory"){const ids=shuffle(allIndices()).slice(0,8);memoryDeck=shuffle(ids.flatMap(id=>[{id,side:"term",label:WORDS[id].term,open:false,matched:false},{id,side:"meaning",label:WORDS[id].meaning,open:false,matched:false}]));memoryFirst=-1;memoryLocked=false;memoryMoves=0;memoryMatches=0;}setMode(modeName);}
+function renderHome(){
+ const chapters=[...new Set(WORDS.map(w=>w.chapter))];
+ const chapterCards=chapters.map(ch=>{const subset=WORDS.filter(w=>w.chapter===ch);const sections=[...new Set(subset.map(w=>w.section))];return '<div class="chapter-card"><div class="chapter-head"><strong>'+esc(ch)+'</strong></div><div class="chapter-body"><p class="small-note">'+subset.length+' woorden · '+sections.length+' onderdelen</p>'+sections.map(s=>'<span class="section-chip">'+esc(s.split(" · ")[0])+'</span>').join("")+'</div></div>';}).join("");
+ view.innerHTML='<div class="section-head"><div><h2>Kies je oefening</h2><p class="small-note">Je voortgang wordt op dit apparaat bewaard.</p></div>'+directionMarkup()+'</div>'+
+ '<div class="grid three">'+
+ '<button class="tile" data-start="cards"><span class="emoji">🃏</span><strong>Flashcards</strong><span>Bekijk het woord en draai de kaart om voor de betekenis.</span></button>'+
+ '<button class="tile" data-start="quiz"><span class="emoji">🎯</span><strong>Meerkeuzequiz</strong><span>Kies de juiste betekenis of het juiste woord.</span></button>'+
+ '<button class="tile" data-start="write"><span class="emoji">✍️</span><strong>Zelf schrijven</strong><span>Typ het antwoord zelf. Je krijgt twee pogingen.</span></button>'+
+ '<button class="tile" data-start="test"><span class="emoji">📝</span><strong>Toets</strong><span>Maak 10, 20 of alle '+WORDS.length+' vragen zonder meerkeuze.</span></button>'+
+ '<button class="tile" data-start="memory"><span class="emoji">🧠</span><strong>Memory</strong><span>Zoek de juiste woord-betekenisparen.</span></button>'+
+ '<button class="tile" data-start="words"><span class="emoji">📚</span><strong>Woordenlijst</strong><span>Doorzoek alle woorden per hoofdstuk en onderdeel.</span></button>'+
+ '</div><div class="section-head"><div><h2>Jouw woorden</h2><p class="small-note">Precies ingedeeld volgens de zichtbare kopjes in de afbeeldingen. De extra woorden zonder zichtbare kop staan apart in hoofdstuk 1.</p></div></div>'+
+ '<div class="grid">'+chapterCards+'</div>'+
+ '<div class="panel" style="margin-top:16px"><div class="panel-top"><span class="pill">Voortgang</span><strong>'+mastered.size+' / '+WORDS.length+'</strong></div><div class="result-number" style="font-size:3rem">'+Math.round(mastered.size/WORDS.length*100)+'%</div><div class="progress-track" style="height:12px"><div class="progress-fill" style="width:'+(mastered.size/WORDS.length*100)+'%"></div></div><div class="action-row"><button class="secondary" data-action="reset">Voortgang wissen</button></div></div>';
+}
+function renderCards(){
+ if(!cardOrder.length)cardOrder=shuffle(allIndices());cardAt=Math.min(cardAt,cardOrder.length-1);
+ const idx=cardOrder[cardAt],w=WORDS[idx];
+ view.innerHTML='<div class="section-head"><div><h2>🃏 Flashcards</h2><p class="small-note">Kaart '+(cardAt+1)+' van '+cardOrder.length+'</p></div>'+directionMarkup()+'</div>'+
+ '<div class="panel"><div class="panel-top"><span class="pill">'+(mastered.has(idx)?"✓ Geoefend":"Oefenkaart")+'</span><span>'+w.chapter+' · '+w.section+'</span></div>'+
+ '<button class="secondary" data-action="flip" style="display:block;margin:20px auto 0">↻ Draai kaart om</button>'+
+ '<div class="big-word">'+esc(flipped?answerFor(w):promptFor(w))+'</div>'+
+ '<div class="meaning">'+(flipped?'<span class="pill">Antwoord</span>':'<span class="small-note">Bedenk het antwoord en draai de kaart om.</span>')+'</div>'+
+ '<div class="action-row"><button class="secondary" data-action="prev">← Vorige</button><button class="primary" data-action="known">✓ Dit kende ik</button><button class="primary" data-action="next">Volgende →</button></div></div>';
+}
+function makeQuizOptions(){
+ const idx=quizOrder[quizAt];if(idx===undefined)return;
+ const right=answerFor(WORDS[idx]),pool=shuffle(allIndices().filter(i=>i!==idx));
+ const used=new Set([norm(right)]),out=[{id:idx,label:right}];
+ for(const id of pool){const label=answerFor(WORDS[id]);if(!used.has(norm(label))){used.add(norm(label));out.push({id,label});}if(out.length===4)break;}
+ quizOptions=shuffle(out);quizChosen=-1;
+}
+function renderQuiz(){
+ if(quizAt>=quizOrder.length){view.innerHTML='<div class="panel" style="text-align:center"><div class="eyebrow" style="color:#35786d">Ronde afgerond</div><h2 style="margin-top:8px">Goed gedaan!</h2><div class="result-number">'+quizScore+' / '+quizOrder.length+'</div><p class="small-note">'+Math.round(quizScore/quizOrder.length*100)+'% goed beantwoord.</p><div class="action-row"><button class="primary" data-start="quiz">Nog een quiz</button><button class="secondary" data-mode="home">Terug naar start</button></div></div>';return;}
+ const idx=quizOrder[quizAt],w=WORDS[idx],correct=answerFor(w);
+ const choices=quizOptions.map((o,i)=>'<button class="choice '+(quizAnswered&&o.id===idx?"correct":quizAnswered&&i===quizChosen&&o.id!==idx?"wrong":"")+'" data-action="quiz-answer" data-choice="'+i+'" '+(quizAnswered?"disabled":"")+'>'+esc(o.label)+'</button>').join("");
+ view.innerHTML='<div class="section-head"><div><h2>🎯 Meerkeuzequiz</h2><p class="small-note">Vraag '+(quizAt+1)+' van '+quizOrder.length+' · score '+quizScore+'</p></div>'+directionMarkup()+'</div>'+
+ '<div class="panel"><div class="panel-top"><span class="pill">Kies één antwoord</span><span>'+Math.round(quizAt/quizOrder.length*100)+'%</span></div><div class="quiz-prompt">'+esc(promptFor(w))+'</div><div class="choices">'+choices+'</div>'+
+ (quizAnswered?'<div class="feedback '+(quizChosen>=0&&quizOptions[quizChosen].id===idx?"good":"bad")+'">'+(quizChosen>=0&&quizOptions[quizChosen].id===idx?"Helemaal goed! 🎉":"Het juiste antwoord is: "+esc(correct))+'</div><div class="action-row"><button class="primary" data-action="quiz-next">'+(quizAt===quizOrder.length-1?"Bekijk resultaat":"Volgende vraag →")+'</button></div>':'')+
+ '<div class="action-row"><button class="secondary" data-mode="home">Stop en terug</button></div></div>';
+}
+function renderWrite(){
+ if(writeAt>=writeOrder.length){writeOrder=shuffle(allIndices());writeAt=0;writeTries=0;writeChecked=false;}
+ const idx=writeOrder[writeAt],w=WORDS[idx];
+ view.innerHTML='<div class="section-head"><div><h2>✍️ Zelf schrijven</h2><p class="small-note">Woord '+(writeAt+1)+' van '+writeOrder.length+'</p></div>'+directionMarkup()+'</div>'+
+ '<div class="panel"><div class="panel-top"><span class="pill">Typ zelf het antwoord</span><span>'+w.chapter+'</span></div><div class="quiz-prompt">'+esc(promptFor(w))+'</div>'+
+ '<form id="write-form" class="write-form"><label for="write-answer" class="small-note">Jouw antwoord</label><input id="write-answer" class="write-input" type="text" autocomplete="off" autocapitalize="off" placeholder="Typ het antwoord..." '+(writeChecked?"disabled":"")+' required><div class="action-row">'+(writeChecked?'<button type="button" class="primary" data-action="write-next">Volgend woord →</button>':'<button type="submit" class="primary">Controleer antwoord</button>')+'</div></form>'+
+ (writeChecked?'<div class="feedback '+(writeCorrect?"good":"bad")+'">'+(writeCorrect?"Goed gedaan! 🎉":"Het juiste antwoord is: "+esc(answerFor(w)))+'</div>':(writeTries>0?'<div class="feedback bad">Nog niet helemaal. Je hebt nog één poging.</div>':'<p class="small-note" style="text-align:center;margin-top:16px">Tip: let op de hele betekenis en de woorden in de juiste volgorde.</p>'))+
+ '<div class="action-row"><button class="secondary" data-action="write-new">Nieuwe willekeurige reeks</button></div></div>';
+}
+function renderTest(){
+ if(!testActive){
+  view.innerHTML='<div class="section-head"><div><h2>📝 Toets</h2><p class="small-note">Geen meerkeuze of hints. Je antwoorden worden aan het einde nagekeken.</p></div>'+directionMarkup()+'</div>'+
+  '<div class="grid three">'+
+  '<button class="tile" data-action="begin-test" data-length="10"><span class="emoji">📝</span><strong>Korte toets</strong><span>10 willekeurige vragen</span></button>'+
+  '<button class="tile" data-action="begin-test" data-length="20"><span class="emoji">📋</span><strong>Lange toets</strong><span>20 willekeurige vragen</span></button>'+
+  '<button class="tile" data-action="begin-test" data-length="'+WORDS.length+'"><span class="emoji">🏆</span><strong>Alles oefenen</strong><span>Alle '+WORDS.length+' woorden</span></button>'+
+  '</div><div class="action-row"><button class="secondary" data-mode="home">← Terug naar start</button></div>';return;
+ }
+ if(testAt>=testOrder.length){
+  const correct=testAnswers.filter(a=>a.correct).length;
+  const review=testAnswers.map((a,i)=>'<div class="wordrow"><strong>'+(i+1)+'. '+esc(promptFor(WORDS[a.id]))+'</strong><span>Jouw antwoord: '+esc(a.answer||"Geen antwoord")+'<br><b>Juiste antwoord: '+esc(answerFor(WORDS[a.id]))+'</b></span></div>').join("");
+  view.innerHTML='<div class="panel" style="text-align:center"><div class="eyebrow" style="color:#35786d">Toets afgerond</div><h2 style="margin-top:8px">Jouw resultaat</h2><div class="result-number">'+correct+' / '+testOrder.length+'</div><p class="small-note">'+Math.round(correct/testOrder.length*100)+'% goed.</p><div class="progress-track" style="height:12px"><div class="progress-fill" style="width:'+(correct/testOrder.length*100)+'%"></div></div><div class="action-row"><button class="primary" data-action="new-test">Nog een toets</button><button class="secondary" data-mode="home">Terug naar start</button></div></div><div class="section-head"><div><h2>Antwoorden nakijken</h2></div></div><div class="panel"><div class="wordlist">'+review+'</div></div>';return;
+ }
+ const id=testOrder[testAt],w=WORDS[id];
+ view.innerHTML='<div class="section-head"><div><h2>📝 Toets</h2><p class="small-note">Vraag '+(testAt+1)+' van '+testOrder.length+'</p></div>'+directionMarkup()+'</div>'+
+ '<div class="panel"><div class="panel-top"><span class="pill">Geen hints</span><span>'+Math.round(testAt/testOrder.length*100)+'%</span></div><div class="quiz-prompt">'+esc(promptFor(w))+'</div>'+
+ '<form id="test-form" class="write-form"><label for="test-answer" class="small-note">Typ het antwoord</label><input id="test-answer" class="write-input" type="text" autocomplete="off" placeholder="Jouw antwoord..." required><div class="action-row"><button class="primary" type="submit">Beantwoord en ga verder →</button></div></form><div class="action-row"><button class="secondary" data-action="cancel-test">Toets stoppen</button></div></div>';
+}
+function renderMemory(){
+ if(memoryMatches>=8){view.innerHTML='<div class="panel" style="text-align:center"><div class="eyebrow" style="color:#35786d">Memory voltooid</div><h2 style="margin-top:8px">Alle paren gevonden! 🎉</h2><div class="result-number">'+memoryMoves+' pogingen</div><div class="action-row"><button class="primary" data-start="memory">Opnieuw spelen</button><button class="secondary" data-mode="home">Terug naar start</button></div></div>';return;}
+ const cards=memoryDeck.map((card,i)=>'<button class="memory-card '+(card.open?"":"closed")+' '+(card.matched?"matched":"")+'" data-memory="'+i+'" '+(memoryLocked||card.matched?"disabled":"")+'>'+(card.open||card.matched?esc(card.label):"✦")+'</button>').join("");
+ view.innerHTML='<div class="section-head"><div><h2>🧠 Memory</h2><p class="small-note">Vind woord en betekenis bij elkaar.</p></div><span class="pill">'+memoryMatches+' / 8 paren</span></div><div class="panel"><div class="panel-top"><span>Hoofdstuk 1 en 2 door elkaar</span><span>Pogingen: '+memoryMoves+'</span></div><div class="memory-grid" style="margin-top:17px">'+cards+'</div><div class="action-row"><button class="secondary" data-start="memory">Opnieuw schudden</button><button class="secondary" data-mode="home">Terug naar start</button></div></div>';
+}
+function renderWords(){
+ const sectionOptions=[...new Set(WORDS.map(w=>w.section))];
+ const matches=WORDS.map((w,i)=>({w,i})).filter(x=>(filterChapter==="all"||x.w.chapter===filterChapter)&&norm(x.w.term+" "+x.w.meaning+" "+x.w.section+" "+x.w.chapter).includes(norm(searchText)));
+ const options='<option value="all">Alle hoofdstukken en onderdelen</option>'+[...new Set(WORDS.map(w=>w.chapter))].map(ch=>'<option value="'+esc(ch)+'" '+(filterChapter===ch?"selected":"")+'>'+esc(ch)+'</option>').join("")+sectionOptions.map(ch=>'<option value="'+esc(ch)+'" '+(filterChapter===ch?"selected":"")+'>'+esc(ch)+'</option>').join("");
+ const rows=matches.map(({w,i})=>'<div class="wordrow"><strong>'+esc(w.term)+'</strong><span>'+esc(w.meaning)+'</span><div class="word-meta"><span>'+esc(w.chapter)+' · '+esc(w.section.split(" · ").slice(1).join(" · "))+'</span><span class="knownmark">'+(mastered.has(i)?"✓ Geoefend":"")+'</span></div></div>').join("");
+ view.innerHTML='<div class="section-head"><div><h2>📚 Woordenlijst</h2><p class="small-note">'+matches.length+' van de '+WORDS.length+' woorden</p></div></div>'+
+ '<div class="panel"><div class="wordlist-tools"><input class="write-input" id="word-search" type="search" placeholder="Zoek op woord of betekenis..." value="'+esc(searchText)+'" style="margin:0"><select class="write-input" id="chapter-filter" style="margin:0;padding:12px">'+options+'</select></div><div class="wordlist">'+(rows||'<div class="wordrow">Geen woorden gevonden.</div>')+'</div><div class="action-row"><button class="primary" data-start="cards">Oefenen met flashcards</button></div></div>';
+}
+function handleDirection(newDirection){
+ if(mode==="test"&&testActive)return;
+ direction=newDirection;
+ if(mode==="quiz"&&quizAt<quizOrder.length){quizAnswered=false;makeQuizOptions();}
+ if(mode==="write"){writeChecked=false;writeTries=0;writeCorrect=false;}
+ render();
+}
+function startTestRun(length){
+ testLength=Math.min(Number(length)||10,WORDS.length);testOrder=shuffle(allIndices()).slice(0,testLength);testAt=0;testAnswers=[];testScore=0;testActive=true;mode="test";render();
+}
+view.addEventListener("click",function(e){
+ const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.mode){setMode(b.dataset.mode);return;}
+ if(b.dataset.start){start(b.dataset.start);return;}
+ if(b.dataset.action==="direction"){handleDirection(b.dataset.dir);return;}
+ const a=b.dataset.action;
+ if(a==="flip"){flipped=!flipped;renderCards();}
+ else if(a==="prev"){cardAt=(cardAt+WORDS.length-1)%WORDS.length;flipped=false;renderCards();}
+ else if(a==="next"){cardAt=(cardAt+1)%WORDS.length;flipped=false;renderCards();}
+ else if(a==="known"){mastered.add(cardOrder[cardAt]);saveProgress();cardAt=(cardAt+1)%WORDS.length;flipped=false;renderCards();}
+ else if(a==="quiz-answer"&&!quizAnswered){quizChosen=Number(b.dataset.choice);quizAnswered=true;if(quizOptions[quizChosen]&&quizOptions[quizChosen].id===quizOrder[quizAt]){quizScore++;mastered.add(quizOrder[quizAt]);saveProgress();}renderQuiz();}
+ else if(a==="quiz-next"){quizAt++;quizAnswered=false;makeQuizOptions();renderQuiz();}
+ else if(a==="write-next"){writeAt++;writeTries=0;writeChecked=false;writeCorrect=false;renderWrite();}
+ else if(a==="write-new"){writeOrder=shuffle(allIndices());writeAt=0;writeTries=0;writeChecked=false;writeCorrect=false;renderWrite();}
+ else if(a==="begin-test"){startTestRun(b.dataset.length);}
+ else if(a==="cancel-test"){testActive=false;setMode("test");}
+ else if(a==="new-test"){startTestRun(testLength);}
+ else if(a==="reset"){if(confirm("Weet je zeker dat je de voortgang wilt wissen?")){mastered.clear();saveProgress();renderHome();}}
+ else if(a==="memory-card"){;}
+ else if(b.dataset.memory!==undefined){handleMemory(Number(b.dataset.memory));}
+});
+view.addEventListener("submit",function(e){
+ if(e.target.id==="write-form"){
+  e.preventDefault();const input=$("write-answer");if(!input||writeChecked)return;
+  writeTries++;writeCorrect=norm(input.value)===norm(answerFor(WORDS[writeOrder[writeAt]]));
+  if(writeCorrect){writeChecked=true;mastered.add(writeOrder[writeAt]);saveProgress();}
+  else if(writeTries>=2)writeChecked=true;
+  renderWrite();
+ }else if(e.target.id==="test-form"){
+  e.preventDefault();const input=$("test-answer");if(!input||!input.value.trim())return;
+  const id=testOrder[testAt],answer=input.value.trim(),correct=norm(answer)===norm(answerFor(WORDS[id]));
+  testAnswers.push({id,answer,correct});if(correct){mastered.add(id);saveProgress();}testAt++;renderTest();
+ }
+});
+view.addEventListener("input",function(e){if(e.target.id==="word-search"){searchText=e.target.value;const p=e.target.selectionStart;renderWords();const input=$("word-search");input.focus();input.setSelectionRange(p,p);}});
+view.addEventListener("change",function(e){if(e.target.id==="chapter-filter"){filterChapter=e.target.value;renderWords();}});
+nav.addEventListener("click",function(e){const b=e.target.closest("button[data-mode]");if(b)setMode(b.dataset.mode);});
+function handleMemory(index){
+ if(memoryLocked||!memoryDeck[index]||memoryDeck[index].matched||memoryDeck[index].open)return;
+ const card=memoryDeck[index];card.open=true;
+ if(memoryFirst<0){memoryFirst=index;renderMemory();return;}
+ memoryMoves++;
+ const first=memoryDeck[memoryFirst];
+ if(first.id===card.id&&first.side!==card.side){
+  first.matched=true;card.matched=true;memoryMatches++;mastered.add(card.id);saveProgress();memoryFirst=-1;renderMemory();return;
+ }
+ memoryLocked=true;renderMemory();
+ setTimeout(()=>{if(mode!=="memory")return;first.open=false;card.open=false;memoryFirst=-1;memoryLocked=false;renderMemory();},850);
+}
+renderHome();updateProgress();
+</script>
+</body>
+</html>
