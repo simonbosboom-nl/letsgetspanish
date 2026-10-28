@@ -280,5 +280,83 @@ function handleMemory(index){
 }
 renderHome();updateProgress();
 </script>
+<script>
+(function(){
+"use strict";
+const EXERCISES={"leesmanieren":{"title":"Leesmanieren","emoji":"👀","intro":"Kies de leesmanier die het beste past bij je doel.","questions":[{"q":"Je bekijkt eerst de titel, tussenkopjes en afbeeldingen om te beslissen of een tekst bruikbaar is. Wat doe je?","options":["Oriënterend lezen","Studerend lezen","Intensief lezen","Zoekend lezen"],"answer":0,"why":"Oriënterend lezen helpt je het onderwerp te verkennen en te beslissen of je verder leest."},{"q":"Je wilt snel weten waar een lang artikel in grote lijnen over gaat. Welke leesmanier past?","options":["Genietend lezen","Globaal lezen","Studerend lezen","Kritisch lezen"],"answer":1,"why":"Globaal lezen is gericht op de hoofdgedachte en de grote lijn, niet op ieder detail."},{"q":"Je zoekt in een lange webpagina alleen de datum waarop iets gebeurde. Welke leesmanier gebruik je?","options":["Intensief lezen","Oriënterend lezen","Zoekend lezen","Genietend lezen"],"answer":2,"why":"Bij zoekend lezen speur je gericht naar één gegeven, zoals een datum, naam of plaats."},{"q":"Je moet precies begrijpen hoe een ingewikkeld proces werkt en welke stappen in welke volgorde komen. Hoe lees je?","options":["Globaal lezen","Intensief lezen","Zoekend lezen","Oriënterend lezen"],"answer":1,"why":"Intensief lezen betekent dat je nauwkeurig leest om details en verbanden te begrijpen."},{"q":"Je leert een hoofdstuk voor een toets. Je maakt aantekeningen, markeert kernbegrippen en herhaalt de informatie. Welke leesmanier?","options":["Studerend lezen","Genietend lezen","Oriënterend lezen","Zoekend lezen"],"answer":0,"why":"Bij studerend lezen wil je informatie onthouden en later kunnen gebruiken."},{"q":"Je beoordeelt of een nieuwsbericht betrouwbaar is en of de schrijver feiten of meningen gebruikt. Wat doe je?","options":["Globaal lezen","Genietend lezen","Kritisch lezen","Zoekend lezen"],"answer":2,"why":"Bij kritisch lezen beoordeel je betrouwbaarheid, argumenten en het doel van een tekst."},{"q":"Je leest vrijwillig een spannend verhaal omdat je ervan geniet. Welke leesmanier past?","options":["Zoekend lezen","Genietend lezen","Studerend lezen","Oriënterend lezen"],"answer":1,"why":"Bij genietend lezen lees je vooral voor plezier of ontspanning."},{"q":"Je wilt weten of een tekst geschikt is voor je werkstuk. Je bekijkt de bron, titel, datum en tussenkopjes. Wat doe je?","options":["Oriënterend lezen","Intensief lezen","Studerend lezen","Genietend lezen"],"answer":0,"why":"Oriënterend lezen helpt bepalen waar de tekst over gaat en of die bij je zoekvraag past."}]},"woordraad":{"title":"Woordraadstrategieën","emoji":"🔎","intro":"Gebruik aanwijzingen in het woord en in de tekst om onbekende woorden te begrijpen.","questions":[{"q":"Lees: 'De grond was kurkdroog; er was al weken geen regen gevallen.' Wat betekent 'kurkdroog' waarschijnlijk?","options":["Heel nat","Heel droog","Heel koud","Heel glad"],"answer":1,"why":"De context geeft een aanwijzing: er was wekenlang geen regen."},{"q":"Je kent 'vriendelijk', maar niet 'onvriendelijk'. Welke strategie helpt?","options":["Alleen de titel lezen","Het woord opdelen: on- + vriendelijk","De alinea overslaan","Alleen de laatste zin lezen"],"answer":1,"why":"Door woorddelen te bekijken, zie je dat het voorvoegsel 'on-' vaak een tegenstelling aangeeft."},{"q":"Lees: 'Een herbivoor, een dier dat planten eet, leeft meestal niet van vlees.' Welke aanwijzing helpt?","options":["Een voorbeeld","Een uitleg in de tekst","Een rijmwoord","Een titel"],"answer":1,"why":"De tekst legt direct uit wat een herbivoor is: een dier dat planten eet."},{"q":"Je kent 'fiets' en 'route'. Wat kun je doen bij het onbekende woord 'fietsroute'?","options":["Bekende woorddelen combineren","Het woord achterstevoren lezen","De betekenis zomaar raden","De zin overslaan"],"answer":0,"why":"Samenstellingen kun je vaak begrijpen door bekende delen samen te voegen."},{"q":"Lees: 'Mila was opgelucht: de vermiste sleutel was eindelijk gevonden.' Wat betekent 'opgelucht' hier?","options":["Boos","Blij en minder bezorgd","Moe","Verbaasd"],"answer":1,"why":"De sleutel is gevonden, dus Mila hoeft zich minder zorgen te maken."},{"q":"Je leest: 'Het gebouw was gigantisch, enorm hoog, bijna zo hoog als een wolkenkrabber.' Welke strategie helpt?","options":["Een synoniem of omschrijving zoeken","Alleen leestekens bekijken","Het woord overschrijven","Lettergrepen tellen"],"answer":0,"why":"'Enorm' is een synoniem van 'gigantisch' en geeft de betekenis aan."},{"q":"Lees: 'In tegenstelling tot haar rustige broer was Noor uitbundig: ze praatte luid en vertelde enthousiast.' Wat betekent 'uitbundig'?","options":["Heel stil","Heel enthousiast en uitgelaten","Heel slordig","Heel voorzichtig"],"answer":1,"why":"De tegenstelling met 'rustig' en de aanwijzingen 'luid' en 'enthousiast' helpen je het woord raden."},{"q":"Je hebt de context en woorddelen bekeken, maar twijfelt nog over een belangrijk woord. Wat doe je?","options":["De betekenis verzinnen","Het woord altijd overslaan","Een betrouwbaar woordenboek raadplegen","Alleen naar de eerste letter kijken"],"answer":2,"why":"Gebruik eerst woordraadstrategieën; controleer belangrijke of onzekere betekenissen daarna in een betrouwbare bron."}]},"tekstsoorten":{"title":"Tekstsoorten","emoji":"📰","intro":"Herken tekstsoorten aan hun doel, opbouw en kenmerken.","questions":[{"q":"Een tekst vertelt kort wat er vandaag in de stad is gebeurd, met feiten, plaats en tijd. Welke tekstsoort?","options":["Nieuwsbericht","Gedicht","Handleiding","Recensie"],"answer":0,"why":"Een nieuwsbericht brengt recente gebeurtenissen onder de aandacht, meestal met feiten."},{"q":"Een journalist stelt een sporter vragen en schrijft de antwoorden op. Welke tekstsoort?","options":["Advertentie","Interview","Roman","Instructie"],"answer":1,"why":"Een interview bestaat uit vragen aan een persoon en diens antwoorden."},{"q":"Een schrijver bespreekt een film en legt uit wat goed en minder goed is, met een oordeel. Wat is dit?","options":["Nieuwsbericht","Uitnodiging","Recensie","Handleiding"],"answer":2,"why":"Een recensie bespreekt en beoordeelt bijvoorbeeld een boek, film of voorstelling."},{"q":"'Meng de bloem met water. Kneed vijf minuten. Bak het brood op 200 graden.' Welke tekstsoort?","options":["Gedicht","Instructie/recept","Nieuwsbericht","Interview"],"answer":1,"why":"Een instructie of recept legt stap voor stap uit hoe je iets doet of maakt."},{"q":"Een bedrijf wil dat mensen een telefoon kopen. De tekst noemt voordelen en eindigt met 'Bestel nu!'. Wat is dit?","options":["Reclame/advertentie","Verslag","Roman","Gedicht"],"answer":0,"why":"Reclame probeert de lezer te overtuigen iets te kopen of te doen."},{"q":"Een leerling beschrijft wat de klas tijdens een excursie zag en deed, in tijdsvolgorde. Welke tekstsoort?","options":["Advertentie","Verslag","Interview","Sprookje"],"answer":1,"why":"Een verslag beschrijft wat er is gebeurd of gedaan, vaak in een duidelijke volgorde."},{"q":"Een lang verzonnen verhaal met personages en hoofdstukken staat in een boek. Welke tekstsoort?","options":["Nieuwsbericht","Roman","Handleiding","Folder"],"answer":1,"why":"Een roman is een lang verhaal in boekvorm met uitgewerkte personages en gebeurtenissen."},{"q":"Een tekst heeft regels, strofen, ritme en soms rijm. Wat is dit meestal?","options":["Nieuwsbericht","Brief","Gedicht","Gebruiksaanwijzing"],"answer":2,"why":"Een gedicht gebruikt vaak regels en strofen, ritme, rijm of beeldspraak."},{"q":"Een verhaal wordt verteld met tekeningen, tekstballonnen en korte dialogen. Welke tekstsoort?","options":["Betoog","Stripverhaal","Artikel","Formulier"],"answer":1,"why":"Een stripverhaal combineert beelden met tekstballonnen en dialogen."},{"q":"Een schrijver neemt een standpunt in en gebruikt argumenten om lezers te overtuigen. Welke tekstsoort?","options":["Betoog","Interview","Roman","Uitnodiging"],"answer":0,"why":"Een betoog verdedigt een standpunt met argumenten."},{"q":"Een kaartje vertelt waar en wanneer een verjaardagsfeest is en vraagt of je komt. Wat is dit?","options":["Nieuwsbericht","Uitnodiging","Recensie","Verslag"],"answer":1,"why":"Een uitnodiging laat weten dat iemand welkom is en geeft praktische informatie."},{"q":"Een tekst legt stap voor stap uit hoe je een apparaat monteert, met waarschuwingen en plaatjes. Welke tekstsoort?","options":["Handleiding/gebruiksaanwijzing","Gedicht","Betoog","Interview"],"answer":0,"why":"Een handleiding helpt de lezer een apparaat te gebruiken of een handeling uit te voeren."}]}};
+const nav=document.getElementById("main-nav"),view=document.getElementById("view");
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const shuffle=a=>{const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
+let current="",order=[],at=0,score=0,answered=false,chosen=-1,best={};
+try{best=JSON.parse(localStorage.getItem("nederlandsSkillResultsV1")||"{}")||{};}catch(e){}
+function ensureHomeTiles(){
+ const grid=view.querySelector(".grid.three");
+ if(!grid||view.querySelector("[data-extra-home]"))return;
+ const tiles=[
+  ["leesmanieren","👀","Leesmanieren","Oefen oriënterend, globaal, zoekend, intensief, studerend en kritisch lezen."],
+  ["woordraad","🔎","Woordraadstrategieën","Raad onbekende woorden met context, woorddelen en synoniemen."],
+  ["tekstsoorten","📰","Tekstsoorten","Herken nieuwsberichten, interviews, recensies, instructies en meer."]
+ ];
+ grid.insertAdjacentHTML("beforeend",tiles.map(t=>'<button class="tile" data-extra-nav="'+t[0]+'" data-extra-home="1"><span class="emoji">'+t[1]+'</span><strong>'+t[2]+'</strong><span>'+t[3]+'</span></button>').join(""));
+}
+function setActive(){
+ nav.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.extraNav===current));
+}
+function start(key){
+ current=key;order=shuffle(EXERCISES[key].questions.map((q,i)=>i));at=0;score=0;answered=false;chosen=-1;setActive();render();
+}
+function render(){
+ const set=EXERCISES[current];if(!set)return;
+ if(at>=order.length){
+  const pct=Math.round(score/order.length*100);best[current]=Math.max(best[current]||0,pct);
+  try{localStorage.setItem("nederlandsSkillResultsV1",JSON.stringify(best));}catch(e){}
+  view.innerHTML='<div class="panel" style="text-align:center"><div class="eyebrow" style="color:#35786d">'+esc(set.title)+' · afgerond</div><div class="skill-symbol" style="margin:15px auto">'+set.emoji+'</div><h2>Oefening voltooid!</h2><div class="result-number">'+score+' / '+order.length+'</div><p class="small-note">'+pct+'% goed · Beste score: '+best[current]+'%</p><div class="progress-track" style="height:12px"><div class="progress-fill" style="width:'+pct+'%"></div></div><div class="action-row"><button class="primary" data-extra-nav="'+current+'">Opnieuw oefenen</button><button class="secondary" data-extra-home-return>Terug naar start</button></div></div>';
+  return;
+ }
+ const q=set.questions[order[at]];
+ const choices=q.options.map((v,i)=>'<button class="choice '+(answered&&i===q.answer?"correct":answered&&i===chosen?"wrong":"")+'" data-extra-answer="'+i+'" '+(answered?"disabled":"")+'>'+esc(v)+'</button>').join("");
+ view.innerHTML='<div class="section-head"><div><h2>'+set.emoji+' '+esc(set.title)+'</h2><p class="small-note">'+esc(set.intro)+'</p></div><span class="pill">Vraag '+(at+1)+' / '+order.length+'</span></div>'+
+ '<div class="panel"><div class="panel-top"><span class="skill-topic">'+esc(set.title)+'</span><span>Score: '+score+'</span></div><div class="skill-question">'+esc(q.q)+'</div><div class="choices">'+choices+'</div>'+
+ (answered?'<div class="skill-explanation"><strong>'+(chosen===q.answer?'✅ Goed antwoord!':'💡 Uitleg')+'</strong>'+esc(q.why)+'</div><div class="action-row"><button class="primary" data-extra-next>'+(at===order.length-1?'Bekijk resultaat':'Volgende vraag →')+'</button></div>':'')+
+ '<div class="action-row"><button class="secondary" data-extra-home-return>Terug naar start</button></div></div>';
+}
+function exitToHome(){
+ current="";setActive();
+ const home=nav.querySelector('[data-mode="home"]');if(home)home.click();
+}
+function navHandler(e){
+ const b=e.target.closest("[data-extra-nav]");
+ if(b){e.preventDefault();e.stopPropagation();start(b.dataset.extraNav);return;}
+ if(e.target.closest("[data-extra-home-return]")){e.preventDefault();e.stopPropagation();exitToHome();return;}
+}
+function viewHandler(e){
+ const a=e.target.closest("[data-extra-answer]");
+ if(a&&current){
+  if(answered)return;
+  chosen=Number(a.dataset.extraAnswer);answered=true;
+  if(chosen===EXERCISES[current].questions[order[at]].answer)score++;
+  render();return;
+ }
+ if(e.target.closest("[data-extra-next]")){
+  at++;answered=false;chosen=-1;render();return;
+ }
+ if(e.target.closest("[data-extra-nav]")){const b=e.target.closest("[data-extra-nav]");start(b.dataset.extraNav);return;}
+ if(e.target.closest("[data-extra-home-return]")){exitToHome();return;}
+ // The original page changes the view first on ordinary navigation clicks; repopulate tiles afterwards.
+ if(e.target.closest("[data-mode]")||e.target.closest("[data-start]")){
+  current="";setActive();Promise.resolve().then(ensureHomeTiles);
+ }
+}
+["leesmanieren","woordraad","tekstsoorten"].forEach(key=>{
+ const b=document.createElement("button");b.type="button";b.className="navbtn";b.dataset.extraNav=key;
+ b.textContent=EXERCISES[key].emoji+" "+EXERCISES[key].title;nav.appendChild(b);
+});
+nav.addEventListener("click",navHandler);
+view.addEventListener("click",viewHandler);
+ensureHomeTiles();
+window.__nederlandsExtraExercises={count:Object.fromEntries(Object.entries(EXERCISES).map(([k,v])=>[k,v.questions.length]))};
+})();
+</script>
 </body>
 </html>
