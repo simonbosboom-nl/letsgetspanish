@@ -301,7 +301,8 @@ function ensureHomeTiles(){
  grid.insertAdjacentHTML("beforeend",tiles.map(t=>'<button class="tile" data-extra-nav="'+t[0]+'" data-extra-home="1"><span class="emoji">'+t[1]+'</span><strong>'+t[2]+'</strong><span>'+t[3]+'</span></button>').join(""));
 }
 function setActive(){
- nav.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.extraNav===current));
+ if(current)nav.querySelectorAll("[data-mode]").forEach(b=>b.classList.remove("active"));
+ nav.querySelectorAll("[data-extra-nav]").forEach(b=>b.classList.toggle("active",b.dataset.extraNav===current));
 }
 function start(key){
  current=key;order=shuffle(EXERCISES[key].questions.map((q,i)=>i));at=0;score=0;answered=false;chosen=-1;setActive();render();
@@ -329,6 +330,9 @@ function navHandler(e){
  const b=e.target.closest("[data-extra-nav]");
  if(b){e.preventDefault();e.stopPropagation();start(b.dataset.extraNav);return;}
  if(e.target.closest("[data-extra-home-return]")){e.preventDefault();e.stopPropagation();exitToHome();return;}
+ if(e.target.closest("[data-mode]")){
+  current="";setActive();Promise.resolve().then(ensureHomeTiles);
+ }
 }
 function viewHandler(e){
  const a=e.target.closest("[data-extra-answer]");
