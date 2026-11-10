@@ -1095,9 +1095,12 @@ function drawExplorerFrame(now){
   e.progress+=e.speed*dt/900*(e.slowTime>0?.48:1);
   if(e.progress<0){e.x=930+Math.abs(e.progress)*180;e.y=250;continue;}
   if(e.progress>=1){
-   e.hp=0;explorerLives--;explorerHeroHp-=e.kind==="boss"?55:e.kind==="tank"?28:15;
+   e.hp=0;explorerLives--;
+   const impact=e.kind==="boss"?55:e.kind==="tank"?28:15;
+   explorerHeroHp-=explorerSpecialTime>0?Math.ceil(impact*.3):impact;
    feedback="💥 "+(e.kind==="boss"?"De baas": "Een "+e.kind+"-monster")+" bereikte het kasteel!";
-   if(explorerHeroHp<=0){explorerLives--;explorerHeroHp=explorerHeroMaxHp;if(explorerLives<=0){ended=true;renderGame();return;}}
+   if(explorerHeroHp<=0){explorerHeroHp=explorerHeroMaxHp;explorerLives--;feedback+=" Je held moest opnieuw op krachten komen.";}
+   if(explorerLives<=0){ended=true;renderGame();return;}
    continue;
   }
   const speedFactor=e.slowTime>0?.48:1;e.progress+=0;
@@ -1165,7 +1168,7 @@ function renderBoard(){
  if(game==="explorer"){
   const world=activeExplorerWorld();
   const areas=Array.from({length:6},(_,i)=>'<span class="explore-tile '+(i<regionsFound?"visited":i===regionsFound?"current":"")+'">'+(i<regionsFound?"✓":i===regionsFound?"?":"·")+'</span>').join("");
-  return stats([world.icon+" "+world.name,"Golf: "+Math.min(10,waves+1)+" / 10",explorerHeroData.icon+" "+explorerHeroData.name+" Lv."+explorerHeroLevel,"🪙 "+explorerCoins+" · 💎 "+gems,"Torens: "+explorerTowers.length,"❤️ "+explorerHeroHp+"/"+explorerHeroMaxHp])+
+  return stats([world.icon+" "+world.name,"Golf: "+Math.min(10,waves+1)+" / 10",explorerHeroData.icon+" "+explorerHeroData.name+" Lv."+explorerHeroLevel,"Kasteel: "+("❤️".repeat(Math.max(0,explorerLives))),"🪙 "+explorerCoins+" · 💎 "+gems,"Torens: "+explorerTowers.length,"Held: "+explorerHeroHp+"/"+explorerHeroMaxHp])+
    '<div class="explore-map"><div class="map-banner"><span>'+world.icon+' '+world.name.toUpperCase()+' · GOLF '+Math.min(10,waves+1)+'</span><span>'+explorerHeroData.icon+' '+explorerHeroData.name+' · plaats torens en verdedig het kasteel</span></div>'+
    '<div class="explorer-canvas-wrap"><canvas id="explorerCanvas" class="explorer-canvas" aria-label="Verken het veld, beweeg je held en plaats verdedigende torens"></canvas></div>'+
    '<p id="explorerStatus" class="mini-hint">Golf '+(waves+1)+' · Edelstenen '+gems+' · Torens '+explorerTowers.length+' · Verplaats de held met de kaart of pijltjes.</p>'+
@@ -1179,7 +1182,7 @@ function renderBoard(){
    '<button id="explorerSpecial" class="btn special" type="button" '+(explorerSpecialCooldown>0?'disabled':'')+'>'+explorerHeroData.icon+' '+explorerHeroData.special+' '+(explorerSpecialCooldown>0?"("+Math.ceil(explorerSpecialCooldown)+"s)":"!")+'</button>'+
    '</div>'+
    '<div class="selected-tower-panel" id="selectedTowerPanel">'+(explorerTowers.find(t=>t.id===explorerSelectedTowerId)?(()=>{const t=explorerTowers.find(t=>t.id===explorerSelectedTowerId),cfg=EXPLORER_TOWERS[t.type];return '<span>'+cfg.icon+' '+cfg.name+' · Level '+t.level+'</span><button id="upgradeSelectedTower" class="btn light" '+(explorerCoins<25*t.level||t.level>=4?'disabled':'')+'>Verbeter · '+(25*t.level)+' 🪙</button>';})():'Tik op een toren om deze te selecteren en te verbeteren.')+'</div>'+
-   '<p class="mini-hint" id="explorerHint">'+(explorerPlaceMode?"Klik op een plek in het veld om de toren neer te zetten.":"Je start met 20 edelstenen: plaats een toren, klik op het veld om je held te sturen en beantwoord de taalvraag om aan te vallen.")+'</p></div>'+
+   '<p class="mini-hint" id="explorerHint">'+(explorerPlaceMode?"Klik op een plek in het veld om de toren neer te zetten.":"Je begint met munten en edelstenen. Kies een torentype, klik op het veld om hem te plaatsen, beweeg je held en gebruik je speciale vaardigheid. Verlies niet al je kasteellevens.")+'</p></div>'+
    '<p class="mini-hint">Verdedig het kasteel · '+LANGS[lang].name+' · Kies het juiste antwoord om je held te laten aanvallen.</p>'+questionHTML();
  }
  if(game==="pablo")return renderPabloBoard();
