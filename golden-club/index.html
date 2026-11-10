@@ -167,7 +167,7 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 .hero-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .hero-choice{display:flex;align-items:center;flex-direction:column;gap:5px;padding:12px 8px;border-radius:16px;border:2px solid #bad3a0;background:#ffffffdf;color:#2d4930;min-width:0}
 .hero-choice.selected{border-color:#d4a42c;box-shadow:0 0 0 3px #f1d87866;background:#fff9df}
-.hero-choice:disabled{opacity:.75;cursor:not-allowed}.hero-avatar{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--hero-colour);box-shadow:inset 0 -5px 0 #0002,0 4px 7px #0002;font-size:29px}
+.hero-choice:disabled{opacity:.75;cursor:not-allowed}.hero-choice.locked{opacity:.78;border-style:dashed}.hero-choice.locked.selected{border:2px solid #b38a32;opacity:1;background:#fff3d7}.hero-avatar{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--hero-colour);box-shadow:inset 0 -5px 0 #0002,0 4px 7px #0002;font-size:29px}
 .hero-choice strong{font-size:15px}.hero-role{font-size:12px;color:#657963}.hero-choice small{font-size:11px;text-align:center}.hero-choice em{font-size:12px;font-weight:950;color:#876111;font-style:normal}
 .unlock-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:13px 0}.world-unlocks,.explorer-achievements{padding:12px;border-radius:14px;background:#ffffffa8;margin-top:10px;color:#36552f;display:grid;gap:8px}
 .world-unlocks>div{display:flex;gap:6px;flex-wrap:wrap}.world-chip{font-size:12px;padding:6px 9px;border-radius:99px;font-weight:850}.world-chip.unlocked{background:#e0f2c9;color:#315f2a}.world-chip.locked{background:#e8e4de;color:#777}
@@ -315,7 +315,7 @@ function renderExplorerHeroSelect(){
  const today=new Date().toISOString().slice(0,10),dailyReady=explorerDailyClaimed!==today;
  const heroes=EXPLORER_HEROES.map(h=>{
   const unlocked=explorerUnlockedHeroes.includes(h.id),selected=explorerHeroId===h.id;
-  return '<button class="hero-choice '+(selected?"selected":"")+'" data-explorer-hero="'+h.id+'" '+(!unlocked?'disabled':'')+'>'+
+  return '<button class="hero-choice '+(selected?"selected":"")+(unlocked?"":" locked")+'" data-explorer-hero="'+h.id+'">'+
    '<span class="hero-avatar" style="--hero-colour:'+h.color+'">'+h.icon+'</span><strong>'+h.name+'</strong><span class="hero-role">'+h.role+'</span>'+
    '<small>❤️ '+h.hp+' · ⚔️ '+h.damage+' · Bereik '+h.range+'</small>'+
    (unlocked?'<em>'+(selected?"Geselecteerd":"Kies held")+'</em>':'<em>🔒 '+h.cost+' 🪙</em>')+'</button>';
@@ -1411,7 +1411,12 @@ document.querySelectorAll(".game-card").forEach(b=>b.addEventListener("click",()
 $("backToGames").addEventListener("click",()=>{if(frogFrameId)cancelAnimationFrame(frogFrameId);frogFrameId=0;if(explorerFrameId)cancelAnimationFrame(explorerFrameId);explorerFrameId=0;if(raceFrameId)cancelAnimationFrame(raceFrameId);raceFrameId=0;if(pabloFrameId)cancelAnimationFrame(pabloFrameId);pabloFrameId=0;$("playArea").classList.add("hidden");$("gameMenu").classList.remove("hidden");game="";window.scrollTo({top:0,behavior:"smooth"});});
 $("gameBody").addEventListener("click",e=>{
  const heroChoice=e.target.closest("[data-explorer-hero]");
- if(heroChoice&&game==="explorer"&&!explorerHeroChosen){explorerChooseHero(heroChoice.dataset.explorerHero);return;}
+ if(heroChoice&&game==="explorer"&&!explorerHeroChosen){
+  const id=heroChoice.dataset.explorerHero;
+  if(explorerUnlockedHeroes.includes(id))explorerChooseHero(id);
+  else{explorerHeroId=id;renderGame();}
+  return;
+ }
  const heroUnlock=e.target.closest("#unlockHero");
  if(heroUnlock&&game==="explorer"&&!explorerHeroChosen){
   const h=explorerHeroById(explorerHeroId);
