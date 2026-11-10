@@ -180,6 +180,7 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 
 .world-chip{border:1px solid transparent;cursor:pointer;font-family:inherit}.world-chip.selected{outline:3px solid #d2a52f;outline-offset:1px}.world-chip:disabled{cursor:not-allowed;opacity:.6}
 @media(max-width:650px){.hero-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.tower-shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.explorer-select{padding:12px}.explorer-wallet span{font-size:12px}.world-chip{font-size:11px}}
+.tower-buy.tower-locked{background:#f4f0e7;border-style:dashed;color:#756b58}.tower-buy.tower-locked em{color:#9a6820}
 </style>
 </head>
 <body>
@@ -253,7 +254,7 @@ const strokeDataCache={};
 let frogArcade=null,frogFrameId=0,pabloArcade=null,pabloFrameId=0,pabloLastTime=0,pabloKeys={left:false,right:false};
 let explorerFrameId=0,explorerLastTime=0,explorerHero={x:130,y:265},explorerTarget={x:130,y:265},explorerEnemies=[],explorerTowers=[],explorerShots=[],explorerPlaceMode=false,explorerNextTowerId=1;
 
-let explorerCoins=50,explorerHeroId="warrior",explorerHeroChosen=false,explorerHeroData=null,explorerSelectedWorld=0;
+let explorerCoins=50,explorerHeroId="warrior",explorerHeroChosen=false,explorerHeroData=null,explorerSelectedWorld=0,explorerUnlockedTowers=["arrow","magic"];
 let explorerHeroHp=0,explorerHeroMaxHp=0,explorerHeroCooldown=0,explorerSpecialCooldown=0,explorerSpecialTime=0;
 let explorerHeroLevel=1,explorerSelectedTowerType="arrow",explorerSelectedTowerId=null,explorerTotalKills=0,explorerHighestWave=0;
 let explorerUnlockedHeroes=["warrior","archer","knight"],explorerDailyClaimed="";
@@ -270,9 +271,9 @@ const EXPLORER_HEROES=[
 const EXPLORER_TOWERS={
  arrow:{name:"Boogtoren",icon:"🏹",cost:20,damage:12,range:190,cooldown:.72,colour:"#d9aa54",desc:"Snelle pijlen tegen één vijand."},
  magic:{name:"Magische toren",icon:"🔮",cost:35,damage:17,range:175,cooldown:1.05,colour:"#a77bea",desc:"Magie raakt ook vijanden in de buurt."},
- cannon:{name:"Kanontoren",icon:"💣",cost:45,damage:30,range:155,cooldown:1.55,colour:"#727b89",desc:"Langzaam, maar veel schade en explosies."},
- ice:{name:"IJstoren",icon:"❄️",cost:32,damage:7,range:185,cooldown:.85,colour:"#70cde5",desc:"Vertraagt vijanden met ijsschoten."},
- poison:{name:"Gif-toren",icon:"☠️",cost:38,damage:8,range:170,cooldown:.9,colour:"#7ec35c",desc:"Vergiftigt vijanden na een treffer."}
+ cannon:{name:"Kanontoren",icon:"💣",cost:45,unlockCost:85,damage:30,range:155,cooldown:1.55,colour:"#727b89",desc:"Langzaam, maar veel schade en explosies."},
+ ice:{name:"IJstoren",icon:"❄️",cost:32,unlockCost:65,damage:7,range:185,cooldown:.85,colour:"#70cde5",desc:"Vertraagt vijanden met ijsschoten."},
+ poison:{name:"Gif-toren",icon:"☠️",cost:38,unlockCost:75,damage:8,range:170,cooldown:.9,colour:"#7ec35c",desc:"Vergiftigt vijanden na een treffer."}
 };
 const EXPLORER_WORLDS=[
  {name:"Betoverd bos",icon:"🌳",sky:"#b6e68b",ground:"#4d9147",path:"#bca77a",accent:"#d7ed9e",enemy:"#794cc1"},
@@ -287,6 +288,7 @@ function loadExplorerMeta(){
   if(saved){
    explorerCoins=Math.max(0,Number(saved.coins)||0);gems=Math.max(0,Number(saved.gems)||0);
    explorerUnlockedHeroes=Array.isArray(saved.heroes)?saved.heroes:["warrior","archer","knight"];
+   explorerUnlockedTowers=Array.isArray(saved.towers)?saved.towers:["arrow","magic"];
    explorerTotalKills=Math.max(0,Number(saved.kills)||0);
    explorerHighestWave=Math.max(0,Number(saved.highestWave)||0);
    explorerDailyClaimed=String(saved.daily||"");
@@ -294,7 +296,7 @@ function loadExplorerMeta(){
  }catch(_){}
 }
 function saveExplorerMeta(){
- try{localStorage.setItem(EXPLORER_STORE,JSON.stringify({coins:explorerCoins,gems,heroes:explorerUnlockedHeroes,kills:explorerTotalKills,highestWave:explorerHighestWave,daily:explorerDailyClaimed}));}catch(_){}
+ try{localStorage.setItem(EXPLORER_STORE,JSON.stringify({coins:explorerCoins,gems,heroes:explorerUnlockedHeroes,towers:explorerUnlockedTowers,kills:explorerTotalKills,highestWave:explorerHighestWave,daily:explorerDailyClaimed}));}catch(_){}
 }
 loadExplorerMeta();
 function activeExplorerWorld(){return EXPLORER_WORLDS[Math.min(4,Math.floor(waves/2))];}
@@ -345,7 +347,7 @@ function explorerChooseHero(id){
 }
 function explorerPlaceTower(x,y,type){
  const cfg=EXPLORER_TOWERS[type||explorerSelectedTowerType];
- if(!cfg||explorerCoins<cfg.cost||explorerTowers.length>=10)return false;
+ if(!cfg||!explorerUnlockedTowers.includes(type||explorerSelectedTowerType)||explorerCoins<cfg.cost||explorerTowers.length>=10)return false;
  explorerCoins-=cfg.cost;explorerPlaceMode=false;explorerSelectedTowerId=null;
  explorerTowers.push({id:explorerNextTowerId++,type:type||explorerSelectedTowerType,x,y,level:1,cooldown:.15,range:cfg.range});
  saveExplorerMeta();feedback=cfg.name+" geplaatst! De toren valt automatisch vijanden aan.";
@@ -1174,10 +1176,11 @@ function renderBoard(){
    '<p id="explorerStatus" class="mini-hint">Golf '+(waves+1)+' · Edelstenen '+gems+' · Torens '+explorerTowers.length+' · Verplaats de held met de kaart of pijltjes.</p>'+
    '<div class="arcade-controls explorer-move-controls"><button class="btn light" data-explorer-move="left">←</button><button class="btn light" data-explorer-move="up">↑</button><button class="btn light" data-explorer-move="down">↓</button><button class="btn light" data-explorer-move="right">→</button></div>'+
    '<div class="explore-regions"><strong>Ontdekte gebieden</strong><div class="explore-tiles">'+areas+'</div></div>'+
-   '<div class="tower-shop"><strong>🏰 Kies een toren</strong><div class="tower-shop-grid">'+Object.entries(EXPLORER_TOWERS).map(([id,t])=>'<button class="tower-buy '+(explorerSelectedTowerType===id?'chosen':'')+'" data-tower-type="'+id+'" '+(explorerCoins<t.cost||explorerTowers.length>=10?'disabled':'')+'><b>'+t.icon+' '+t.name+'</b><small>'+t.damage+' schade · '+t.range+' bereik</small><em>'+t.cost+' 🪙</em></button>').join("")+'</div></div>'+
+   '<div class="tower-shop"><strong>🏰 Kies een toren</strong><div class="tower-shop-grid">'+Object.entries(EXPLORER_TOWERS).map(([id,t])=>{const unlocked=explorerUnlockedTowers.includes(id);return '<button class="tower-buy '+(explorerSelectedTowerType===id?'chosen':'')+(unlocked?'':' tower-locked')+'" data-tower-type="'+id+'"><b>'+t.icon+' '+t.name+'</b><small>'+t.damage+' schade · '+t.range+' bereik</small><em>'+(unlocked?'Bouwen · '+t.cost+' 🪙':'🔒 Ontgrendel · '+t.unlockCost+' 🪙')+'</em></button>';}).join("")+'</div></div>'+
    '<div class="explore-actions">'+
    '<button id="exploreRegion" class="btn light" type="button" '+(exploredThisWave?'disabled':'')+'>🧭 Verken gebied · +8 💎</button>'+
-   '<button id="buildTower" class="btn gold" type="button" '+(explorerCoins<EXPLORER_TOWERS[explorerSelectedTowerType].cost||explorerTowers.length>=10?'disabled':'')+'>'+ (explorerPlaceMode?"Klik op het veld…":EXPLORER_TOWERS[explorerSelectedTowerType].icon+" Plaats "+EXPLORER_TOWERS[explorerSelectedTowerType].name)+'</button>'+
+   '<button id="unlockTower" class="btn light" type="button" '+(explorerUnlockedTowers.includes(explorerSelectedTowerType)||explorerCoins<(EXPLORER_TOWERS[explorerSelectedTowerType].unlockCost||0)?'disabled':'')+'>🔓 Ontgrendel '+EXPLORER_TOWERS[explorerSelectedTowerType].name+' · '+(EXPLORER_TOWERS[explorerSelectedTowerType].unlockCost||0)+' 🪙</button>'+
+   '<button id="buildTower" class="btn gold" type="button" '+(!explorerUnlockedTowers.includes(explorerSelectedTowerType)||explorerCoins<EXPLORER_TOWERS[explorerSelectedTowerType].cost||explorerTowers.length>=10?'disabled':'')+'>'+ (explorerPlaceMode?"Klik op het veld…":EXPLORER_TOWERS[explorerSelectedTowerType].icon+" Plaats "+EXPLORER_TOWERS[explorerSelectedTowerType].name)+'</button>'+
    '<button id="upgradeHero" class="btn light" type="button" '+(explorerCoins<35*explorerHeroLevel||explorerHeroLevel>=5?'disabled':'')+'>⬆️ Verbeter held · '+(35*explorerHeroLevel)+' 🪙</button>'+
    '<button id="explorerSpecial" class="btn special" type="button" '+(explorerSpecialCooldown>0?'disabled':'')+'>'+explorerHeroData.icon+' '+explorerHeroData.special+' '+(explorerSpecialCooldown>0?"("+Math.ceil(explorerSpecialCooldown)+"s)":"!")+'</button>'+
    '</div>'+
@@ -1470,6 +1473,11 @@ $("gameBody").addEventListener("click",e=>{
  if(e.target.closest("#startExplorerAdventure")&&game==="explorer"&&!explorerHeroChosen){explorerChooseHero(explorerHeroId);return;}
  const towerChoice=e.target.closest("[data-tower-type]");
  if(towerChoice&&game==="explorer"&&explorerHeroChosen){explorerSelectedTowerType=towerChoice.dataset.towerType;renderGame();return;}
+ if(e.target.closest("#unlockTower")&&game==="explorer"&&explorerHeroChosen){
+  const cfg=EXPLORER_TOWERS[explorerSelectedTowerType],cost=cfg.unlockCost||0;
+  if(!explorerUnlockedTowers.includes(explorerSelectedTowerType)&&explorerCoins>=cost){explorerCoins-=cost;explorerUnlockedTowers.push(explorerSelectedTowerType);saveExplorerMeta();feedback=cfg.name+" vrijgespeeld!";renderGame();}
+  return;
+ }
  if(e.target.closest("#explorerSpecial")&&game==="explorer"){explorerCastSpecial();renderGame();return;}
  if(e.target.closest("#upgradeSelectedTower")&&game==="explorer"){explorerUpgradeTower();renderGame();return;}
  const explorerCanvas=e.target.closest("#explorerCanvas");
