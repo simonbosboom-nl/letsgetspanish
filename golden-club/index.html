@@ -160,6 +160,24 @@ h1{font-size:clamp(29px,6vw,47px);line-height:1.06;letter-spacing:-.04em;margin:
 @keyframes frogHop{0%{transform:translateY(10px) scale(.82)}65%{transform:translateY(-11px) scale(1.08)}100%{transform:translateY(0) scale(1)}}@keyframes obstacleDrift{from{transform:translateY(0)}to{transform:translateY(-5px)}}@keyframes roadRoll{from{background-position:0 0}to{background-position:-53px 0}}@keyframes carBounce{from{transform:translateY(0)}to{transform:translateY(-2px)}}@keyframes blobWiggle{from{transform:translateY(-50%) rotate(-8deg)}to{transform:translateY(calc(-50% - 3px)) rotate(8deg)}}@keyframes blobTravel{from{margin-left:0}to{margin-left:-150px}}@keyframes towerShot{0%{right:20%;opacity:0}15%{opacity:1}100%{right:83%;opacity:0}}@keyframes cloudFloat{from{transform:translateX(-5px)}to{transform:translateX(8px)}}@keyframes heroRun{from{transform:translateY(0)}to{transform:translateY(-4px)}}@keyframes starShine{from{transform:scale(.92) rotate(-7deg)}to{transform:scale(1.12) rotate(7deg)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 .languages{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+
+.explorer-select{padding:18px;border-radius:22px;border:2px solid #92b95f;background:linear-gradient(145deg,#e2f2c8,#b5d891);color:#24452a;box-shadow:0 12px 28px #345c2920}
+.explorer-select-head{text-align:center;padding:10px 4px 15px}.explorer-select-head h2{font-size:clamp(25px,4vw,34px);margin:6px 0}.explorer-select-head p{max-width:700px;margin:0 auto;color:#42633d;line-height:1.5}
+.explorer-wallet{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:6px 0 15px}.explorer-wallet span{background:#fff9dd;border:1px solid #d9c16d;color:#624b16;padding:8px 12px;border-radius:99px;font-weight:900}
+.hero-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.hero-choice{display:flex;align-items:center;flex-direction:column;gap:5px;padding:12px 8px;border-radius:16px;border:2px solid #bad3a0;background:#ffffffdf;color:#2d4930;min-width:0}
+.hero-choice.selected{border-color:#d4a42c;box-shadow:0 0 0 3px #f1d87866;background:#fff9df}
+.hero-choice:disabled{opacity:.75;cursor:not-allowed}.hero-avatar{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:var(--hero-colour);box-shadow:inset 0 -5px 0 #0002,0 4px 7px #0002;font-size:29px}
+.hero-choice strong{font-size:15px}.hero-role{font-size:12px;color:#657963}.hero-choice small{font-size:11px;text-align:center}.hero-choice em{font-size:12px;font-weight:950;color:#876111;font-style:normal}
+.unlock-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:13px 0}.world-unlocks,.explorer-achievements{padding:12px;border-radius:14px;background:#ffffffa8;margin-top:10px;color:#36552f;display:grid;gap:8px}
+.world-unlocks>div{display:flex;gap:6px;flex-wrap:wrap}.world-chip{font-size:12px;padding:6px 9px;border-radius:99px;font-weight:850}.world-chip.unlocked{background:#e0f2c9;color:#315f2a}.world-chip.locked{background:#e8e4de;color:#777}
+.explorer-achievements{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}.explorer-achievements strong{width:100%}
+.tower-shop{padding:10px;background:#f0f6e0;border:1px solid #c5dba5;border-radius:14px;margin:10px 0;color:#35552e}.tower-shop-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:9px}
+.tower-buy{display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;min-height:78px;padding:8px 5px;border:1px solid #bad49b;border-radius:11px;background:#fff;color:#31552a;font-size:12px;text-align:center}
+.tower-buy.chosen{border:2px solid #c39125;background:#fff5d4}.tower-buy:disabled{opacity:.45}.tower-buy small{font-size:10px;color:#65775d}.tower-buy em{font-style:normal;font-weight:950;color:#926313}
+.selected-tower-panel{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;background:#fff9e5;border:1px solid #e0c879;border-radius:12px;color:#6b551b;font-size:13px;font-weight:850;margin-top:9px}
+.btn.special{background:linear-gradient(135deg,#593d99,#9060c7);color:white;border-color:#593d99}
+
 </style>
 </head>
 <body>
@@ -232,6 +250,148 @@ let flashDeck=[],flashIndex=0,flashRevealed=false,drawIndex=0,drawingState=null,
 const strokeDataCache={};
 let frogArcade=null,frogFrameId=0,pabloArcade=null,pabloFrameId=0,pabloLastTime=0,pabloKeys={left:false,right:false};
 let explorerFrameId=0,explorerLastTime=0,explorerHero={x:130,y:265},explorerTarget={x:130,y:265},explorerEnemies=[],explorerTowers=[],explorerShots=[],explorerPlaceMode=false,explorerNextTowerId=1;
+
+let explorerCoins=50,explorerHeroId="warrior",explorerHeroChosen=false,explorerHeroData=null;
+let explorerHeroHp=0,explorerHeroMaxHp=0,explorerHeroCooldown=0,explorerSpecialCooldown=0,explorerSpecialTime=0;
+let explorerHeroLevel=1,explorerSelectedTowerType="arrow",explorerSelectedTowerId=null,explorerTotalKills=0,explorerHighestWave=0;
+let explorerUnlockedHeroes=["warrior","archer","knight"],explorerDailyClaimed="";
+let explorerEffects=[],explorerWorldIndex=0,explorerBossDefeated=0;
+const EXPLORER_STORE="goldenExplorerProgressV2";
+const EXPLORER_HEROES=[
+ {id:"warrior",name:"Krijger",icon:"⚔️",role:"Van dichtbij",color:"#d75a45",cost:0,hp:150,damage:18,range:105,speed:175,cooldown:.8,special:"Zware slag",specialText:"Raakt alle blobs dichtbij.",specialCooldown:9},
+ {id:"archer",name:"Boogschutter",icon:"🏹",role:"Lange afstand",color:"#399b65",cost:0,hp:95,damage:15,range:260,speed:180,cooldown:.68,special:"Pijlenregen",specialText:"Schiet drie sterke pijlen op de dichtstbijzijnde blobs.",specialCooldown:8},
+ {id:"knight",name:"Ridder",icon:"🛡️",role:"Verdediger",color:"#7389b7",cost:0,hp:190,damage:11,range:115,speed:145,cooldown:1.0,special:"Schildmuur",specialText:"Herstelt levens en beschermt tijdelijk tegen schade.",specialCooldown:12},
+ {id:"mage",name:"Magiër",icon:"🧙",role:"Magische schade",color:"#9060c7",cost:80,hp:100,damage:22,range:225,speed:150,cooldown:1.05,special:"Sterrenexplosie",specialText:"Een magische explosie raakt een groep vijanden.",specialCooldown:10},
+ {id:"ninja",name:"Ninja",icon:"⚡",role:"Supersnel",color:"#48556e",cost:100,hp:105,damage:14,range:130,speed:270,cooldown:.48,special:"Bliksemsprong",specialText:"Stormt vooruit en raakt vijanden op zijn route.",specialCooldown:8},
+ {id:"ranger",name:"Ranger",icon:"🌿",role:"Natuurkracht",color:"#5d9a49",cost:120,hp:125,damage:13,range:205,speed:195,cooldown:.78,special:"Natuurzegen",specialText:"Geneest de held en vergiftigt nabije vijanden.",specialCooldown:11}
+];
+const EXPLORER_TOWERS={
+ arrow:{name:"Boogtoren",icon:"🏹",cost:20,damage:12,range:190,cooldown:.72,colour:"#d9aa54",desc:"Snelle pijlen tegen één vijand."},
+ magic:{name:"Magische toren",icon:"🔮",cost:35,damage:17,range:175,cooldown:1.05,colour:"#a77bea",desc:"Magie raakt ook vijanden in de buurt."},
+ cannon:{name:"Kanontoren",icon:"💣",cost:45,damage:30,range:155,cooldown:1.55,colour:"#727b89",desc:"Langzaam, maar veel schade en explosies."},
+ ice:{name:"IJstoren",icon:"❄️",cost:32,damage:7,range:185,cooldown:.85,colour:"#70cde5",desc:"Vertraagt vijanden met ijsschoten."},
+ poison:{name:"Gif-toren",icon:"☠️",cost:38,damage:8,range:170,cooldown:.9,colour:"#7ec35c",desc:"Vergiftigt vijanden na een treffer."}
+};
+const EXPLORER_WORLDS=[
+ {name:"Betoverd bos",icon:"🌳",sky:"#b6e68b",ground:"#4d9147",path:"#bca77a",accent:"#d7ed9e",enemy:"#794cc1"},
+ {name:"Zandwoestijn",icon:"🏜️",sky:"#f6d18b",ground:"#c99042",path:"#e8c78b",accent:"#f9e2a8",enemy:"#c66b36"},
+ {name:"IJswereld",icon:"❄️",sky:"#bcecff",ground:"#71b5c8",path:"#d4e6eb",accent:"#e8fbff",enemy:"#5688c7"},
+ {name:"Vulkanisch gebied",icon:"🌋",sky:"#e9a17c",ground:"#734a42",path:"#b56b49",accent:"#f3b45b",enemy:"#9a4a9c"},
+ {name:"Donker kasteel",icon:"🏰",sky:"#77718f",ground:"#48475e",path:"#9b92a0",accent:"#d5c3e8",enemy:"#5940a8"}
+];
+function loadExplorerMeta(){
+ try{
+  const saved=JSON.parse(localStorage.getItem(EXPLORER_STORE)||"null");
+  if(saved){
+   explorerCoins=Math.max(0,Number(saved.coins)||0);gems=Math.max(0,Number(saved.gems)||0);
+   explorerUnlockedHeroes=Array.isArray(saved.heroes)?saved.heroes:["warrior","archer","knight"];
+   explorerTotalKills=Math.max(0,Number(saved.kills)||0);
+   explorerHighestWave=Math.max(0,Number(saved.highestWave)||0);
+   explorerDailyClaimed=String(saved.daily||"");
+  }
+ }catch(_){}
+}
+function saveExplorerMeta(){
+ try{localStorage.setItem(EXPLORER_STORE,JSON.stringify({coins:explorerCoins,gems,heroes:explorerUnlockedHeroes,kills:explorerTotalKills,highestWave:explorerHighestWave,daily:explorerDailyClaimed}));}catch(_){}
+}
+loadExplorerMeta();
+function activeExplorerWorld(){return EXPLORER_WORLDS[Math.min(4,Math.floor(waves/2))];}
+function explorerHeroById(id){return EXPLORER_HEROES.find(h=>h.id===id)||EXPLORER_HEROES[0];}
+function explorerAwardKill(e){
+ if(e.deadRewarded)return;
+ e.deadRewarded=true;e.hp=0;explorerCoins+=e.kind==="boss"?35:e.kind==="tank"?12:e.kind==="flyer"?9:6;gems+=e.kind==="boss"?12:2;explorerTotalKills++;
+ if(e.kind==="boss")explorerBossDefeated++;
+ saveExplorerMeta();
+}
+function explorerDamageEnemy(e,damage,effectType){
+ if(!e||e.hp<=0)return;
+ e.hp-=damage;e.hitFlash=.14;
+ if(effectType==="ice")e.slowTime=Math.max(e.slowTime||0,2.5);
+ if(effectType==="poison"){e.poisonTime=Math.max(e.poisonTime||0,4);e.poisonDamage=Math.max(e.poisonDamage||0,3);}
+ if(e.hp<=0)explorerAwardKill(e);
+}
+function renderExplorerHeroSelect(){
+ const world=EXPLORER_WORLDS[Math.min(4,Math.floor(explorerHighestWave/2))];
+ const today=new Date().toISOString().slice(0,10),dailyReady=explorerDailyClaimed!==today;
+ const heroes=EXPLORER_HEROES.map(h=>{
+  const unlocked=explorerUnlockedHeroes.includes(h.id),selected=explorerHeroId===h.id;
+  return '<button class="hero-choice '+(selected?"selected":"")+'" data-explorer-hero="'+h.id+'" '+(!unlocked?'disabled':'')+'>'+
+   '<span class="hero-avatar" style="--hero-colour:'+h.color+'">'+h.icon+'</span><strong>'+h.name+'</strong><span class="hero-role">'+h.role+'</span>'+
+   '<small>❤️ '+h.hp+' · ⚔️ '+h.damage+' · Bereik '+h.range+'</small>'+
+   (unlocked?'<em>'+(selected?"Geselecteerd":"Kies held")+'</em>':'<em>🔒 '+h.cost+' 🪙</em>')+'</button>';
+ }).join("");
+ const worlds=EXPLORER_WORLDS.map((w,i)=>{
+  const unlocked=explorerHighestWave>=i*2;
+  return '<span class="world-chip '+(unlocked?"unlocked":"locked")+'">'+w.icon+' '+w.name+(unlocked?"":" · 🔒")+'</span>';
+ }).join("");
+ return '<div class="explorer-select"><div class="explorer-select-head"><span class="eyebrow">🗺️ AVONTUUR · BOSRĲK</span><h2>Kies je held</h2><p>Elke held heeft eigen levens, aanvalskracht, snelheid en een speciale vaardigheid. Versla de blobs en bescherm het kasteel.</p></div>'+
+  '<div class="explorer-wallet"><span>🪙 '+explorerCoins+' munten</span><span>💎 '+gems+' edelstenen</span><span>🏆 Beste golf: '+explorerHighestWave+'</span></div>'+
+  '<div class="hero-choice-grid">'+heroes+'</div>'+
+  '<div class="unlock-row"><button class="btn light" id="unlockHero" type="button">🔓 Ontgrendel gekozen held</button><button class="btn gold" id="claimExplorerDaily" type="button" '+(dailyReady?"":"disabled")+'>'+(dailyReady?"🎁 Dagelijkse beloning":"✓ Dagelijkse beloning opgehaald")+'</button></div>'+
+  '<div class="world-unlocks"><strong>Werelden</strong><div>'+worlds+'</div></div>'+
+  '<div class="explorer-achievements"><strong>Prestaties</strong><span>👾 '+explorerTotalKills+' blobs verslagen</span><span>👑 '+explorerBossDefeated+' bazen verslagen</span><span>🌍 '+Math.min(5,1+Math.floor(explorerHighestWave/2))+'/5 werelden ontdekt</span></div>'+
+  '<div class="action-row"><button class="btn gold" id="startExplorerAdventure" type="button">🌲 Begin avontuur met '+explorerHeroById(explorerHeroId).name+' →</button></div></div>';
+}
+function explorerChooseHero(id){
+ if(!explorerUnlockedHeroes.includes(id))return false;
+ explorerHeroId=id;explorerHeroData=explorerHeroById(id);explorerHeroLevel=1;heroLevel=1;
+ explorerHeroMaxHp=explorerHeroData.hp;explorerHeroHp=explorerHeroMaxHp;
+ explorerHeroCooldown=0;explorerSpecialCooldown=0;explorerSpecialTime=0;
+ explorerHero={x:130,y:265};explorerTarget={x:130,y:265};explorerHeroChosen=true;
+ explorerTowers=[];explorerShots=[];explorerPlaceMode=false;explorerSelectedTowerId=null;
+ makeQuestion();spawnExplorerWave();renderGame();return true;
+}
+function explorerPlaceTower(x,y,type){
+ const cfg=EXPLORER_TOWERS[type||explorerSelectedTowerType];
+ if(!cfg||explorerCoins<cfg.cost||explorerTowers.length>=10)return false;
+ explorerCoins-=cfg.cost;explorerPlaceMode=false;explorerSelectedTowerId=null;
+ explorerTowers.push({id:explorerNextTowerId++,type:type||explorerSelectedTowerType,x,y,level:1,cooldown:.15,range:cfg.range});
+ saveExplorerMeta();feedback=cfg.name+" geplaatst! De toren valt automatisch vijanden aan.";
+ return true;
+}
+function explorerUpgradeTower(){
+ const tower=explorerTowers.find(t=>t.id===explorerSelectedTowerId);
+ if(!tower||tower.level>=4)return false;
+ const cost=25*tower.level;
+ if(explorerCoins<cost)return false;
+ explorerCoins-=cost;tower.level++;tower.range+=15;tower.damageBonus=(tower.damageBonus||0)+5;saveExplorerMeta();
+ feedback=EXPLORER_TOWERS[tower.type].name+" verbeterd naar level "+tower.level+"!";return true;
+}
+function explorerUpgradeHero(){
+ const cost=35*explorerHeroLevel;
+ if(explorerCoins<cost||explorerHeroLevel>=5)return false;
+ explorerCoins-=cost;explorerHeroLevel++;heroLevel=explorerHeroLevel;
+ explorerHeroMaxHp+=15;explorerHeroHp=Math.min(explorerHeroMaxHp,explorerHeroHp+25);
+ explorerHeroData={...explorerHeroData,damage:explorerHeroData.damage+4,range:explorerHeroData.range+8};
+ saveExplorerMeta();feedback=explorerHeroData.name+" is nu level "+explorerHeroLevel+"!";return true;
+}
+function explorerCastSpecial(){
+ if(!explorerHeroData||explorerSpecialCooldown>0||ended)return;
+ const hero=explorerHeroData,near=explorerEnemies.filter(e=>e.hp>0&&explorerDistance(explorerHero,e)<150);
+ if(hero.id==="warrior"){
+  near.forEach(e=>explorerDamageEnemy(e,hero.damage*2,"hero"));
+  explorerEffects.push({x:explorerHero.x,y:explorerHero.y,life:.45,type:"slash",radius:120});
+ }else if(hero.id==="archer"){
+  near.sort((a,b)=>explorerDistance(explorerHero,a)-explorerDistance(explorerHero,b)).slice(0,3).forEach(e=>explorerDamageEnemy(e,hero.damage*2,"hero"));
+ }else if(hero.id==="mage"){
+  near.forEach(e=>explorerDamageEnemy(e,hero.damage*1.8,"magic"));
+  explorerEffects.push({x:explorerHero.x,y:explorerHero.y,life:.7,type:"magic",radius:160});
+ }else if(hero.id==="knight"){
+  explorerHeroHp=Math.min(explorerHeroMaxHp,explorerHeroHp+55);explorerSpecialTime=5;
+  explorerEffects.push({x:explorerHero.x,y:explorerHero.y,life:.8,type:"shield",radius:55});
+ }else if(hero.id==="ninja"){
+  const target=near.sort((a,b)=>explorerDistance(explorerHero,a)-explorerDistance(explorerHero,b)).slice(0,5);
+  target.forEach(e=>explorerDamageEnemy(e,hero.damage*1.65,"hero"));
+  explorerHero.x=Math.min(840,explorerHero.x+75);explorerTarget={x:explorerHero.x,y:explorerHero.y};
+  explorerEffects.push({x:explorerHero.x,y:explorerHero.y,life:.5,type:"slash",radius:80});
+ }else{
+  explorerHeroHp=Math.min(explorerHeroMaxHp,explorerHeroHp+35);
+  near.forEach(e=>explorerDamageEnemy(e,hero.damage,"poison"));
+  explorerEffects.push({x:explorerHero.x,y:explorerHero.y,life:.8,type:"nature",radius:140});
+ }
+ explorerSpecialCooldown=hero.specialCooldown;feedback=hero.special+" gebruikt!";saveExplorerMeta();
+}
+
 const shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
 const norm=s=>String(s||"").trim().toLocaleLowerCase();
 function promptOf(p){return direction==="toDutch"?p[0]:p[1]}
@@ -741,13 +901,16 @@ function explorerRoutePosition(progress){
          y:u*u*u*s[0][1]+3*u*u*t*s[1][1]+3*u*t*t*s[2][1]+t*t*t*s[3][1]};
 }
 function spawnExplorerWave(){
- const count=Math.min(10,3+waves);
+ const count=Math.min(12,4+waves);
  explorerEnemies=[];
  for(let i=0;i<count;i++){
-  const progress=-i*.09,point=explorerRoutePosition(0);
-  explorerEnemies.push({progress,x:930+i*24,y:point.y,hp:1+Math.floor(waves/3),maxHp:1+Math.floor(waves/3),speed:22+waves*1.5+(i%3)*4,r:15+(i%2)*2,phase:i*.7,attackCooldown:0});
+  const kind=(waves>0&&(waves+1)%4===0&&i===count-1)?"boss":(waves>=2&&i%6===5)?"tank":(waves>=1&&i%4===2)?"flyer":(i%3===1)?"fast":"blob";
+  const stats={blob:{hp:26,speed:43,r:16},fast:{hp:17,speed:76,r:13},tank:{hp:95,speed:22,r:25},flyer:{hp:28,speed:61,r:15},boss:{hp:220,speed:17,r:34}}[kind];
+  const scale=1+waves*.21;
+  const progress=-i*.078,point=explorerRoutePosition(0);
+  explorerEnemies.push({kind,progress,x:930+i*25,y:point.y,hp:Math.round(stats.hp*scale),maxHp:Math.round(stats.hp*scale),speed:stats.speed*(1+waves*.035),r:stats.r*(kind==="boss"?1+waves*.03:1),phase:i*.7,attackCooldown:0,slowTime:0,poisonTime:0,poisonDamage:0,hitFlash:0});
  }
- explorerShots=[];
+ explorerShots=[];explorerEffects=[];
 }
 function startExplorerGame(){
  explorerLastTime=0;explorerHero={x:130,y:265};explorerTarget={x:130,y:265};
@@ -756,35 +919,76 @@ function startExplorerGame(){
 }
 function explorerDistance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
 function drawBlob(ctx,e,now){
- const wobble=Math.sin(now/120+e.phase)*3;
- ctx.save();ctx.translate(e.x,e.y+wobble);
- ctx.fillStyle="#794cc1";ctx.strokeStyle="#482781";ctx.lineWidth=3;
- ctx.beginPath();ctx.moveTo(-e.r,-2);ctx.quadraticCurveTo(-e.r-5,-e.r,0,-e.r-3);ctx.quadraticCurveTo(e.r+7,-e.r, e.r,2);ctx.quadraticCurveTo(e.r+2,e.r+7,0,e.r);ctx.quadraticCurveTo(-e.r-4,e.r+6,-e.r,-2);ctx.fill();ctx.stroke();
- ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(-5,-3,4,5,0,0,Math.PI*2);ctx.ellipse(5,-3,4,5,0,0,Math.PI*2);ctx.fill();
- ctx.fillStyle="#20182f";ctx.beginPath();ctx.arc(-4,-2,1.7,0,Math.PI*2);ctx.arc(6,-2,1.7,0,Math.PI*2);ctx.fill();
- ctx.fillStyle="#4a263c";ctx.fillRect(-e.r,-e.r-10,e.r*2,4);
- ctx.fillStyle="#ed5a57";ctx.fillRect(-e.r,-e.r-10,e.r*2*(e.hp/e.maxHp),4);
+ const bob=Math.sin(now/125+e.phase)*3,kind=e.kind||"blob";
+ ctx.save();ctx.translate(e.x,e.y+bob-(kind==="flyer"?13+Math.sin(now/190+e.phase)*5:0));
+ const colour=kind==="boss"?"#6c2c91":kind==="tank"?"#b35e3d":kind==="fast"?"#e16b89":kind==="flyer"?"#4b8fc1":"#794cc1";
+ ctx.fillStyle=colour;ctx.strokeStyle="#38264d";ctx.lineWidth=3;
+ if(kind==="flyer"){
+  ctx.fillStyle="#8ed8ef";ctx.beginPath();ctx.ellipse(-e.r,-3,e.r*.8,e.r*.45,-.45,0,Math.PI*2);ctx.ellipse(e.r,-3,e.r*.8,e.r*.45,.45,0,Math.PI*2);ctx.fill();
+ }
+ ctx.beginPath();
+ if(kind==="boss"){ctx.arc(0,0,e.r,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle="#e7b654";ctx.beginPath();ctx.moveTo(-e.r*.8,-e.r*.45);ctx.lineTo(-e.r*.55,-e.r*1.2);ctx.lineTo(-e.r*.1,-e.r*.55);ctx.lineTo(e.r*.4,-e.r*1.15);ctx.lineTo(e.r*.7,-e.r*.35);ctx.closePath();ctx.fill();}
+ else if(kind==="tank"){ctx.roundRect(-e.r,-e.r*.7,e.r*2,e.r*1.55,9);ctx.fill();ctx.stroke();ctx.fillStyle="#d6a15c";ctx.fillRect(-e.r*.8,-e.r*.95,e.r*1.6,5);}
+ else{ctx.moveTo(-e.r,-2);ctx.quadraticCurveTo(-e.r-5,-e.r,0,-e.r-3);ctx.quadraticCurveTo(e.r+7,-e.r,e.r,2);ctx.quadraticCurveTo(e.r+2,e.r+7,0,e.r);ctx.quadraticCurveTo(-e.r-4,e.r+6,-e.r,-2);ctx.fill();ctx.stroke();}
+ if(kind==="fast"){ctx.fillStyle="#f7dc67";ctx.beginPath();ctx.moveTo(-e.r,-3);ctx.lineTo(-e.r-11,-e.r);ctx.lineTo(-e.r-6,3);ctx.fill();}
+ ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(-e.r*.3,-3,e.r*.22,e.r*.3,0,0,Math.PI*2);ctx.ellipse(e.r*.3,-3,e.r*.22,e.r*.3,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#20182f";ctx.beginPath();ctx.arc(-e.r*.27,-2,e.r*.09,0,Math.PI*2);ctx.arc(e.r*.33,-2,e.r*.09,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle="#472a4c";ctx.fillRect(-e.r,-e.r-11,e.r*2,5);ctx.fillStyle="#ed5a57";ctx.fillRect(-e.r,-e.r-11,e.r*2*Math.max(0,e.hp/e.maxHp),5);
+ if(e.poisonTime>0){ctx.fillStyle="#9fe36b";ctx.beginPath();ctx.arc(e.r*.8,-e.r*.75,4,0,Math.PI*2);ctx.fill();}
+ if(e.slowTime>0){ctx.strokeStyle="#7ee8ff";ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,e.r+5,0,Math.PI*2);ctx.stroke();}
+ if(e.hitFlash>0){ctx.fillStyle="#fff9";ctx.beginPath();ctx.arc(0,0,e.r,0,Math.PI*2);ctx.fill();}
  ctx.restore();
 }
 function drawExplorerHero(ctx,x,y,level,now){
- ctx.save();ctx.translate(x,y);
- ctx.fillStyle="#3f6c9e";ctx.beginPath();ctx.roundRect(-12,-4,24,27,6);ctx.fill();
- ctx.fillStyle="#d9b78c";ctx.beginPath();ctx.arc(0,-13,11,0,Math.PI*2);ctx.fill();
- ctx.fillStyle="#543727";ctx.beginPath();ctx.arc(0,-18,11,Math.PI,Math.PI*2);ctx.fill();
- ctx.fillStyle="#fff";ctx.fillRect(-5,-14,3,3);ctx.fillRect(3,-14,3,3);
- ctx.strokeStyle="#d9dce4";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(9,2);ctx.lineTo(21,-13);ctx.stroke();
- ctx.fillStyle="#e2d9c8";ctx.beginPath();ctx.moveTo(21,-13);ctx.lineTo(26,-26);ctx.lineTo(16,-18);ctx.closePath();ctx.fill();
- ctx.fillStyle="#f0ca55";ctx.fillRect(-10,9,20,4);
- for(let i=0;i<level;i++){ctx.fillStyle="#f6d55f";ctx.beginPath();ctx.arc(-12+i*6,22,2,0,Math.PI*2);ctx.fill();}
+ const h=explorerHeroData||explorerHeroById(explorerHeroId),moving=explorerDistance(explorerHero,explorerTarget)>3,step=moving?Math.sin(now/65)*4:Math.sin(now/260)*1.5;
+ ctx.save();ctx.translate(x,y);ctx.fillStyle="#233b2a55";ctx.beginPath();ctx.ellipse(0,23,18,6,0,0,Math.PI*2);ctx.fill();
+ // Cape/backpack and boots
+ ctx.fillStyle=h.color;ctx.beginPath();ctx.moveTo(-9,-2);ctx.lineTo(-18,17+step);ctx.lineTo(-4,13);ctx.lineTo(7,20-step);ctx.lineTo(11,-2);ctx.closePath();ctx.fill();
+ ctx.fillStyle="#344050";ctx.beginPath();ctx.roundRect(-11,15+step,8,10,3);ctx.roundRect(3,15-step,8,10,3);ctx.fill();
+ // Armour/body silhouette
+ ctx.fillStyle=h.id==="mage"?"#563b91":h.id==="ninja"?"#303b50":h.id==="ranger"?"#467945":h.id==="archer"?"#8d6a3d":h.id==="knight"?"#7587ac":"#a44936";
+ ctx.beginPath();ctx.roundRect(-13,-5,26,24,7);ctx.fill();
+ ctx.fillStyle="#d8b48c";ctx.beginPath();ctx.arc(0,-15,11,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=h.id==="ninja"?"#252b3d":h.id==="mage"?"#3d276b": "#553a2c";
+ ctx.beginPath();if(h.id==="mage"){ctx.moveTo(-14,-16);ctx.lineTo(0,-36);ctx.lineTo(15,-16);ctx.closePath();}else{ctx.arc(0,-19,11,Math.PI,Math.PI*2);}ctx.fill();
+ ctx.fillStyle="#fff";ctx.fillRect(-5,-17,3,3);ctx.fillRect(3,-17,3,3);
+ // Individual weapons
+ ctx.lineWidth=4;ctx.lineCap="round";
+ if(h.id==="warrior"||h.id==="knight"){ctx.strokeStyle="#d5dce6";ctx.beginPath();ctx.moveTo(11,1);ctx.lineTo(23,-21);ctx.stroke();ctx.fillStyle="#e6eaf0";ctx.beginPath();ctx.moveTo(23,-21);ctx.lineTo(18,-9);ctx.lineTo(28,-17);ctx.closePath();ctx.fill();}
+ if(h.id==="archer"||h.id==="ranger"){ctx.strokeStyle="#96633a";ctx.beginPath();ctx.arc(18,-5,13,-1.3,1.3);ctx.stroke();ctx.strokeStyle="#e9e1c8";ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(22,-18);ctx.lineTo(22,8);ctx.stroke();}
+ if(h.id==="mage"){ctx.strokeStyle="#7652a5";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(15,10);ctx.lineTo(19,-30);ctx.stroke();ctx.fillStyle="#c7f2ff";ctx.shadowBlur=10;ctx.shadowColor="#85e3ff";ctx.beginPath();ctx.arc(19,-33,6,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;}
+ if(h.id==="ninja"){ctx.fillStyle="#dce6f4";ctx.beginPath();ctx.moveTo(15,-4);ctx.lineTo(28,-12);ctx.lineTo(20,-1);ctx.closePath();ctx.fill();}
+ if(explorerSpecialTime>0&&h.id==="knight"){ctx.strokeStyle="#94dfff";ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,31,0,Math.PI*2);ctx.stroke();}
+ ctx.fillStyle="#f5d66e";for(let i=0;i<level;i++){ctx.beginPath();ctx.arc(-10+i*5,23,2.2,0,Math.PI*2);ctx.fill();}
  ctx.restore();
 }
-function explorerPlaceTower(x,y){
- if(gems<20||explorerTowers.length>=8)return false;
- gems-=20;explorerPlaceMode=false;
- explorerTowers.push({id:explorerNextTowerId++,x,y,level:1,cooldown:.1,range:180});
- towerLevel=explorerTowers.length;
- feedback="🏹 Toren geplaatst! Hij valt automatisch blobs aan.";
- return true;
+function explorerPlaceTower(x,y,type){
+ const id=type||explorerSelectedTowerType,cfg=EXPLORER_TOWERS[id];
+ if(!cfg||explorerCoins<cfg.cost||explorerTowers.length>=10)return false;
+ explorerCoins-=cfg.cost;explorerPlaceMode=false;explorerSelectedTowerId=null;
+ explorerTowers.push({id:explorerNextTowerId++,type:id,x,y,level:1,cooldown:.15,range:cfg.range,damageBonus:0});
+ towerLevel=explorerTowers.length;saveExplorerMeta();feedback=cfg.name+" geplaatst!";return true;
+}
+function explorerUpgradeTower(){
+ const tower=explorerTowers.find(t=>t.id===explorerSelectedTowerId);
+ if(!tower||tower.level>=4)return false;const cost=25*tower.level;
+ if(explorerCoins<cost)return false;explorerCoins-=cost;tower.level++;tower.range+=15;tower.damageBonus=(tower.damageBonus||0)+5;saveExplorerMeta();feedback=EXPLORER_TOWERS[tower.type].name+" verbeterd naar level "+tower.level+"!";return true;
+}
+function explorerUpgradeHero(){
+ const cost=35*explorerHeroLevel;if(explorerCoins<cost||explorerHeroLevel>=5)return false;
+ explorerCoins-=cost;explorerHeroLevel++;heroLevel=explorerHeroLevel;explorerHeroMaxHp+=15;explorerHeroHp=Math.min(explorerHeroMaxHp,explorerHeroHp+25);
+ explorerHeroData.damage+=4;explorerHeroData.range+=8;saveExplorerMeta();feedback=explorerHeroData.name+" is nu level "+explorerHeroLevel+"!";return true;
+}
+function explorerCastSpecial(){
+ if(!explorerHeroData||explorerSpecialCooldown>0||ended)return;
+ const h=explorerHeroData,near=explorerEnemies.filter(e=>e.hp>0&&explorerDistance(explorerHero,e)<155);
+ if(h.id==="warrior"){near.forEach(e=>explorerDamageEnemy(e,h.damage*2,"hero"));explorerEffects.push({x:explorerHero.x,y:explorerHero.y,life:.45,type:"slash",radius:125});}
+ else if(h.id==="archer"){near.sort((a,b)=>explorerDistance(explorerHero,a)-explorerDistance(explorerHero,b)).slice(0,3).forEach(e=>explorerDamageEnemy(e,h.damage*2,"hero"));}
+ else if(h.id==="mage"){near.forEach(e=>explorerDamageEnemy(e,h.damage*1.8,"magic"));explorerEffects.push({x:explorerHero.x,y:explorerHero.y,life:.7,type:"magic",radius:165});}
+ else if(h.id==="knight"){explorerHeroHp=Math.min(explorerHeroMaxHp,explorerHeroHp+60);explorerSpecialTime=5;explorerEffects.push({x:explorerHero.x,y:explorerHero.y,life:.8,type:"shield",radius:58});}
+ else if(h.id==="ninja"){near.sort((a,b)=>explorerDistance(explorerHero,a)-explorerDistance(explorerHero,b)).slice(0,5).forEach(e=>explorerDamageEnemy(e,h.damage*1.65,"hero"));explorerHero.x=Math.min(840,explorerHero.x+80);explorerTarget={x:explorerHero.x,y:explorerHero.y};explorerEffects.push({x:explorerHero.x,y:explorerHero.y,life:.5,type:"slash",radius:85});}
+ else{explorerHeroHp=Math.min(explorerHeroMaxHp,explorerHeroHp+40);near.forEach(e=>explorerDamageEnemy(e,h.damage,"poison"));explorerEffects.push({x:explorerHero.x,y:explorerHero.y,life:.8,type:"nature",radius:145});}
+ explorerSpecialCooldown=h.specialCooldown;feedback=h.special+" gebruikt!";saveExplorerMeta();
 }
 function drawExplorerFrame(now){
  if(game!=="explorer")return;
@@ -794,11 +998,11 @@ function drawExplorerFrame(now){
  const ctx=canvas.getContext("2d");ctx.setTransform(canvas.width/900,0,0,canvas.height/500,0,0);
  const dt=Math.min(.04,explorerLastTime?(now-explorerLastTime)/1000:1/60);explorerLastTime=now;
  ctx.clearRect(0,0,900,500);
- const bg=ctx.createLinearGradient(0,0,900,500);bg.addColorStop(0,"#95d170");bg.addColorStop(1,"#427b39");ctx.fillStyle=bg;ctx.fillRect(0,0,900,500);
+ const world=activeExplorerWorld();const bg=ctx.createLinearGradient(0,0,900,500);bg.addColorStop(0,world.sky);bg.addColorStop(1,world.ground);ctx.fillStyle=bg;ctx.fillRect(0,0,900,500);
  // Grass texture and a winding path to the castle.
- for(let i=0;i<180;i++){const x=(i*97)%900,y=(i*53)%500;ctx.fillStyle=i%2?"#b2de73":"#6db254";ctx.globalAlpha=.22;ctx.beginPath();ctx.ellipse(x,y,3,1.5,Math.sin(i)*.8,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
- ctx.strokeStyle="#c7ba91";ctx.lineWidth=76;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(860,250);ctx.bezierCurveTo(750,235,760,95,610,110);ctx.bezierCurveTo(470,125,535,385,370,382);ctx.bezierCurveTo(220,380,275,160,100,180);ctx.stroke();
- ctx.strokeStyle="#e1d3ad";ctx.lineWidth=60;ctx.beginPath();ctx.moveTo(860,250);ctx.bezierCurveTo(750,235,760,95,610,110);ctx.bezierCurveTo(470,125,535,385,370,382);ctx.bezierCurveTo(220,380,275,160,100,180);ctx.stroke();
+ for(let i=0;i<180;i++){const x=(i*97)%900,y=(i*53)%500;ctx.fillStyle=i%2?world.accent:world.ground;ctx.globalAlpha=.22;ctx.beginPath();ctx.ellipse(x,y,3,1.5,Math.sin(i)*.8,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
+ ctx.strokeStyle=world.path;ctx.lineWidth=76;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(860,250);ctx.bezierCurveTo(750,235,760,95,610,110);ctx.bezierCurveTo(470,125,535,385,370,382);ctx.bezierCurveTo(220,380,275,160,100,180);ctx.stroke();
+ ctx.strokeStyle=world.accent;ctx.lineWidth=60;ctx.beginPath();ctx.moveTo(860,250);ctx.bezierCurveTo(750,235,760,95,610,110);ctx.bezierCurveTo(470,125,535,385,370,382);ctx.bezierCurveTo(220,380,275,160,100,180);ctx.stroke();
  ctx.strokeStyle="#fff0c7";ctx.lineWidth=2;ctx.setLineDash([12,14]);ctx.beginPath();ctx.moveTo(860,250);ctx.bezierCurveTo(750,235,760,95,610,110);ctx.bezierCurveTo(470,125,535,385,370,382);ctx.bezierCurveTo(220,380,275,160,100,180);ctx.stroke();ctx.setLineDash([]);
  // Trees/decorations
  for(let i=0;i<11;i++){const x=55+i*79,y=60+(i%3)*26;ctx.fillStyle="#5b3e2c";ctx.fillRect(x-3,y+5,6,20);ctx.fillStyle=i%2?"#2a7545":"#36854a";ctx.beginPath();ctx.arc(x,y,18,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(x-7,y-8,9,0,Math.PI*2);ctx.fill();}
@@ -806,51 +1010,77 @@ function drawExplorerFrame(now){
  ctx.fillStyle="#ddd2bd";ctx.strokeStyle="#766b5a";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(70,145);ctx.lineTo(45,160);ctx.lineTo(45,215);ctx.lineTo(98,215);ctx.lineTo(98,160);ctx.closePath();ctx.fill();ctx.stroke();
  ctx.fillStyle="#bc5148";ctx.beginPath();ctx.moveTo(38,160);ctx.lineTo(71,136);ctx.lineTo(105,160);ctx.closePath();ctx.fill();
  ctx.fillStyle="#44342a";ctx.fillRect(65,187,14,28);
- // Tower projectiles and automated targeting.
+ // Towers automatically target the closest enemy in range; their shots have different effects.
  for(const t of explorerTowers){
-  const nearest=explorerEnemies.filter(e=>e.hp>0&&explorerDistance(t,e)<t.range).sort((a,b)=>explorerDistance(t,a)-explorerDistance(t,b))[0];
+  const cfg=EXPLORER_TOWERS[t.type],nearest=explorerEnemies.filter(e=>e.hp>0&&explorerDistance(t,e)<t.range).sort((a,b)=>explorerDistance(t,a)-explorerDistance(t,b))[0];
   t.cooldown-=dt;
-  if(nearest&&t.cooldown<=0){explorerShots.push({x:t.x,y:t.y-15,target:nearest,speed:270,damage:t.level});t.cooldown=.55;}
-  ctx.fillStyle="#715137";ctx.fillRect(t.x-5,t.y-4,10,22);
-  ctx.fillStyle="#dbd3b5";ctx.beginPath();ctx.roundRect(t.x-17,t.y-27,34,24,5);ctx.fill();ctx.strokeStyle="#80623c";ctx.lineWidth=3;ctx.stroke();
-  ctx.fillStyle="#7353b7";ctx.beginPath();ctx.arc(t.x,t.y-15,7,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#f4d060";ctx.beginPath();ctx.arc(t.x,t.y-15,2,0,Math.PI*2);ctx.fill();
+  if(nearest&&t.cooldown<=0){explorerShots.push({x:t.x,y:t.y-18,target:nearest,speed:t.type==="cannon"?185:300,damage:cfg.damage+(t.level-1)*5+(t.damageBonus||0),type:t.type,radius:t.type==="cannon"?48:t.type==="magic"?35:0});t.cooldown=cfg.cooldown/Math.max(.7,1+(t.level-1)*.08);}
+  const colour=cfg.colour;
+  ctx.fillStyle="#513e2e";ctx.fillRect(t.x-5,t.y-4,10,23);
+  ctx.fillStyle=colour;ctx.strokeStyle="#443d4b";ctx.lineWidth=3;
+  if(t.type==="cannon"){ctx.beginPath();ctx.roundRect(t.x-19,t.y-35,38,31,7);ctx.fill();ctx.stroke();ctx.fillStyle="#313b4b";ctx.beginPath();ctx.arc(t.x,t.y-26,8,0,Math.PI*2);ctx.fill();}
+  else if(t.type==="ice"){ctx.beginPath();ctx.moveTo(t.x,t.y-42);ctx.lineTo(t.x+17,t.y-15);ctx.lineTo(t.x,t.y-6);ctx.lineTo(t.x-17,t.y-15);ctx.closePath();ctx.fill();ctx.stroke();}
+  else if(t.type==="poison"){ctx.beginPath();ctx.moveTo(t.x,t.y-42);ctx.lineTo(t.x+17,t.y-10);ctx.lineTo(t.x-17,t.y-10);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle="#e7f7bc";ctx.beginPath();ctx.arc(t.x,t.y-20,4,0,Math.PI*2);ctx.fill();}
+  else{ctx.beginPath();ctx.arc(t.x,t.y-24,17,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle=t.type==="magic"?"#e5caff":"#f8e6b4";ctx.beginPath();ctx.arc(t.x,t.y-24,7,0,Math.PI*2);ctx.fill();}
+  ctx.fillStyle="#fff";ctx.font="bold 10px system-ui";ctx.textAlign="center";ctx.fillText("Lv."+t.level,t.x,t.y+30);
+  if(t.id===explorerSelectedTowerId){ctx.strokeStyle="#fff29a";ctx.lineWidth=3;ctx.setLineDash([5,5]);ctx.beginPath();ctx.arc(t.x,t.y,t.range,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
  }
  for(let i=explorerShots.length-1;i>=0;i--){
   const b=explorerShots[i],e=b.target;
   if(!explorerEnemies.includes(e)||e.hp<=0){explorerShots.splice(i,1);continue;}
   const dx=e.x-b.x,dy=e.y-b.y,d=Math.hypot(dx,dy)||1,step=b.speed*dt;
-  if(d<step+e.r){e.hp-=b.damage;explorerShots.splice(i,1);if(e.hp<=0){gems+=2;}}
-  else{b.x+=dx/d*step;b.y+=dy/d*step;}
-  ctx.fillStyle="#ffe65b";ctx.beginPath();ctx.arc(b.x,b.y,4,0,Math.PI*2);ctx.fill();ctx.shadowBlur=10;ctx.shadowColor="#ffe65b";ctx.shadowBlur=0;
+  if(d<step+e.r){
+   if(b.radius){explorerEnemies.filter(x=>x.hp>0&&explorerDistance(x,e)<b.radius).forEach(x=>explorerDamageEnemy(x,b.damage,b.type));}
+   else explorerDamageEnemy(e,b.damage,b.type);
+   explorerShots.splice(i,1);
+  }else{b.x+=dx/d*step;b.y+=dy/d*step;}
+  ctx.fillStyle=b.type==="ice"?"#9ceeff":b.type==="poison"?"#99dc62":b.type==="magic"?"#d8a8ff":b.type==="cannon"?"#353c4b":"#ffe56b";
+  ctx.beginPath();ctx.arc(b.x,b.y,b.type==="cannon"?7:4,0,Math.PI*2);ctx.fill();
+  if(b.type==="magic"||b.type==="ice"){ctx.shadowBlur=12;ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=0;}
  }
+ // Hero attacks the nearest blob automatically when it is in range.
+ if(explorerHeroData&&explorerHeroHp>0){
+  explorerHeroCooldown-=dt;explorerSpecialCooldown=Math.max(0,explorerSpecialCooldown-dt);explorerSpecialTime=Math.max(0,explorerSpecialTime-dt);
+  const target=explorerEnemies.filter(e=>e.hp>0&&explorerDistance(explorerHero,e)<explorerHeroData.range).sort((a,b)=>explorerDistance(explorerHero,a)-explorerDistance(explorerHero,b))[0];
+  if(target&&explorerHeroCooldown<=0){explorerShots.push({x:explorerHero.x,y:explorerHero.y-15,target,speed:340,damage:explorerHeroData.damage,type:"hero",radius:0});explorerHeroCooldown=explorerHeroData.cooldown;}
+ }
+ // Timed poison, slow effects and hit flashes.
+ for(const e of explorerEnemies){
+  e.slowTime=Math.max(0,(e.slowTime||0)-dt);e.hitFlash=Math.max(0,(e.hitFlash||0)-dt);
+  if(e.poisonTime>0){e.poisonTime=Math.max(0,e.poisonTime-dt);e.poisonTick=(e.poisonTick||0)-dt;if(e.poisonTick<=0){e.poisonTick=.6;explorerDamageEnemy(e,e.poisonDamage||3,"hero");}}
+ }
+ for(const fx of explorerEffects){fx.life-=dt;ctx.strokeStyle=fx.type==="magic"?"#e4bdff":fx.type==="shield"?"#8ee3ff":fx.type==="nature"?"#a9ed74":"#fff2b2";ctx.lineWidth=5;ctx.globalAlpha=Math.max(0,fx.life);ctx.beginPath();ctx.arc(fx.x,fx.y,fx.radius*(1-fx.life),0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
+ explorerEffects=explorerEffects.filter(fx=>fx.life>0);
+ // Hero can also be hit by enemies that reach the castle or during a wrong answer.
  // Blobs walk the winding path. Reaching the castle costs one life.
  for(const e of explorerEnemies){
   if(e.hp<=0)continue;
-  e.progress+=e.speed*dt/900;
+  e.progress+=e.speed*dt/900*(e.slowTime>0?.48:1);
   if(e.progress<0){e.x=930+Math.abs(e.progress)*180;e.y=250;continue;}
   if(e.progress>=1){
-   e.hp=0;explorerLives--;
-   feedback="💥 Een blob bereikte het kasteel!";
-   if(explorerLives<=0){ended=true;renderGame();return;}
+   e.hp=0;explorerLives--;explorerHeroHp-=e.kind==="boss"?55:e.kind==="tank"?28:15;
+   feedback="💥 "+(e.kind==="boss"?"De baas": "Een "+e.kind+"-monster")+" bereikte het kasteel!";
+   if(explorerHeroHp<=0){explorerLives--;explorerHeroHp=explorerHeroMaxHp;if(explorerLives<=0){ended=true;renderGame();return;}}
    continue;
   }
+  const speedFactor=e.slowTime>0?.48:1;e.progress+=0;
   const point=explorerRoutePosition(Math.max(0,e.progress));e.x=point.x;e.y=point.y;
  }
  explorerEnemies=explorerEnemies.filter(e=>e.hp>0);
  for(const e of explorerEnemies)drawBlob(ctx,e,now);
  // Hero follows the most recent click / direction-key target.
  const dx=explorerTarget.x-explorerHero.x,dy=explorerTarget.y-explorerHero.y,d=Math.hypot(dx,dy);
- if(d>2){const step=Math.min(d,165*dt);explorerHero.x+=dx/d*step;explorerHero.y+=dy/d*step;}
+ if(d>2){const step=Math.min(d,explorerHeroData?explorerHeroData.speed*dt:165*dt);explorerHero.x+=dx/d*step;explorerHero.y+=dy/d*step;}
  ctx.strokeStyle="#fff2a6";ctx.lineWidth=2;ctx.setLineDash([4,5]);ctx.beginPath();ctx.arc(explorerTarget.x,explorerTarget.y,21,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
  drawExplorerHero(ctx,explorerHero.x,explorerHero.y,heroLevel,now);
- const explorerStatus=$("explorerStatus");if(explorerStatus)explorerStatus.textContent="Golf "+(waves+1)+" · Levens "+explorerLives+" · Edelstenen "+gems+" · Torens "+explorerTowers.length;
+ const explorerStatus=$("explorerStatus");if(explorerStatus)explorerStatus.textContent=world.icon+" "+world.name+" · Golf "+(waves+1)+"/10 · "+explorerHeroData.name+" Lv."+explorerHeroLevel+" · ❤️ "+explorerHeroHp+"/"+explorerHeroMaxHp+" · 🪙 "+explorerCoins+" · 💎 "+gems;
+ const specialButton=$("explorerSpecial");if(specialButton){specialButton.disabled=explorerSpecialCooldown>0;specialButton.textContent=explorerHeroData.icon+" "+explorerHeroData.special+(explorerSpecialCooldown>0?" ("+Math.ceil(explorerSpecialCooldown)+"s)":"!");}
  if(explorerPlaceMode){ctx.strokeStyle="#f4d45d";ctx.lineWidth=3;ctx.setLineDash([8,8]);ctx.beginPath();ctx.arc(explorerHero.x,explorerHero.y,45,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
  if(explorerEnemies.length===0&&!ended){
-  waves++;
-  if(waves>=8){ended=true;renderGame();return;}
-  gems+=8;exploredThisWave=false;feedback="✅ Golf voltooid! De volgende golf blobs komt eraan.";
-  spawnExplorerWave();renderGame();return;
+  waves++;explorerHighestWave=Math.max(explorerHighestWave,waves);explorerCoins+=12;gems+=8;exploredThisWave=false;saveExplorerMeta();
+  if(waves>=10){ended=true;renderGame();return;}
+  feedback="✅ Golf voltooid! +12 munten en +8 edelstenen. De volgende wereld wacht!";
+  spawnExplorerWave();makeQuestion();renderGame();return;
  }
  explorerFrameId=requestAnimationFrame(drawExplorerFrame);
 }
@@ -859,8 +1089,9 @@ function startExplorerFrame(){
  explorerFrameId=requestAnimationFrame(drawExplorerFrame);
 }
 window.addEventListener("keydown",e=>{
- if(game!=="explorer"||ended)return;
- const delta=26;
+ if(game!=="explorer"||ended||!explorerHeroChosen)return;
+ if(e.key===" "){e.preventDefault();explorerCastSpecial();return;}
+ const delta=34;
  if(e.key==="ArrowLeft"){explorerTarget.x=Math.max(20,explorerTarget.x-delta);e.preventDefault();}
  else if(e.key==="ArrowRight"){explorerTarget.x=Math.min(880,explorerTarget.x+delta);e.preventDefault();}
  else if(e.key==="ArrowUp"){explorerTarget.y=Math.max(30,explorerTarget.y-delta);e.preventDefault();}
@@ -893,19 +1124,25 @@ function renderBoard(){
  }
  if(game==="frog")return renderFrogBoard();
  if(game==="race")return renderRaceBoard();
+ if(game==="explorer"&&!explorerHeroChosen)return renderExplorerHeroSelect();
  if(game==="explorer"){
+  const world=activeExplorerWorld();
   const areas=Array.from({length:6},(_,i)=>'<span class="explore-tile '+(i<regionsFound?"visited":i===regionsFound?"current":"")+'">'+(i<regionsFound?"✓":i===regionsFound?"?":"·")+'</span>').join("");
-  return stats(["Golf: "+Math.min(8,waves+1)+" / 8","Heldlevel: "+heroLevel,"Edelstenen: "+gems,"Torens: "+explorerTowers.length,"❤️".repeat(explorerLives||0)])+
-   '<div class="explore-map"><div class="map-banner"><span>🗺️ BOSPAD · GOLF '+Math.min(8,waves+1)+'</span><span>Verplaats je held · plaats torens</span></div>'+
+  return stats([world.icon+" "+world.name,"Golf: "+Math.min(10,waves+1)+" / 10",explorerHeroData.icon+" "+explorerHeroData.name+" Lv."+explorerHeroLevel,"🪙 "+explorerCoins+" · 💎 "+gems,"Torens: "+explorerTowers.length,"❤️ "+explorerHeroHp+"/"+explorerHeroMaxHp])+
+   '<div class="explore-map"><div class="map-banner"><span>'+world.icon+' '+world.name.toUpperCase()+' · GOLF '+Math.min(10,waves+1)+'</span><span>'+explorerHeroData.icon+' '+explorerHeroData.name+' · plaats torens en verdedig het kasteel</span></div>'+
    '<div class="explorer-canvas-wrap"><canvas id="explorerCanvas" class="explorer-canvas" aria-label="Verken het veld, beweeg je held en plaats verdedigende torens"></canvas></div>'+
    '<p id="explorerStatus" class="mini-hint">Golf '+(waves+1)+' · Edelstenen '+gems+' · Torens '+explorerTowers.length+' · Verplaats de held met de kaart of pijltjes.</p>'+
    '<div class="arcade-controls explorer-move-controls"><button class="btn light" data-explorer-move="left">←</button><button class="btn light" data-explorer-move="up">↑</button><button class="btn light" data-explorer-move="down">↓</button><button class="btn light" data-explorer-move="right">→</button></div>'+
    '<div class="explore-regions"><strong>Ontdekte gebieden</strong><div class="explore-tiles">'+areas+'</div></div>'+
+   '<div class="tower-shop"><strong>🏰 Kies een toren</strong><div class="tower-shop-grid">'+Object.entries(EXPLORER_TOWERS).map(([id,t])=>'<button class="tower-buy '+(explorerSelectedTowerType===id?'chosen':'')+'" data-tower-type="'+id+'" '+(explorerCoins<t.cost||explorerTowers.length>=10?'disabled':'')+'><b>'+t.icon+' '+t.name+'</b><small>'+t.damage+' schade · '+t.range+' bereik</small><em>'+t.cost+' 🪙</em></button>').join("")+'</div></div>'+
    '<div class="explore-actions">'+
    '<button id="exploreRegion" class="btn light" type="button" '+(exploredThisWave?'disabled':'')+'>🧭 Verken gebied · +8 💎</button>'+
-   '<button id="buildTower" class="btn gold" type="button" '+(gems<20||explorerTowers.length>=8?'disabled':'')+'>'+ (explorerPlaceMode?"Klik op het veld…":"🏹 Plaats toren · 20 💎")+'</button>'+
-   '<button id="upgradeHero" class="btn light" type="button" '+(gems<30||heroLevel>=5?'disabled':'')+'>🛡️ Verbeter held · 30 💎</button>'+
-   '</div><p class="mini-hint" id="explorerHint">'+(explorerPlaceMode?"Klik op een plek in het veld om de toren neer te zetten.":"Je start met 20 edelstenen: plaats een toren, klik op het veld om je held te sturen en beantwoord de taalvraag om aan te vallen.")+'</p></div>'+
+   '<button id="buildTower" class="btn gold" type="button" '+(explorerCoins<EXPLORER_TOWERS[explorerSelectedTowerType].cost||explorerTowers.length>=10?'disabled':'')+'>'+ (explorerPlaceMode?"Klik op het veld…":EXPLORER_TOWERS[explorerSelectedTowerType].icon+" Plaats "+EXPLORER_TOWERS[explorerSelectedTowerType].name)+'</button>'+
+   '<button id="upgradeHero" class="btn light" type="button" '+(explorerCoins<35*explorerHeroLevel||explorerHeroLevel>=5?'disabled':'')+'>⬆️ Verbeter held · '+(35*explorerHeroLevel)+' 🪙</button>'+
+   '<button id="explorerSpecial" class="btn special" type="button" '+(explorerSpecialCooldown>0?'disabled':'')+'>'+explorerHeroData.icon+' '+explorerHeroData.special+' '+(explorerSpecialCooldown>0?"("+Math.ceil(explorerSpecialCooldown)+"s)":"!")+'</button>'+
+   '</div>'+
+   '<div class="selected-tower-panel" id="selectedTowerPanel">'+(explorerTowers.find(t=>t.id===explorerSelectedTowerId)?(()=>{const t=explorerTowers.find(t=>t.id===explorerSelectedTowerId),cfg=EXPLORER_TOWERS[t.type];return '<span>'+cfg.icon+' '+cfg.name+' · Level '+t.level+'</span><button id="upgradeSelectedTower" class="btn light" '+(explorerCoins<25*t.level||t.level>=4?'disabled':'')+'>Verbeter · '+(25*t.level)+' 🪙</button>';})():'Tik op een toren om deze te selecteren en te verbeteren.')+'</div>'+
+   '<p class="mini-hint" id="explorerHint">'+(explorerPlaceMode?"Klik op een plek in het veld om de toren neer te zetten.":"Je start met 20 edelstenen: plaats een toren, klik op het veld om je held te sturen en beantwoord de taalvraag om aan te vallen.")+'</p></div>'+
    '<p class="mini-hint">Verdedig het kasteel · '+LANGS[lang].name+' · Kies het juiste antwoord om je held te laten aanvallen.</p>'+questionHTML();
  }
  if(game==="pablo")return renderPabloBoard();
@@ -927,14 +1164,14 @@ function renderGame(){
   let title="",body="";
   if(game==="frog"){title=frogStep>=7?"🐸 Overkant bereikt!":"Oeps, probeer opnieuw!";body=frogStep>=7?"Froggie is veilig aan de overkant gekomen. Goed geoefend!":"Je levens zijn op. Probeer andere woorden en help Froggie verder.";}
   if(game==="race"){title=playerProgress>=100?"🏆 Jij wint de race!":"🏁 De tegenstander wint!";body="Jouw afstand: "+Math.min(100,playerProgress)+"% · tegenstander: "+Math.min(100,opponentProgress)+"%. Start een nieuwe race en probeer sneller te antwoorden.";}
-  if(game==="explorer"){title=waves>=8?"🏰 Toren gered!":"👾 De blobs winnen deze keer";body=waves>=8?"Je hebt alle acht golven overleefd en "+gems+" edelstenen verzameld!":"Je bereikte golf "+waves+". Bouw je toren weer op en probeer het opnieuw.";}
+  if(game==="explorer"){title=waves>=10?"🏰 Het kasteel is gered!":"👾 De blobs winnen deze keer";body=waves>=10?"Je hebt tien golven en vijf werelden overleefd!":"Je bereikte golf "+waves+". Verbeter je held en torens en probeer het opnieuw.";}
   if(game==="memory"){title="🏆 Memory voltooid!";body="Je vond alle paren in "+memoryMoves+" pogingen.";}
   if(game==="pablo"){title=pabloLevel>8?"🌟 Super Pablo heeft gewonnen!":"🎮 Nog een poging?";body=pabloLevel>8?"Je hebt alle acht levels voltooid en "+pabloStars+" sterren verzameld!":"Je bereikte level "+pabloLevel+". Probeer de volgende keer meer sterren te pakken.";}
   $("gameBody").innerHTML=renderEnd(title,body);return;
  }
  $("gameBody").innerHTML=renderBoard();
  if(game==="frog")startFrogFrame();
- if(game==="explorer")startExplorerFrame();
+ if(game==="explorer"&&explorerHeroChosen)startExplorerFrame();
  if(game==="race")startRaceFrame();
  if(game==="pablo"){startPabloFrame();}
 }
@@ -953,7 +1190,7 @@ function startGame(which){
  }else if(game==="cards"){flashDeck=shuffle(DATA[lang]);flashIndex=0;}
  else if(game==="race"){raceAngle=0;raceLane=0;raceBoost=0;raceOpponentProgress=0;makeRacePuzzle();}
  else if(game==="frog"){frogArcade=makeFrogArcade();}
- else if(game==="explorer"){gems=20;explorerHero={x:130,y:265};explorerTarget={x:130,y:265};explorerPlaceMode=false;explorerTowers=[];explorerShots=[];spawnExplorerWave();makeQuestion();}
+ else if(game==="explorer"){explorerHeroChosen=false;explorerHeroId=explorerUnlockedHeroes.includes(explorerHeroId)?explorerHeroId:"warrior";explorerHeroData=explorerHeroById(explorerHeroId);waves=0;explorerLives=3;explorerHeroLevel=1;heroLevel=1;explorerHeroMaxHp=explorerHeroData.hp;explorerHeroHp=explorerHeroMaxHp;explorerTowers=[];explorerShots=[];explorerEffects=[];explorerPlaceMode=false;explorerSelectedTowerId=null;explorerSelectedTowerType="arrow";explorerNextTowerId=1;explorerHero={x:130,y:265};explorerTarget={x:130,y:265};gems=Math.max(gems,20);makeQuestion();}
  else if(game==="pablo"){pabloArcade=makePabloArcade();pabloKeys={left:false,right:false};}
  else makeQuestion();
  renderGame();
@@ -1173,12 +1410,32 @@ $("directionToggle").addEventListener("click",()=>{
 document.querySelectorAll(".game-card").forEach(b=>b.addEventListener("click",()=>startGame(b.dataset.game)));
 $("backToGames").addEventListener("click",()=>{if(frogFrameId)cancelAnimationFrame(frogFrameId);frogFrameId=0;if(explorerFrameId)cancelAnimationFrame(explorerFrameId);explorerFrameId=0;if(raceFrameId)cancelAnimationFrame(raceFrameId);raceFrameId=0;if(pabloFrameId)cancelAnimationFrame(pabloFrameId);pabloFrameId=0;$("playArea").classList.add("hidden");$("gameMenu").classList.remove("hidden");game="";window.scrollTo({top:0,behavior:"smooth"});});
 $("gameBody").addEventListener("click",e=>{
+ const heroChoice=e.target.closest("[data-explorer-hero]");
+ if(heroChoice&&game==="explorer"&&!explorerHeroChosen){explorerChooseHero(heroChoice.dataset.explorerHero);return;}
+ const heroUnlock=e.target.closest("#unlockHero");
+ if(heroUnlock&&game==="explorer"&&!explorerHeroChosen){
+  const h=explorerHeroById(explorerHeroId);
+  if(!explorerUnlockedHeroes.includes(h.id)&&explorerCoins>=h.cost){explorerCoins-=h.cost;explorerUnlockedHeroes.push(h.id);saveExplorerMeta();renderGame();}
+  return;
+ }
+ if(e.target.closest("#claimExplorerDaily")&&game==="explorer"&&!explorerHeroChosen){
+  const today=new Date().toISOString().slice(0,10);
+  if(explorerDailyClaimed!==today){explorerDailyClaimed=today;explorerCoins+=30;gems+=15;saveExplorerMeta();renderGame();}
+  return;
+ }
+ if(e.target.closest("#startExplorerAdventure")&&game==="explorer"&&!explorerHeroChosen){explorerChooseHero(explorerHeroId);return;}
+ const towerChoice=e.target.closest("[data-tower-type]");
+ if(towerChoice&&game==="explorer"&&explorerHeroChosen){explorerSelectedTowerType=towerChoice.dataset.towerType;renderGame();return;}
+ if(e.target.closest("#explorerSpecial")&&game==="explorer"){explorerCastSpecial();renderGame();return;}
+ if(e.target.closest("#upgradeSelectedTower")&&game==="explorer"){explorerUpgradeTower();renderGame();return;}
  const explorerCanvas=e.target.closest("#explorerCanvas");
  if(explorerCanvas&&game==="explorer"){
   const r=explorerCanvas.getBoundingClientRect(),x=Math.max(24,Math.min(876,(e.clientX-r.left)/r.width*900)),y=Math.max(25,Math.min(470,(e.clientY-r.top)/r.height*500));
+  const tappedTower=explorerTowers.find(t=>explorerDistance({x,y},t)<28);
+  if(tappedTower){explorerSelectedTowerId=tappedTower.id;renderGame();return;}
   if(explorerPlaceMode){
    if(explorerPlaceTower(x,y)){renderGame();return;}
-   const hint=$("explorerHint");if(hint)hint.textContent="Je hebt minstens 20 edelstenen nodig om een toren te plaatsen.";
+   const hint=$("explorerHint");if(hint)hint.textContent="Niet genoeg munten om deze toren te plaatsen.";
   }else{explorerTarget={x,y};}
   return;
  }
@@ -1204,12 +1461,11 @@ $("gameBody").addEventListener("click",e=>{
   renderGame();return;
  }
  if(e.target.closest("#buildTower")){
-  if(gems>=20&&explorerTowers.length<8){explorerPlaceMode=true;feedback="Klik op de kaart waar je de toren wilt neerzetten.";}
+  if(explorerCoins>=EXPLORER_TOWERS[explorerSelectedTowerType].cost&&explorerTowers.length<10){explorerPlaceMode=true;feedback="Klik op een plek langs het pad om je "+EXPLORER_TOWERS[explorerSelectedTowerType].name+" te plaatsen.";}
   renderGame();return;
  }
  if(e.target.closest("#upgradeHero")){
-  if(gems>=30&&heroLevel<5){gems-=30;heroLevel++;feedback="🛡️ Je held is sterker geworden! Goede antwoorden leveren meer materialen op.";}
-  renderGame();return;
+  explorerUpgradeHero();renderGame();return;
  }
  const raceLaneButton=e.target.closest("[data-race-lane]");if(raceLaneButton){raceLane=Number(raceLaneButton.dataset.raceLane);return;}
  const raceTile=e.target.closest("[data-race-tile]");if(raceTile){chooseRaceTile(Number(raceTile.dataset.raceTile));return;}
