@@ -252,7 +252,7 @@ let memoryDeck=[],memoryFirst=null,memoryPending=null,memoryMatches=0,memoryMove
 let flashDeck=[],flashIndex=0,flashRevealed=false,drawIndex=0,drawingState=null,drawHasMarks=false,drawnStrokes=[],currentStroke=null,drawSetupToken=0;
 const strokeDataCache={};
 let frogArcade=null,frogFrameId=0,pabloArcade=null,pabloFrameId=0,pabloLastTime=0,pabloKeys={left:false,right:false};
-let explorerFrameId=0,explorerLastTime=0,explorerHero={x:130,y:265},explorerTarget={x:130,y:265},explorerEnemies=[],explorerTowers=[],explorerShots=[],explorerPlaceMode=false,explorerNextTowerId=1;
+let explorerFrameId=0,explorerLastTime=0,explorerHero={x:130,y:265},explorerTarget={x:130,y:265},explorerEnemies=[],explorerTowers=[],explorerShots=[],explorerPlaceMode=false,explorerNextTowerId=1,explorerFocusTarget=null;
 
 let explorerCoins=50,explorerHeroId="warrior",explorerHeroChosen=false,explorerHeroData=null,explorerSelectedWorld=0,explorerUnlockedTowers=["arrow","magic"];
 let explorerHeroHp=0,explorerHeroMaxHp=0,explorerHeroCooldown=0,explorerSpecialCooldown=0,explorerSpecialTime=0;
@@ -341,7 +341,7 @@ function explorerChooseHero(id){
  explorerHeroId=id;explorerHeroData=explorerHeroById(id);waves=explorerSelectedWorld*2;explorerLives=3;explorerHeroLevel=1;heroLevel=1;
  explorerHeroMaxHp=explorerHeroData.hp;explorerHeroHp=explorerHeroMaxHp;
  explorerHeroCooldown=0;explorerSpecialCooldown=0;explorerSpecialTime=0;
- explorerHero={x:130,y:265};explorerTarget={x:130,y:265};explorerHeroChosen=true;
+ explorerHero={x:130,y:265};explorerTarget={x:130,y:265};explorerFocusTarget=null;explorerHeroChosen=true;
  explorerTowers=[];explorerShots=[];explorerPlaceMode=false;explorerSelectedTowerId=null;
  makeQuestion();spawnExplorerWave();renderGame();return true;
 }
@@ -1080,7 +1080,9 @@ function drawExplorerFrame(now){
  // Hero attacks the nearest blob automatically when it is in range.
  if(explorerHeroData&&explorerHeroHp>0){
   explorerHeroCooldown-=dt;explorerSpecialCooldown=Math.max(0,explorerSpecialCooldown-dt);explorerSpecialTime=Math.max(0,explorerSpecialTime-dt);
-  const target=explorerEnemies.filter(e=>e.hp>0&&explorerDistance(explorerHero,e)<explorerHeroData.range).sort((a,b)=>explorerDistance(explorerHero,a)-explorerDistance(explorerHero,b))[0];
+  if(explorerFocusTarget&&(!explorerEnemies.includes(explorerFocusTarget)||explorerFocusTarget.hp<=0))explorerFocusTarget=null;
+  const inRange=explorerEnemies.filter(e=>e.hp>0&&explorerDistance(explorerHero,e)<explorerHeroData.range);
+  const target=explorerFocusTarget&&inRange.includes(explorerFocusTarget)?explorerFocusTarget:inRange.sort((a,b)=>explorerDistance(explorerHero,a)-explorerDistance(explorerHero,b))[0];
   if(target&&explorerHeroCooldown<=0){explorerShots.push({x:explorerHero.x,y:explorerHero.y-15,target,speed:340,damage:explorerHeroData.damage,type:"hero",heroId:explorerHeroId,radius:0});explorerHeroCooldown=explorerHeroData.cooldown;}
  }
  // Timed poison, slow effects and hit flashes.
@@ -1107,9 +1109,18 @@ function drawExplorerFrame(now){
   }
   const speedFactor=e.slowTime>0?.48:1;e.progress+=0;
   const point=explorerRoutePosition(Math.max(0,e.progress));e.x=point.x;e.y=point.y;
+  e.attackCooldown=Math.max(0,(e.attackCooldown||0)-dt);
+  if(explorerDistance(e,explorerHero)<e.r+24&&e.attackCooldown<=0){
+   const impact=e.kind==="boss"?24:e.kind==="tank"?17:e.kind==="fast"?10:12;
+   explorerHeroHp-=explorerSpecialTime>0?Math.ceil(impact*.35):impact;e.attackCooldown=1.15;
+   feedback="💥 "+(e.kind==="boss"?"De baas":"Een monster")+" raakt je held!";
+   if(explorerHeroHp<=0){explorerLives--;explorerHeroHp=explorerHeroMaxHp;explorerHero.x=130;explorerHero.y=265;explorerTarget={x:130,y:265};explorerFocusTarget=null;feedback+=" Je held is teruggekeerd naar het kamp.";}
+   if(explorerLives<=0){ended=true;renderGame();return;}
+  }
  }
  explorerEnemies=explorerEnemies.filter(e=>e.hp>0);
  for(const e of explorerEnemies)drawBlob(ctx,e,now);
+ if(explorerFocusTarget&&explorerFocusTarget.hp>0){ctx.strokeStyle="#ffe66b";ctx.lineWidth=3;ctx.setLineDash([5,4]);ctx.beginPath();ctx.arc(explorerFocusTarget.x,explorerFocusTarget.y,explorerFocusTarget.r+10,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
  // Hero follows the most recent click / direction-key target.
  const dx=explorerTarget.x-explorerHero.x,dy=explorerTarget.y-explorerHero.y,d=Math.hypot(dx,dy);
  if(d>2){const step=Math.min(d,explorerHeroData?explorerHeroData.speed*dt:165*dt);explorerHero.x+=dx/d*step;explorerHero.y+=dy/d*step;}
@@ -1173,7 +1184,7 @@ function renderBoard(){
   return stats([world.icon+" "+world.name,"Golf: "+Math.min(10,waves+1)+" / 10",explorerHeroData.icon+" "+explorerHeroData.name+" Lv."+explorerHeroLevel,"Kasteel: "+("❤️".repeat(Math.max(0,explorerLives))),"🪙 "+explorerCoins+" · 💎 "+gems,"Torens: "+explorerTowers.length,"Held: "+explorerHeroHp+"/"+explorerHeroMaxHp])+
    '<div class="explore-map"><div class="map-banner"><span>'+world.icon+' '+world.name.toUpperCase()+' · GOLF '+Math.min(10,waves+1)+'</span><span>'+explorerHeroData.icon+' '+explorerHeroData.name+' · plaats torens en verdedig het kasteel</span></div>'+
    '<div class="explorer-canvas-wrap"><canvas id="explorerCanvas" class="explorer-canvas" aria-label="Verken het veld, beweeg je held en plaats verdedigende torens"></canvas></div>'+
-   '<p id="explorerStatus" class="mini-hint">Golf '+(waves+1)+' · Edelstenen '+gems+' · Torens '+explorerTowers.length+' · Verplaats de held met de kaart of pijltjes.</p>'+
+   '<p id="explorerStatus" class="mini-hint">Golf '+(waves+1)+' · Edelstenen '+gems+' · Torens '+explorerTowers.length+' · Tik op een monster om het als doelwit te kiezen; klik op de grond om te bewegen.</p>'+
    '<div class="arcade-controls explorer-move-controls"><button class="btn light" data-explorer-move="left">←</button><button class="btn light" data-explorer-move="up">↑</button><button class="btn light" data-explorer-move="down">↓</button><button class="btn light" data-explorer-move="right">→</button></div>'+
    '<div class="explore-regions"><strong>Ontdekte gebieden</strong><div class="explore-tiles">'+areas+'</div></div>'+
    '<div class="tower-shop"><strong>🏰 Kies een toren</strong><div class="tower-shop-grid">'+Object.entries(EXPLORER_TOWERS).map(([id,t])=>{const unlocked=explorerUnlockedTowers.includes(id);return '<button class="tower-buy '+(explorerSelectedTowerType===id?'chosen':'')+(unlocked?'':' tower-locked')+'" data-tower-type="'+id+'"><b>'+t.icon+' '+t.name+'</b><small>'+t.damage+' schade · '+t.range+' bereik</small><em>'+(unlocked?'Bouwen · '+t.cost+' 🪙':'🔒 Ontgrendel · '+t.unlockCost+' 🪙')+'</em></button>';}).join("")+'</div></div>'+
@@ -1483,6 +1494,8 @@ $("gameBody").addEventListener("click",e=>{
  const explorerCanvas=e.target.closest("#explorerCanvas");
  if(explorerCanvas&&game==="explorer"){
   const r=explorerCanvas.getBoundingClientRect(),x=Math.max(24,Math.min(876,(e.clientX-r.left)/r.width*900)),y=Math.max(25,Math.min(470,(e.clientY-r.top)/r.height*500));
+  const tappedEnemy=explorerEnemies.filter(e=>e.hp>0).sort((a,b)=>explorerDistance({x,y},a)-explorerDistance({x,y},b))[0];
+  if(tappedEnemy&&explorerDistance({x,y},tappedEnemy)<Math.max(34,tappedEnemy.r+12)){explorerFocusTarget=tappedEnemy;explorerTarget={x:Math.max(28,Math.min(870,tappedEnemy.x-48)),y:Math.max(28,Math.min(472,tappedEnemy.y))};feedback="🎯 Doelwit gekozen! Je held richt zijn aanvallen op dit monster.";return;}
   const tappedTower=explorerTowers.find(t=>explorerDistance({x,y},t)<28);
   if(tappedTower){explorerSelectedTowerId=tappedTower.id;renderGame();return;}
   if(explorerPlaceMode){
